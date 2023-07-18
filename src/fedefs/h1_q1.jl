@@ -35,31 +35,31 @@ isdefined(FEType::Type{<:H1Q1}, ::Type{<:Quadrilateral2D}) = true
 isdefined(FEType::Type{<:H1Q1}, ::Type{<:Tetrahedron3D}) = true
 isdefined(FEType::Type{<:H1Q1}, ::Type{<:Hexahedron3D}) = true
 
-function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{AT_NODES}, exact_function; items = [], bonus_quadorder::Int = 0, time = 0) where {Tv,Ti,FEType <: H1Q1,APT}
+function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{AT_NODES}, exact_function; items = [], kwargs...) where {Tv,Ti,FEType <: H1Q1,APT}
     nnodes = size(FE.xgrid[Coordinates],2)
-    point_evaluation!(Target, FE, AT_NODES, exact_function; items = items, component_offset = nnodes, time = time)
+    point_evaluation!(Target, FE, AT_NODES, exact_function; items = items, component_offset = nnodes, kwargs...)
 end
 
-function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_EDGES}, exact_function; items = [], bonus_quadorder::Int = 0, time = 0) where {Tv,Ti,FEType <: H1Q1,APT}
+function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_EDGES}, exact_function; items = [], kwargs...) where {Tv,Ti,FEType <: H1Q1,APT}
     # delegate edge nodes to node interpolation
     subitems = slice(FE.xgrid[EdgeNodes], items)
-    interpolate!(Target, FE, AT_NODES, exact_function; items = subitems, bonus_quadorder = bonus_quadorder, time = time)
+    interpolate!(Target, FE, AT_NODES, exact_function; items = subitems, kwargs...)
 end
 
-function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_FACES}, exact_function; items = [], bonus_quadorder::Int = 0, time = 0) where {Tv,Ti,FEType <: H1Q1,APT}
+function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_FACES}, exact_function; items = [], kwargs...) where {Tv,Ti,FEType <: H1Q1,APT}
     # delegate face nodes to node interpolation
     subitems = slice(FE.xgrid[FaceNodes], items)
-    interpolate!(Target, FE, AT_NODES, exact_function; items = subitems, bonus_quadorder = bonus_quadorder, time = time)
+    interpolate!(Target, FE, AT_NODES, exact_function; items = subitems, kwargs...)
 end
 
-function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_CELLS}, exact_function; items = [], bonus_quadorder::Int = 0, time = 0) where {Tv,Ti,FEType <: H1Q1,APT}
+function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_CELLS}, exact_function; items = [], kwargs...) where {Tv,Ti,FEType <: H1Q1,APT}
     if FE.broken == true
         # broken interpolation
-        point_evaluation_broken!(Target, FE, ON_CELLS, exact_function; items = items, time = time)
+        point_evaluation_broken!(Target, FE, ON_CELLS, exact_function; items = items, kwargs...)
     else
         # delegate cell nodes to node interpolation
         subitems = slice(FE.xgrid[CellNodes], items)
-        interpolate!(Target, FE, AT_NODES, exact_function; items = subitems, bonus_quadorder = bonus_quadorder, time = time)
+        interpolate!(Target, FE, AT_NODES, exact_function; items = subitems, kwargs...)
     end
 end
 

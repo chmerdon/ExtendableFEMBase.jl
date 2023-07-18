@@ -92,10 +92,10 @@ function ExtendableGrids.interpolate!(Target::AbstractVector{T}, FE::FESpace{Tv,
     end
 end
 
-function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_CELLS}, exact_function!; items = [], time = 0) where {Tv,Ti,FEType <: H1BR,APT}
+function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {Tv,Ti,FEType <: H1BR,APT}
     # delegate cell faces to face interpolation
     subitems = slice(FE.xgrid[CellFaces], items)
-    interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, time = time)
+    interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, kwargs...)
 end
 
 

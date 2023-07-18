@@ -34,7 +34,7 @@ isdefined(FEType::Type{<:H1CR}, ::Type{<:Triangle2D}) = true
 isdefined(FEType::Type{<:H1CR}, ::Type{<:Quadrilateral2D}) = true
 isdefined(FEType::Type{<:H1CR}, ::Type{<:Tetrahedron3D}) = true
 
-function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_FACES}, exact_function!; items = [], time = 0) where {T,Tv,Ti,FEType <: H1CR,APT}
+function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_FACES}, exact_function!; items = [], kwargs...) where {T,Tv,Ti,FEType <: H1CR,APT}
     # preserve face means
     xItemVolumes = FE.xgrid[FaceVolumes]
     xItemNodes = FE.xgrid[FaceNodes]
@@ -47,7 +47,7 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv
 
     # compute exact face means
     facemeans = zeros(T,ncomponents,nitems)
-    integrate!(facemeans, FE.xgrid, ON_FACES, exact_function!; items = items, time = time)
+    integrate!(facemeans, FE.xgrid, ON_FACES, exact_function!; items = items, kwargs...)
     for item in items
         for c = 1 : ncomponents
             Target[offset4component[c]+item] = facemeans[c,item] / xItemVolumes[item]
@@ -55,10 +55,10 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv
     end
 end
 
-function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_CELLS}, exact_function!; items = [], time = 0) where {Tv,Ti,FEType <: H1CR,APT}
+function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {Tv,Ti,FEType <: H1CR,APT}
     # delegate cell faces to face interpolation
     subitems = slice(FE.xgrid[CellFaces], items)
-    interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, time = time)
+    interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, kwargs...)
 end
 
 # BEWARE ON FACES

@@ -42,27 +42,27 @@ isdefined(FEType::Type{<:H1P1TEB}, ::Type{<:Triangle2D}) = true
 isdefined(FEType::Type{<:H1P1TEB}, ::Type{<:Tetrahedron3D}) = true
 
 
-function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{AT_NODES}, exact_function!; items = [], time = 0) where {Tv,Ti,FEType <: H1P1TEB,APT}
+function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{AT_NODES}, exact_function!; items = [], kwargs...) where {Tv,Ti,FEType <: H1P1TEB,APT}
     nnodes = size(FE.xgrid[Coordinates],2)
-    point_evaluation!(Target, FE, AT_NODES, exact_function!; items = items, component_offset = nnodes, time = time)
+    point_evaluation!(Target, FE, AT_NODES, exact_function!; items = items, component_offset = nnodes, kwargs...)
 end
 
-function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_EDGES}, exact_function!; items = [], time = 0) where {Tv,Ti,FEType <: H1P1TEB{2},APT}
+function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_EDGES}, exact_function!; items = [], kwargs...) where {Tv,Ti,FEType <: H1P1TEB{2},APT}
     # delegate edge nodes to node interpolation
     subitems = slice(FE.xgrid[EdgeNodes], items)
-    interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, time = time)
+    interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 end
 
-function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_FACES}, exact_function!; items = [], time = 0) where {Tv,Ti,FEType <: H1P1TEB{3},APT}
+function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_FACES}, exact_function!; items = [], kwargs...) where {Tv,Ti,FEType <: H1P1TEB{3},APT}
     # delegate edges to edge interpolation
     subitems = slice(FE.xgrid[FaceEdges], items)
-    interpolate!(Target, FE, ON_EDGES, exact_function!; items = subitems, time = time)
+    interpolate!(Target, FE, ON_EDGES, exact_function!; items = subitems, kwargs...)
 end
 
-function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_FACES}, exact_function!; items = [], time = 0) where {T,Tv,Ti,FEType <: H1P1TEB{2},APT}
+function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_FACES}, exact_function!; items = [], bonus_quadorder = 0, kwargs...) where {T,Tv,Ti,FEType <: H1P1TEB{2},APT}
     # delegate face nodes to node interpolation
     subitems = slice(FE.xgrid[FaceNodes], items)
-    interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, time = time)
+    interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
     # preserve face means in tangential direction
     xItemVolumes = FE.xgrid[FaceVolumes]
@@ -80,7 +80,7 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv
 
     # compute exact face means
     facemeans = zeros(T,ncomponents,nitems)
-    integrate!(facemeans, FE.xgrid, ON_FACES, exact_function!; items = items, time = time)
+    integrate!(facemeans, FE.xgrid, ON_FACES, exact_function!; quadorder = 2 + bonus_quadorder, items = items, kwargs...)
     P1flux::T = 0
     value::T = 0
     itemEG = Edge1D
@@ -107,10 +107,10 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv
 end
 
 
-function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_EDGES}, exact_function!; items = [], time = 0) where {T,Tv,Ti,FEType <: H1P1TEB{3},APT}
+function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_EDGES}, exact_function!; items = [], bonus_quadorder = 0, kwargs...) where {T,Tv,Ti,FEType <: H1P1TEB{3},APT}
     # delegate face nodes to node interpolation
     subitems = slice(FE.xgrid[EdgeNodes], items)
-    interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, time = time)
+    interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
     # preserve edge means in tangential direction
     xItemVolumes = FE.xgrid[EdgeVolumes]
@@ -128,7 +128,7 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv
 
     # compute exact face means
     edgemeans = zeros(T,ncomponents,nitems)
-    integrate!(edgemeans, FE.xgrid, ON_EDGES, exact_function!; items = items, time = time)
+    integrate!(edgemeans, FE.xgrid, ON_EDGES, exact_function!; quadorder = 2 + bonus_quadorder, items = items, kwargs...)
     P1flux::T = 0
     value::T = 0
     itemEG = Edge1D
@@ -150,10 +150,10 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv
     end
 end
 
-function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_CELLS}, exact_function!; items = [], time = 0) where {Tv,Ti,FEType <: H1P1TEB,APT}
+function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {Tv,Ti,FEType <: H1P1TEB,APT}
     # delegate cell faces to face interpolation
     subitems = slice(FE.xgrid[CellFaces], items)
-    interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, time = time)
+    interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, kwargs...)
 end
 
 

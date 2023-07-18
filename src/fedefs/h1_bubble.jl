@@ -34,7 +34,7 @@ isdefined(FEType::Type{<:H1BUBBLE}, ::Type{<:Tetrahedron3D}) = true
 
 interior_dofs_offset(::Type{ON_CELLS}, ::Type{H1BUBBLE{ncomponents}}, EG::Type{<:AbstractElementGeometry}) where {ncomponents} = 0
 
-function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_CELLS}, exact_function!; items = [], time = time) where {T,Tv,Ti,FEType <: H1BUBBLE, APT}
+function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv,Ti,FEType,APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {T,Tv,Ti,FEType <: H1BUBBLE, APT}
     xCellVolumes = FE.xgrid[CellVolumes]
     ncells = num_sources(FE.xgrid[CellNodes])
     if items == []
@@ -44,7 +44,7 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T,1}, FE::FESpace{Tv
     end
     ncomponents = get_ncomponents(FEType)
     integrals4cell = zeros(T,ncomponents,ncells)
-    integrate!(integrals4cell, FE.xgrid, ON_CELLS, exact_function!; items = items, time = time)
+    integrate!(integrals4cell, FE.xgrid, ON_CELLS, exact_function!; items = items, kwargs...)
     for cell in items
         if cell != 0
             for c = 1 : ncomponents
