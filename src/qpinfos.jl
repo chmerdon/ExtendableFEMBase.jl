@@ -9,3 +9,7 @@ mutable struct QPInfos{Ti, Tv, Ttime, Tx, Txref, TvG, TiG, PT}
     grid::ExtendableGrid{TvG,TiG}
     params::PT
 end
+
+function QPInfos(xgrid::ExtendableGrid{Tv,Ti}; time = 0.0, dim = size(xgrid[Coordinates],1), T = Tv, params = []) where {Tv,Ti}
+    return QPInfos(Ti(0), Ti(0), Tv(0), time, zeros(T, dim), zeros(T, dim), xgrid, params)
+end

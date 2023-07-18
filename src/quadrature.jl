@@ -649,7 +649,7 @@ function integrate!(
     end
     itemET = xItemGeometries[1]
     iEG = 1
-    QP = QPInfos(0,0,Tv(0),time,zeros(Tv, dim), zeros(Tv, dim), grid, [])
+    QP = QPInfos(grid)
 
     if typeof(offset) <: Real
         offset = [offset]

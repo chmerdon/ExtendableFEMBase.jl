@@ -79,10 +79,10 @@ function FEEvaluator(FE::FESpace{TvG,TiG,FEType,FEAPT}, operator, qrule::Quadrat
         refbasisvals[i] = zeros(T,ndofs4item_all,ncomponents)
     end    
 
-    if operator <: Jump
-        ndofs4item *=2
-        ndofs4item_all *=2
-    end
+    #if operator <: Jump
+    #    ndofs4item *=2
+    #    ndofs4item_all *=2
+    #end
 
     # set coefficient handlers needed for basis evaluation
     coefficients = zeros(T,0,0)

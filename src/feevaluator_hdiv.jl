@@ -50,18 +50,6 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:NormalF
 end
 
 
-function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:Jump{NormalFlux},<:AbstractHdivFiniteElement})
-    xItemVolumes = FEBE.L2G.ItemVolumes
-    cvals = FEBE.cvals
-    refbasisvals = FEBE.refbasisvals
-    for i = 1 : size(cvals,3), dof_i = 1 : size(refbasisvals[1],1), k = 1 : size(cvals,1)
-        cvals[k,dof_i,i] = refbasisvals[i][dof_i,k] / xItemVolumes[FEBE.citem[]]
-        cvals[k,size(refbasisvals[1],1)+dof_i,i] = -cvals[k,dof_i,i]
-    end
-    return nothing
-end
-
-
 # DIVERGENCE HDIV
 function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:Divergence,<:AbstractHdivFiniteElement})
     # update transformation

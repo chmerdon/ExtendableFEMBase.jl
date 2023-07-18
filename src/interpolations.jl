@@ -50,7 +50,7 @@ function point_evaluation!(target::AbstractArray{T,1}, FES::FESpace{Tv, Ti, FETy
     xCellRegions = FES.xgrid[CellRegions]
     cell::Ti = 0
     result = zeros(T,ncomponents)
-    QP = QPInfos(0,0,Tv(0),time,zeros(Tv, size(FES.xgrid[Coordinates],1)), zeros(Tv, size(FES.xgrid[Coordinates],1)), FES.xgrid, [])
+    QP = QPInfos(FES.xgrid)
     for j in items
         cell = xNodeCells[1,j]
         QP.item = cell
@@ -798,7 +798,7 @@ end
 function nodevalues(xgrid::ExtendableGrid{Tv,Ti}, f::Function; T = Float64, resultdim = 1, time = 0) where {Tv,Ti}
     xCoordinates::Array{Tv,2} = xgrid[Coordinates]
     nnodes::Int = size(xCoordinates,2)
-    QP = QPInfos(0,0,T(0),time,zeros(Tv, size(xgrid[Coordinates],1)), zeros(Tv, size(xgrid[Coordinates],1)), xgrid, [])
+    QP = QPInfos(xgrid)
     nodevals = zeros(T,resultdim,nnodes)
     for j = 1 : nnodes
         QP.x = view(xCoordinates,:,j)

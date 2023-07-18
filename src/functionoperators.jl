@@ -5,25 +5,8 @@ root type for FunctionOperators.
 """
 abstract type AbstractFunctionOperator end # to dispatch which evaluator of the FE_basis_caller is used
 
-abstract type DiscontinuousFunctionOperator <: AbstractFunctionOperator end
 abstract type StandardFunctionOperator <: AbstractFunctionOperator end
 
-abstract type Jump{O} <: DiscontinuousFunctionOperator where {O<:StandardFunctionOperator} end # calculates the jump between both sides of the face
-abstract type Average{O} <: DiscontinuousFunctionOperator where {O<:StandardFunctionOperator} end # calculates the average between both sides of the face
-abstract type Left{O} <: DiscontinuousFunctionOperator where {O<:StandardFunctionOperator} end # calculates the value on left side of the face
-abstract type Right{O} <: DiscontinuousFunctionOperator where {O<:StandardFunctionOperator} end # calculates the value on right side of the face
-
-
-StandardFunctionOperator(::Type{Jump{O}}) where {O} = O
-StandardFunctionOperator(::Type{Average{O}}) where {O} = O
-StandardFunctionOperator(::Type{Left{O}}) where {O} = O
-StandardFunctionOperator(::Type{Right{O}}) where {O} = O
-coeffs(::Type{<:Jump}) = [1,-1]
-coeffs(::Type{<:Average}) = [0.5,0.5]
-coeffs(::Type{<:Left}) = [1,0]
-coeffs(::Type{<:Right}) = [0,1]
-is_discontinuous(::Type{<:StandardFunctionOperator}) = false
-is_discontinuous(::Type{<:DiscontinuousFunctionOperator}) = true
 """
 $(TYPEDEF)
 
@@ -230,19 +213,6 @@ Length4Operator(::Type{<:Hessian}, xdim::Int, ncomponents::Int) = xdim*xdim*ncom
 Length4Operator(::Type{<:SymmetricHessian}, xdim::Int, ncomponents::Int) = ((xdim == 2) ? 3 : 6)*ncomponents
 Length4Operator(::Type{<:Laplacian}, xdim::Int, ncomponents::Int) = ncomponents
 
-
-NeededDerivative4Operator(::Type{Jump{O}}) where {O} = NeededDerivative4Operator(O)
-Length4Operator(::Type{Jump{O}}, xdim, nc) where {O} = Length4Operator(O, xdim, nc)
-DefaultName4Operator(::Type{Jump{O}}) where {O} = "[[" * DefaultName4Operator(O) * "]]"
-NeededDerivative4Operator(::Type{Average{O}}) where {O} = NeededDerivative4Operator(O)
-Length4Operator(::Type{Average{O}}, xdim, nc) where {O} = Length4Operator(O, xdim, nc)
-DefaultName4Operator(::Type{Average{O}}) where {O} = "{{" * DefaultName4Operator(O) * "}}"
-NeededDerivative4Operator(::Type{Left{O}}) where {O} = NeededDerivative4Operator(O)
-Length4Operator(::Type{Left{O}}, xdim, nc) where {O} = Length4Operator(O, xdim, nc)
-DefaultName4Operator(::Type{Left{O}}) where {O} = DefaultName4Operator(O) * "|_Left"
-NeededDerivative4Operator(::Type{Right{O}}) where {O} = NeededDerivative4Operator(O)
-Length4Operator(::Type{Right{O}}, xdim, nc) where {O} = Length4Operator(O, xdim, nc)
-DefaultName4Operator(::Type{Right{O}}) where {O} = DefaultName4Operator(O) * "|_Right"
 
 QuadratureOrderShift4Operator(operator) = -NeededDerivative4Operator(operator)
 

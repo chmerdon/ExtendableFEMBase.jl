@@ -13,20 +13,6 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:Identit
     return nothing  
 end
 
-function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:Jump{Identity},<:AbstractH1FiniteElement})
-    # needs only to be updated if basis sets can change (e.g. for P3 in 2D/3D)
-    if FEBE.subset_handler != NothingFunction
-        subset = _update_subset!(FEBE)
-        cvals = FEBE.cvals
-        fill!(cvals, 0)
-        refbasisvals = FEBE.refbasisvals
-        for i = 1 : size(cvals,3), dof_i = 1 : size(cvals,2), k = 1 : size(cvals,1)
-            cvals[k,dof_i,i] = refbasisvals[i][subset[dof_i],k]
-        end
-    end
-    return nothing  
-end
-
 # IDENTITYCOMPONENT H1
 function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:IdentityComponent{c},<:AbstractH1FiniteElement}) where {c}
     if FEBE.subset_handler != NothingFunction

@@ -23,8 +23,7 @@ export integrate!, integrate, ref_integrate!
 
 include("functionoperators.jl")
 export AbstractFunctionOperator
-export DiscontinuousFunctionOperator, StandardFunctionOperator
-export Jump, Average, Left, Right, is_discontinuous
+export StandardFunctionOperator
 export Identity, IdentityComponent, IdentityDisc
 export ReconstructionIdentity, ReconstructionIdentityDisc
 export ReconstructionGradient, ReconstructionGradientDisc
@@ -38,18 +37,15 @@ export CurlScalar, Curl2D, Curl3D
 export Laplacian, Hessian, SymmetricHessian
 export Trace, Deviator
 export NeededDerivatives4Operator, QuadratureOrderShift4Operator
-export Dofmap4AssemblyType, DofitemAT4Operator
-export DefaultDirichletBoundaryOperator4FE
 export OperatorPair, OperatorTriple
-export Δ, ∇, H
 
 
 include("finiteelements.jl")
-export DofMap, CellDofs, FaceDofs, EdgeDofs, BFaceDofs, BEdgeDofs
+export DofMap
+export CellDofs, FaceDofs, EdgeDofs, BFaceDofs, BEdgeDofs
 export DofMapTypes
 export AbstractFiniteElement
 export FESpace, FESpaces, get_AT, get_FEType
-export get_periodic_coupling_info
 
 export AbstractH1FiniteElement
 export H1BUBBLE, L2P0, H1P1, H1P2, H1P2B, H1MINI, H1CR, H1P3, H1Pk
