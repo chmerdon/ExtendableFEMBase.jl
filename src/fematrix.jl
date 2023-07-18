@@ -188,7 +188,14 @@ end
 function FEMatrix{TvM,TiM}(FES::Array{<:FESpace{TvG,TiG},1}; name = "auto") where {TvM,TiM,TvG,TiG}
     return FEMatrix{TvM,TiM}(FES, FES; name = name)
 end
-# main constructor
+
+"""
+````
+FEMatrix{TvM,TiM}(FESX, FESY; name = "auto")
+````
+
+Creates an FEMatrix with blocks coressponding to the ndofs of FESX (rows) and FESY (columns).
+"""
 function FEMatrix{TvM,TiM}(FESX::Array{<:FESpace{TvG,TiG},1}, FESY::Array{<:FESpace{TvG,TiG},1}; name = "auto") where {TvM,TiM,TvG,TiG}
     ndofsX, ndofsY = 0, 0
     for j=1:length(FESX)
