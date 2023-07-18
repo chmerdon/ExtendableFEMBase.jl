@@ -21,16 +21,16 @@ end
 
 function Base.show(io::IO, FEB::FEVectorBlock; tol = 1e-14)
     @printf(io, "\n");
-    for j=1:FEB.offset+1:FEB.last_index
-        if FEB.entries[j] > tol
-            @printf(io, "[%d] = +%.3e", j, FEB.entries[j]);
-        elseif FEB.entries[j] < -tol
-            @printf(io, "[%d] %.3e", j, FEB.entries[j]);
-        else
-            @printf(io, "[%d] ********", j );
-        end
-        @printf(io, "\n");
-    end    
+    #for j=1:FEB.offset+1:FEB.last_index
+    #    if FEB.entries[j] > tol
+    #        @printf(io, "[%d] = +%.3e", j, FEB.entries[j]);
+    #    elseif FEB.entries[j] < -tol
+    #        @printf(io, "[%d] %.3e", j, FEB.entries[j]);
+    #    else
+    #        @printf(io, "[%d] ********", j );
+    #    end
+    #    @printf(io, "\n");
+    #end    
 end
 
 """
@@ -38,14 +38,14 @@ $(TYPEDEF)
 
 a plain array but with an additional layer of several FEVectorBlock subdivisions each carrying coefficients for their associated FESpace
 """
-struct FEVector{T,Tv,Ti,TT} <: AbstractVector{T}
+struct FEVector{T,Tv,Ti} #<: AbstractVector{T}
     FEVectorBlocks::Array{FEVectorBlock{T,Tv,Ti},1}
     entries::Array{T,1}
-    tags::Vector{TT}
+    tags::Vector{Any}
 end
 
 # overload stuff for AbstractArray{T,1} behaviour
-Base.getindex(FEF::FEVector{T,Tv,Ti,TT}, tag::TT)  where {T,Tv,Ti,TT} = FEF.FEVectorBlocks[findfirst(==(tag), FEF.tags)]
+Base.getindex(FEF::FEVector{T,Tv,Ti}, tag)  where {T,Tv,Ti} = FEF.FEVectorBlocks[findfirst(==(tag), FEF.tags)]
 Base.getindex(FEF::FEVector,i::Int) = FEF.FEVectorBlocks[i]
 Base.getindex(FEB::FEVectorBlock,i::Int)=FEB.entries[FEB.offset+i]
 Base.getindex(FEB::FEVectorBlock,i::AbstractArray)=FEB.entries[FEB.offset.+i]
@@ -151,7 +151,7 @@ function FEVector{T}(FES::Array{<:FESpace{Tv,Ti},1}; name = "auto", tags = [], k
         Blocks[j] = FEVectorBlock{T,Tv,Ti,eltype(FES[j]),assemblytype(FES[j])}(names[j], FES[j], offset , offset+FES[j].ndofs, entries)
         offset += FES[j].ndofs
     end    
-    return FEVector{T,Tv,Ti,eltype(tags)}(Blocks, entries, tags)
+    return FEVector{T,Tv,Ti}(Blocks, entries, tags)
 end
 
 
@@ -163,11 +163,15 @@ Custom `show` function for `FEVector` that prints some information on its blocks
 function Base.show(io::IO, FEF::FEVector)
 	println(io,"\nFEVector information")
     println(io,"====================")
-    println(io,"   block  |  ndofs  | name/tag (FEType) ")
+    println(io,"   block  |  ndofs  | FEType    | name/tag (FEType) ")
     for j=1:length(FEF)
         @printf(io," [%5d]  | ",j);
         @printf(io," %6d |",FEF[j].FES.ndofs);
-        @printf(io," %s/%s (%s)\n",FEF[j].name,FEF.tags[j],FEF[j].FES.name);
+        if length(FEF.tags) >= j
+            @printf(io," %s\t| %s/%s \n",FEF[j].FES.name,FEF[j].name,FEF.tags[j]);
+        else
+            @printf(io," %s\t| %s\n",FEF[j].FES.name,FEF[j].name);
+        end
     end    
 end
 

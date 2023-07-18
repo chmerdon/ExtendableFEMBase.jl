@@ -183,7 +183,7 @@ NeededDerivative4Operator(::Type{<:ReconstructionDivergence}) = 1
 NeededDerivative4Operator(::Type{Trace}) = 0
 NeededDerivative4Operator(::Type{Deviator}) = 0
 
-DefaultName4Operator(::Type{<:StandardFunctionOperator}) = "??"
+DefaultName4Operator(::Type{<:AbstractFunctionOperator}) = "??"
 DefaultName4Operator(::Type{Identity}) = "id"
 DefaultName4Operator(::Type{<:ReconstructionIdentity}) = "R"
 DefaultName4Operator(IC::Type{<:IdentityComponent{T}}) where T = "id_$(T)"

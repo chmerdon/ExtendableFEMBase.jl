@@ -1,11 +1,10 @@
 
 # Function Operators
 
-## Available Operators
+FunctionOperators are abstract types that encode primitive (linear) operators (like Identity, Gradient etc.)
+used to dispatch different evaluations of finite element basis functions.
 
-FunctionOperators are building blocks for the weak form and define the operations that should be applied to the trial and test functions (and their discrete representatives) inside some PDEOperator. Below is a list of currently available FunctionOperators. Note, that not all operators can be applied to all finite element types in principle, but potentially have to be understood in a broken sense and only make sense on certain parts of the mesh
-(e.g. NormalFlux only on a face). Also note that all evaluations are returned as a vector,  so e.g.\ a gradient of a 2d vector-field will be a vector of length 4 (ordered component-wise).
-
+## List of primitive operators
 
 | Function operator                                    | Description                                              | Mathematically                                                            |
 | :--------------------------------------------------- | :------------------------------------------------------- | :------------------------------------------------------------------------ |
@@ -33,25 +32,6 @@ FunctionOperators are building blocks for the weak form and define the operation
     are added as soon as they are needed (and possibly upon request).
     Also, the function operators can be combined with user-defined actions to evaluate other operators that
     can be build from the ones available (e.g. the deviator).
-
-
-## Jumps and Averages and Parents
-
-If one of the operators above is evaluted ON_FACES for a finite element that is not continuous there, the code usually will crash or produce weird results. However, some operators can be transformed into a Jump- or Average operator and then either the jumps or the average of this operator along the face is assembled. The operator Jump(Identity) for example gives the jump of the identity evaluation on both sides of the face.
-Seperate values of a discontinuous quantity on each neighbour of the face can be obtained using the Parent{1} and Parent{2} evaluations.
-
-```@docs
-Jump
-Average
-Parent
-```
-
-!!! note
-
-    Currently this feature is only available for assembly on faces (2D and 3D) and certain function operators like Identity, Gradient, Laplacian, ReconstructionIdentity, ReconstructionGradient, NormalFlux, TangentFlux, but more
-    are added as soon as they are needed (and possibly upon request).
-
-    Also note that a Jump or Average operator has different behaviour depending on the Assembly Pattern it is used in. Usually, the input of the action used in the assembly pattern has the evaluation on one of the two neighbours at a time, which should be okay in a linear context. Only in ItemIntegrators the whole jump comes in the input (here the user can split the jump into left and right value via seperate Parent{1} and Parent{2} evaluations). In NonlinearForms jumps and averages should better not be used currently.
 
 
 ## Reconstruction Operators

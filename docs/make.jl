@@ -55,9 +55,7 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
     generated_examples = []
     notebooks = []
 
-    if with_examples
-
-
+    if run_notebooks
         #
         # Run notebooks
         #
@@ -84,24 +82,21 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
         #     rendernotebook(notebook)
         # end
 
-
         # Use sliderserver to generate html
         notebook_html_dir = joinpath(@__DIR__, "src", "nbhtml")
-        if run_notebooks
-            export_directory(
-                joinpath(@__DIR__, "..", "examples/pluto"),
-                notebook_paths = notebookjl,
-                Export_output_dir = joinpath(notebook_html_dir),
-                Export_offer_binder = false,
-            )
-        end
+        export_directory(
+            joinpath(@__DIR__, "..", "pluto-examples"),
+            notebook_paths = notebookjl,
+            Export_output_dir = joinpath(notebook_html_dir),
+            Export_offer_binder = false,
+        )
 
         # generate frame markdown for each notebook
         for notebook in notebookjl
             base = split(notebook, ".")[1]
             mdstring = """
                        ##### [$(base).jl](@id $(base))
-                       [Download](https://github.com/chmerdon/GradientRobustMultiPhysics.jl/blob/master/examples/pluto/$(notebook))
+                       [Download](https://github.com/chmerdon/ExtendableFEMBase.jl/blob/master/examples/pluto/$(notebook))
                        this [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebook.
                        ```@raw html
                        <iframe style="height:20000px" width="100%" src="../$(base).html"> </iframe>
@@ -119,11 +114,13 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
         @show notebooks
         pushfirst!(notebooks, "About the notebooks" => "notebooks_intro.md")
         @show notebooks
+    end
 
 
-        #
-        # Generate Markdown pages from examples
-        #
+    #
+    # Generate Markdown pages from examples
+    #
+    if with_examples
         example_jl_dir = joinpath(@__DIR__,"..","examples")
         example_md_dir  = joinpath(@__DIR__,"src","examples")
         excluded_examples = ["XXX","A05","231","260","401","402"] # excludes just the run of these examples
@@ -136,7 +133,7 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
             end
             if example_source[1:7] == "Example" && ext==".jl"
                 number = example_source[8:10]
-                source_url="https://github.com/chmerdon/GradientRobustMultiPhysics.jl/raw/master/examples/"*example_source
+                source_url="https://github.com/chmerdon/ExtendableFEMBase.jl/raw/master/examples/"*example_source
                 preprocess(buffer)=replace_source_url(buffer,source_url)|>hashify_block_comments
                     Literate.markdown(joinpath(@__DIR__,"..","examples",example_source),
                                 example_md_dir,
@@ -178,10 +175,10 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
     end
 
     makedocs(
-        modules=[GradientRobustMultiPhysics],
+        modules=[ExtendableFEMBase],
         sitename="ExtendableFEMBase.jl",
         authors="Christian Merdon",
-        #repo = "github.com/chmerdon/GradientRobustMultiPhysics.jl",
+        repo = "github.com/chmerdon/ExtendableFEMBase.jl",
         clean = false,
         checkdocs = :all,
         doctest = true,
@@ -190,10 +187,12 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
             "Index" => "package_index.md",
             "List of Finite Elements" => "fems.md",
             "Base Structures" => Any[
-                    "quadrature.md",
                     "fespace.md",
-                    "febasisevaluators.md",
+                    "fevector.md",
+                    "fematrix.md",
+                    "feevaluator.md",
                     "interpolations.md",
+                    "quadrature.md",
                 ],
             "Tutorial Notebooks" => notebooks,
             "Examples" => generated_examples,
@@ -206,8 +205,8 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
 end
 
 #make_all(; with_examples = true, run_examples = true, run_notebooks = true)
-make_all(; with_examples = true, run_examples = false, run_notebooks = true)
+make_all(; with_examples = false, run_examples = false, run_notebooks = false)
 
 deploydocs(
-    repo = "github.com/chmerdon/GradientRobustMultiPhysics.jl",
+    repo = "github.com/chmerdon/ExtendableFEMBase.jl",
 )

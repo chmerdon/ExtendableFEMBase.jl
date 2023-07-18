@@ -1,5 +1,5 @@
 
 ```@index
-Modules = [GradientRobustMultiPhysics]
+Modules = [ExtendableFEMBase]
 Order   = [:function, :type]
 ```
