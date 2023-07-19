@@ -2,7 +2,6 @@ module ExtendableFEMBase
 
 using ExtendableGrids # + some exports from there
 using ExtendableSparse
-using SuiteSparse
 using SparseArrays
 export Edge1D, Triangle2D, Parallelogram2D, Tetrahedron3D, Parallelepiped3D
 using DiffResults
@@ -24,13 +23,13 @@ export integrate!, integrate, ref_integrate!
 include("functionoperators.jl")
 export AbstractFunctionOperator
 export StandardFunctionOperator
-export Identity, IdentityComponent, IdentityDisc
-export ReconstructionIdentity, ReconstructionIdentityDisc
-export ReconstructionGradient, ReconstructionGradientDisc
+export Identity, IdentityComponent
+export ReconstructionIdentity
+export ReconstructionGradient
 export ReconstructionDivergence
 export ReconstructionNormalFlux
-export NormalFlux, NormalFluxDisc, TangentFlux, TangentFluxDisc
-export Gradient, GradientDisc
+export NormalFlux, NormalFluxDisc, TangentFlux
+export Gradient
 export SymmetricGradient, TangentialGradient
 export Divergence, ReconstructionDivergence
 export CurlScalar, Curl2D, Curl3D
@@ -44,6 +43,7 @@ include("finiteelements.jl")
 export DofMap
 export CellDofs, FaceDofs, EdgeDofs, BFaceDofs, BEdgeDofs
 export DofMapTypes
+export Dofmap4AssemblyType, ItemGeometries4DofMap, EffAT4AssemblyType
 export AbstractFiniteElement
 export FESpace, FESpaces, get_AT, get_FEType
 
@@ -56,7 +56,7 @@ export AbstractH1FiniteElementWithCoefficients
 export H1BR, H1P1TEB
 
 export AbstractHdivFiniteElement
-export HDIVRT0, HDIVBDM1, HDIVRT1, HDIVRT1INT, HDIVBDM2
+export HDIVRT0, HDIVBDM1, HDIVRT1, HDIVBDM2
 export HDIVRTkENRICH
 
 export AbstractHcurlFiniteElement

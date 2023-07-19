@@ -122,7 +122,7 @@ end
 
 function get_basis(::Type{<:AssemblyType},FEType::Type{H1P2{ncomponents,edim}}, ::Type{<:Edge1D}) where {ncomponents,edim}
     function closure(refbasis, xref)
-        refbasis[end] = 1 - xref[1]
+        refbasis[end] = 1//1 - xref[1]
         for k = 1 : ncomponents
             refbasis[3*k-2,k] = 2*refbasis[end]*(refbasis[end] - 1//2)      # node 1
             refbasis[3*k-1,k] = 2*xref[1]*(xref[1] - 1//2)                  # node 2
@@ -133,7 +133,7 @@ end
 
 function get_basis(::Type{<:AssemblyType},FEType::Type{H1P2{ncomponents,edim}}, ::Type{<:Triangle2D}) where {ncomponents,edim}
     function closure(refbasis, xref)
-        refbasis[end] = 1 - xref[1] - xref[2] # store last barycentric coordinate
+        refbasis[end] = 1//1 - xref[1] - xref[2] # store last barycentric coordinate
         for k = 1 : ncomponents
             refbasis[6*k-5,k] = 2*refbasis[end]*(refbasis[end] - 1//2)      # node 1
             refbasis[6*k-4,k] = 2*xref[1]*(xref[1] - 1//2)                  # node 2
@@ -148,7 +148,7 @@ end
 
 function get_basis(::Type{<:AssemblyType},FEType::Type{H1P2{ncomponents,edim}}, ::Type{<:Tetrahedron3D}) where {ncomponents,edim}
     function closure(refbasis, xref)
-        refbasis[end] = 1 - xref[1] - xref[2] - xref[3]
+        refbasis[end] = 1//1 - xref[1] - xref[2] - xref[3]
         for k = 1 : ncomponents
             refbasis[10*k-9,k] = 2*refbasis[end]*(refbasis[end] - 1//2)     # node 1
             refbasis[10*k-8,k] = 2*xref[1]*(xref[1] - 1//2)                 # node 2

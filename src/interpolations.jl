@@ -50,7 +50,7 @@ function point_evaluation!(target::AbstractArray{T,1}, FES::FESpace{Tv, Ti, FETy
     xCellRegions = FES.xgrid[CellRegions]
     cell::Ti = 0
     result = zeros(T,ncomponents)
-    QP = QPInfos(FES.xgrid)
+    QP = QPInfos(FES.xgrid; time = time)
     for j in items
         cell = xNodeCells[1,j]
         QP.item = cell
@@ -101,7 +101,7 @@ end
 #
 # used for interpolation operators of elements with interior degrees of freedom (after setting the exterior ones with other methods)
 # e.g. H1P2 ON_EDGES, H1MINI ON_CELLS, H1P2B ON_EDGES, ON_FACES, ON_CELLS
-function ensure_moments!(target::AbstractArray{T,1}, FE::FESpace{Tv, Ti, FEType, APT}, AT::Type{<:AssemblyType}, exact_function; FEType_ref = "auto", order = 0, items = [], time = time, bonus_quadorder = 0, kwargs...) where {T, Tv, Ti, FEType <: AbstractH1FiniteElement, APT}
+function ensure_moments!(target::AbstractArray{T,1}, FE::FESpace{Tv, Ti, FEType, APT}, AT::Type{<:AssemblyType}, exact_function; FEType_ref = "auto", order = 0, items = [], kwargs...) where {T, Tv, Ti, FEType <: AbstractH1FiniteElement, APT}
 
     xItemVolumes::Array{Tv,1} = FE.xgrid[GridComponentVolumes4AssemblyType(AT)]
     xItemNodes::Adjacency{Ti} = FE.xgrid[GridComponentNodes4AssemblyType(AT)]
@@ -174,7 +174,7 @@ function ensure_moments!(target::AbstractArray{T,1}, FE::FESpace{Tv, Ti, FEType,
             return nothing
         end   
 
-        MOMxBASIS = reshape(integrate(xgrid_ref, ON_CELLS, refbasis_times_refbasis, ndofs_ref^2; quadorder = 2*order_FE), (ndofs_ref, ndofs_ref))
+        MOMxBASIS = reshape(integrate(xgrid_ref, ON_CELLS, refbasis_times_refbasis, ndofs_ref^2; quadorder = 2*order_FE, kwargs...), (ndofs_ref, ndofs_ref))
         MOMxBASIS ./= xgrid_ref[CellVolumes][1]
 
         ## extract quadratic matrix for interior dofs
@@ -798,7 +798,7 @@ end
 function nodevalues(xgrid::ExtendableGrid{Tv,Ti}, f::Function; T = Float64, resultdim = 1, time = 0) where {Tv,Ti}
     xCoordinates::Array{Tv,2} = xgrid[Coordinates]
     nnodes::Int = size(xCoordinates,2)
-    QP = QPInfos(xgrid)
+    QP = QPInfos(xgrid; time = time)
     nodevals = zeros(T,resultdim,nnodes)
     for j = 1 : nnodes
         QP.x = view(xCoordinates,:,j)

@@ -163,14 +163,14 @@ Custom `show` function for `FEVector` that prints some information on its blocks
 function Base.show(io::IO, FEF::FEVector)
 	println(io,"\nFEVector information")
     println(io,"====================")
-    println(io,"   block  |  ndofs  | FEType    | name/tag (FEType) ")
+    println(io,"   block  |  ndofs \t| FEType   \t| name/tag (FEType) ")
     for j=1:length(FEF)
         @printf(io," [%5d]  | ",j);
-        @printf(io," %6d |",FEF[j].FES.ndofs);
+        @printf(io," %6d\t|",FEF[j].FES.ndofs);
         if length(FEF.tags) >= j
-            @printf(io," %s\t| %s/%s \n",FEF[j].FES.name,FEF[j].name,FEF.tags[j]);
+            @printf(io," %s  \t| %s/%s \n",FEF[j].FES.name,FEF[j].name,FEF.tags[j]);
         else
-            @printf(io," %s\t| %s\n",FEF[j].FES.name,FEF[j].name);
+            @printf(io," %s  \t| %s\n",FEF[j].FES.name,FEF[j].name);
         end
     end    
 end

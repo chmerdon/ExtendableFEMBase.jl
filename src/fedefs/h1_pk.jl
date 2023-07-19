@@ -188,10 +188,10 @@ function get_basis(::Type{<:AssemblyType}, FEType::Type{H1Pk{ncomponents,edim,or
     function closure(refbasis, xref)
         fill!(refbasis,0)
         # store first nodal bais function (overwritten later by last basis function)
-        refbasis[end] = 1 - xref[1] - xref[2]
+        refbasis[end] = 1//1 - xref[1] - xref[2]
         # nodal functions
         for j = 1 : 3 
-            refbasis[j,1] = 1
+            refbasis[j,1] = 1//1
             if j == 1
                 for k = 1 : order
                     refbasis[j,1] *= (refbasis[end] - coeffs[k])
@@ -247,15 +247,15 @@ function get_basis(::Type{<:AssemblyType}, FEType::Type{H1Pk{ncomponents,edim,or
         end
         # interior basis functions
         if order == 3
-            refbasis[3*order+1,1] = refbasis[end]*xref[1]*xref[2]*27
+            refbasis[3*order+1,1] = refbasis[end]*xref[1]*xref[2]*27//1
         elseif order == 4
-            refbasis[3*order+1,1] = refbasis[end]*xref[1]*xref[2]*(refbasis[end]-1//4)*128
-            refbasis[3*order+2,1] = refbasis[end]*xref[1]*xref[2]*(xref[1]-1//4)*128
-            refbasis[3*order+3,1] = refbasis[end]*xref[1]*xref[2]*(xref[2]-1//4)*128
+            refbasis[3*order+1,1] = refbasis[end]*xref[1]*xref[2]*(refbasis[end]-1//4)*128//1
+            refbasis[3*order+2,1] = refbasis[end]*xref[1]*xref[2]*(xref[1]-1//4)*128//1
+            refbasis[3*order+3,1] = refbasis[end]*xref[1]*xref[2]*(xref[2]-1//4)*128//1
         elseif order > 4
             interior_basis(view(refbasis,3*order+1:ncomponents*ndofs,:),xref)
             for k = 3*order+1:ndofs
-                refbasis[k,1] *= (1-xref[1]-xref[2])*xref[1]*xref[2]*27
+                refbasis[k,1] *= (1-xref[1]-xref[2])*xref[1]*xref[2]*27//1
             end
         end
 

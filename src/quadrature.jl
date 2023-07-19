@@ -50,97 +50,111 @@ end
 # sets up a quadrature rule that evaluates at vertices of element geometry
 # not optimal from quadrature point of view, but helpful when interpolating
 # order of xref matches dof order of H1Pk element
-function VertexRule(ET::Type{Edge1D}, order = 1)
+function VertexRule(ET::Type{Edge1D}, order = 1; T = Float64)
     if order == 0 
-        xref = [[1/2]]
+        xref = [[1//2]]
     else
-        xref = [[0],[1.0]]
+        xref = [[0//1],[1//1]]
     end
     for j = 1:order-1
-        push!(xref,[j/order])
+        push!(xref,[j//order])
     end
-    w = ones(Float64, length(xref)) / length(xref)
-    return SQuadratureRule{Float64, ET, dim_element(ET), length(w)}("vertex rule edge", xref, w)
+    w = ones(Int, length(xref)) // length(xref)
+    return SQuadratureRule{T, ET, dim_element(ET), length(w)}("vertex rule edge", xref, w)
 end
-function VertexRule(ET::Type{Triangle2D}, order = 1)
+function VertexRule(ET::Type{Triangle2D}, order = 1; T = Float64)
     if order == 0 
-        xref = [[1/3, 1/3]]
+        xref = [[1//3, 1//3]]
     else
-        xref = [[0, 0], [1.0,0], [0,1.0]]
+        xref = [[0//1, 0//1], [1//1,0//1], [0//1,1//1]]
     end
+    ## face/edge dofs
     lcen = local_celledgenodes(ET)
-    for j = 1:order-1
-        for edge = 1 : size(lcen,2)
-            push!(xref, j/order * xref[lcen[2,edge]] + (1 - j/order) * xref[lcen[1,edge]])
+    for edge = 1 : size(lcen,2)
+        for j = 1:order-1
+            push!(xref, j//order * xref[lcen[2,edge]] + (1//1 - j//order) * xref[lcen[1,edge]])
         end
     end
+    ## cell dofs
     if order == 3
-        push!(xref,[1/3, 1/3])
+       push!(xref,[1//3, 1//3])
     end
     if order == 4
-        push!(xref,[1/4, 1/4])
-        push!(xref,[1/2, 1/4])
-        push!(xref,[1/4, 1/1])
+       push!(xref,[1//4, 1//4])
+       push!(xref,[1//2, 1//4])
+       push!(xref,[1//4, 1//2])
     end
     if order > 4
         @warn "VertexRule for order > 4 on $ET not yet implemented"
     end
-    w = ones(Float64, length(xref)) / length(xref)
-    return SQuadratureRule{Float64, ET, dim_element(ET), length(w)}("vertex rule triangle", xref, w)
+    w = ones(Int, length(xref)) // length(xref)
+    return SQuadratureRule{T, ET, dim_element(ET), length(w)}("vertex rule triangle", xref, w)
 end
-function VertexRule(ET::Type{Parallelogram2D}, order = 1)
+function VertexRule(ET::Type{Parallelogram2D}, order = 1; T = Float64)
     if order == 0 
         xref = [[1/2, 1/2]]
     else
         xref = [[0, 0], [1.0,0], [1.0,1.0], [0,1.0]]
     end
     lcen = local_celledgenodes(ET)
-    for j = 1:order-1
-        for edge = 1 : size(lcen,2)
+    for edge = 1 : size(lcen,2)
+        for j = 1:order-1
             push!(xref, j/order * xref[lcen[2,edge]] + (1 - j/order) * xref[lcen[1,edge]])
         end
     end
-    if order > 2
-        @warn "VertexRule for order > 2 on $ET not yet implemented"
+    if order == 2
+        push!(xref,[1//2, 1//2])
     end
-    w = ones(Float64, length(xref)) / length(xref)
-    return SQuadratureRule{Float64, ET, dim_element(ET), length(w)}("vertex rule parallelogram", xref, w)
+    w = ones(Int, length(xref)) // length(xref)
+    return SQuadratureRule{T, ET, dim_element(ET), length(w)}("vertex rule parallelogram", xref, w)
 end
-function VertexRule(ET::Type{Tetrahedron3D}, order = 1)
+function VertexRule(ET::Type{Tetrahedron3D}, order = 1; T = Float64)
+    ## node dofs
     if order == 0 
-        xref = [[1/4, 1/4, 1/4]]
+        xref = [[1//4, 1//4, 1//4]]
     else
-        xref = [[0, 0, 0], [1.0, 0, 0], [0,1.0,0], [0,0,1.0]]
+        xref = [[0//1, 0//1, 0//1], [1//1, 0//1, 0//1], [0//1,1//1,0//1], [0//1,0//1,1//1]]
     end
+    ## edge dofs
     lcen = local_celledgenodes(ET)
-    for j = 1:order-1
-        for edge = 1 : size(lcen,2)
-            push!(xref, j/order * xref[lcen[2,edge]] + (1 - j/order) * xref[lcen[1,edge]])
+    for edge = 1 : size(lcen,2)
+        for j = 1:order-1
+            push!(xref, j//order * xref[lcen[2,edge]] + (1//1 - j//order) * xref[lcen[1,edge]])
         end
     end
+    ## face dofs
     if order > 2
+        lcfn = local_cellfacenodes(ET)
+        for j = 1:order-2, k = 1:order-2
+            for face = 1 : size(lcfn,2)
+                push!(xref, j//order * xref[lcfn[3,face]] + k//order * xref[lcfn[2,face]] + (1 - j//order -k//order) * xref[lcfn[1,face]])
+            end
+        end
+    end
+    ## cell dofs
+    if order > 3
         @warn "VertexRule for order > 2 on $ET not yet implemented"
     end
-    w = ones(Float64, length(xref)) / length(xref)
-    return SQuadratureRule{Float64, ET, dim_element(ET), length(w)}("vertex rule tetrahedron", xref, w)
+    w = ones(Int, length(xref)) // length(xref)
+    return SQuadratureRule{T, ET, dim_element(ET), length(w)}("vertex rule tetrahedron", xref, w)
 end
-function VertexRule(ET::Type{Parallelepiped3D}, order = 1)
+function VertexRule(ET::Type{Parallelepiped3D}, order = 1; T = Float64)
     if order == 0 
-        xref = [[1/2, 1/2, 1/2]]
+        xref = [[1//2, 1//2, 1//2]]
     else
-        xref = [[0, 0, 0], [1.0, 0, 0], [1.0, 1.0, 0], [0, 1.0, 0], [0, 0, 1.0], [1.0, 0, 1], [1.0, 1.0, 1.0], [0, 1.0, 1.0]]
+        xref = [[0//1, 0//1, 0//1], [1//1, 0//1, 0//1], [1//1, 1//1, 0//1], [0//1, 1//1, 0//1], [0//1, 0//1, 1//1], [1//1, 0//1, 1//1], [1//1, 1//1, 1//1], [0//1, 1//1, 1//1]]
     end
     lcen = local_celledgenodes(ET)
-    for j = 1:order-1
-        for edge = 1 : size(lcen,2)
-            push!(xref, j/order * xref[lcen[2,edge]] + (1 - j/order) * xref[lcen[1,edge]])
+    for edge = 1 : size(lcen,2)
+        for j = 1:order-1
+            push!(xref, j//order * xref[lcen[2,edge]] + (1//1 - j//order) * xref[lcen[1,edge]])
         end
     end
     if order > 1
         @warn "VertexRule for order > 2 on $ET not yet implemented"
     end
-    w = ones(Float64, length(xref)) / length(xref)
-    return SQuadratureRule{Float64, ET, dim_element(ET), length(w)}("vertex rule parallelepiped", xref, w)
+    w = ones(Rational{Int}, length(xref)) // length(xref)
+    return SQuadratureRule{T, ET, dim_element(ET), length(w)}("vertex rule parallelepiped", xref, w)
 end
 
 
@@ -649,7 +663,7 @@ function integrate!(
     end
     itemET = xItemGeometries[1]
     iEG = 1
-    QP = QPInfos(grid)
+    QP = QPInfos(grid; time = time)
 
     if typeof(offset) <: Real
         offset = [offset]

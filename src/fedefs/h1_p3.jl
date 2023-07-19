@@ -162,7 +162,7 @@ end
 
 function get_basis(::Type{<:AssemblyType}, ::Type{H1P3{ncomponents,edim}}, ::Type{<:Tetrahedron3D}) where {ncomponents,edim}
     function closure(refbasis, xref)
-        refbasis[end] = 1 - xref[1] - xref[2] - xref[3]
+        refbasis[end] = 1//1 - xref[1] - xref[2] - xref[3]
         for k = 1 : ncomponents
             ## assuming
             ## _local_cellfacenodes_Tetrahedron3D = [1 3 2; 1 2 4; 2 3 4; 1 4 3]'
@@ -185,10 +185,10 @@ function get_basis(::Type{<:AssemblyType}, ::Type{H1P3{ncomponents,edim}}, ::Typ
             refbasis[20*k-5,k] = 27 // 2 * xref[2]*xref[3]*(xref[2] - 1//3)                                  # edge 6.1
             refbasis[20*k-4,k] = 27 // 2 * xref[2]*xref[3]*(xref[3] - 1//3)                                  # edge 6.2
 
-            refbasis[20*k-3,k] = 27*xref[1]*xref[2]*refbasis[end]                                            # face 1
-            refbasis[20*k-2,k] = 27*xref[1]*xref[3]*refbasis[end]                                            # face 2
-            refbasis[20*k-1,k] = 27*xref[1]*xref[2]*xref[3]                                                  # face 3
-            refbasis[20*k,k] = 27*xref[2]*xref[3]*refbasis[end]                                              # face 4
+            refbasis[20*k-3,k] = 27 // 1 * xref[1]*xref[2]*refbasis[end]                                            # face 1
+            refbasis[20*k-2,k] = 27 // 1 * xref[1]*xref[3]*refbasis[end]                                            # face 2
+            refbasis[20*k-1,k] = 27 // 1 * xref[1]*xref[2]*xref[3]                                                  # face 3
+            refbasis[20*k,k] = 27 // 1 * xref[2]*xref[3]*refbasis[end]                                              # face 4
             
         end
     end
