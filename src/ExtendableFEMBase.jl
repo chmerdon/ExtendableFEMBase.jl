@@ -1,9 +1,10 @@
 module ExtendableFEMBase
 
-using ExtendableGrids # + some exports from there
+using ExtendableGrids # + some reexports from there
+export Edge1D, Triangle2D, Parallelogram2D, Tetrahedron3D, Parallelepiped3D
+export ON_CELLS, ON_FACES, ON_IFACES, ON_BFACES, ON_EDGES, ON_BEDGES
 using ExtendableSparse
 using SparseArrays
-export Edge1D, Triangle2D, Parallelogram2D, Tetrahedron3D, Parallelepiped3D
 using DiffResults
 using LinearAlgebra
 using ForwardDiff
@@ -35,7 +36,7 @@ export Divergence, ReconstructionDivergence
 export CurlScalar, Curl2D, Curl3D
 export Laplacian, Hessian, SymmetricHessian
 export Trace, Deviator
-export NeededDerivatives4Operator, QuadratureOrderShift4Operator
+export NeededDerivative4Operator, Length4Operator, QuadratureOrderShift4Operator, DefaultName4Operator
 export OperatorPair, OperatorTriple
 
 

@@ -43,7 +43,7 @@ is the component.
 
 Note that matrix-valued operators evaluations, e.g. for Gradient, are given as a long vector.
 """
-function FEEvaluator(FE::FESpace{TvG,TiG,FEType,FEAPT}, operator, qrule::QuadratureRule{TvR,EG}; T = Float64, AT = ON_CELLS) where {TvG, TiG, TvR, FEType <: AbstractFiniteElement, EG <: AbstractElementGeometry, FEAPT <: AssemblyType}
+function FEEvaluator(FE::FESpace{TvG,TiG,FEType,FEAPT}, operator::Type{<:StandardFunctionOperator}, qrule::QuadratureRule{TvR,EG}; T = Float64, AT = ON_CELLS) where {TvG, TiG, TvR, FEType <: AbstractFiniteElement, EG <: AbstractElementGeometry, FEAPT <: AssemblyType}
     
     xref = qrule.xref
     xgrid = FE.xgrid
@@ -118,22 +118,22 @@ function FEEvaluator(FE::FESpace{TvG,TiG,FEType,FEAPT}, operator, qrule::Quadrat
             for i = 1 : length(xref), j = 1 : ndofs4item, k = 1 : ncomponents
                 current_eval[k,j,i] = refbasisvals[i][j,k]
             end
-        elseif operator <: Jump{Identity}
-            ndofs4item_oneside = size(refbasisvals[1],1)
-            for i = 1 : length(xref), j = 1 : ndofs4item_oneside, k = 1 : ncomponents
-                current_eval[k,j,i] = refbasisvals[i][j,k]
-                current_eval[k,j+ndofs4item_oneside,i] = -refbasisvals[i][j,k]
-            end
+#        elseif operator <: Jump{Identity}
+#            ndofs4item_oneside = size(refbasisvals[1],1)
+#            for i = 1 : length(xref), j = 1 : ndofs4item_oneside, k = 1 : ncomponents
+#                current_eval[k,j,i] = refbasisvals[i][j,k]
+#                current_eval[k,j+ndofs4item_oneside,i] = -refbasisvals[i][j,k]
+#            end
         elseif operator <: IdentityComponent
             for i = 1 : length(xref), j = 1 : ndofs4item
                 current_eval[1,j,i] = refbasisvals[i][j,operator.parameters[1]]
             end
-        elseif operator <: Jump{IdentityComponent}
-            ndofs4item_oneside = size(refbasisvals[1],1)
-            for i = 1 : length(xref), j = 1 : ndofs4item
-                current_eval[1,j,i] = refbasisvals[i][j,operator.parameters[1]]
-                current_eval[1,j+ndofs4item_oneside,i] = -refbasisvals[i][j,operator.parameters[1]]
-            end
+#        elseif operator <: Jump{IdentityComponent}
+#            ndofs4item_oneside = size(refbasisvals[1],1)
+#            for i = 1 : length(xref), j = 1 : ndofs4item
+#                current_eval[1,j,i] = refbasisvals[i][j,operator.parameters[1]]
+#                current_eval[1,j+ndofs4item_oneside,i] = -refbasisvals[i][j,operator.parameters[1]]
+#            end
         end
         Dcfg = nothing
         Dresult = nothing
@@ -427,7 +427,7 @@ function _update_coefficients!(FEBE::FEEvaluator)
 end
 
 ## general call that checks item (but causes 1 allocations)
-function update_basis!(FEBE, item)
+function update_basis!(FEBE::SingleFEEvaluator, item)
     if FEBE.citem[] == item
     else
         FEBE.citem[] = item
