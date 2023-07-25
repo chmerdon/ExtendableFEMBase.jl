@@ -623,13 +623,15 @@ function integrate!(
     dim = size(xCoords,1)
     xItemNodes = grid[GridComponentNodes4AssemblyType(AT)]
     nitems = num_sources(xItemNodes)
-    xItemVolumes = grid[GridComponentVolumes4AssemblyType(AT)]
+    xItemVolumes::Vector{Tv} = grid[GridComponentVolumes4AssemblyType(AT)]
     if AT == ON_EDGES
         xItemRegions = 1:nitems # currently no edge regions are handled, so take something cheap here
     else
         xItemRegions = grid[GridComponentRegions4AssemblyType(AT)]
     end
     xItemGeometries = grid[GridComponentGeometries4AssemblyType(AT)]
+    xUniqueItemGeometries = grid[GridComponentUniqueGeometries4AssemblyType(AT)]
+    ngeoms::Int = length(xUniqueItemGeometries)
     if AT in [ON_FACES, ON_BFACES, ON_IFACES]
         xCellParents = view(grid[FaceCells],1,:)
     elseif AT in [ON_EDGES, ON_BEDGES]
@@ -661,65 +663,74 @@ function integrate!(
     if items == []
         items = 1 : nitems
     end
-    itemET = xItemGeometries[1]
-    iEG = 1
+    itemET::ElementGeometries = xItemGeometries[1]
+    iEG::Int = 1
     QP = QPInfos(grid; time = time)
 
-    if typeof(offset) <: Real
-        offset = [offset]
-    end
+    resultdim::Int = (typeof(integral4items) <: AbstractArray{T,1}) ? length(offset) : size(integral4items,1)
+    result::Vector{T} = zeros(T, resultdim)
     if typeof(integral4items) <: AbstractArray{T,1}
-        resultdim = length(offset)
-        result = zeros(T, resultdim)
-        for it = 1 : length(items)
-            item = items[it]
-
-            # find index for CellType
-            itemET = xItemGeometries[item]
-            iEG = findfirst(isequal(itemET), EG)
-
-            update_trafo!(local2global[iEG],item)
+        function _integrate_cell_1d!(integral4items, ilocal2global::L2GTransformer{T}, iqf::QuadratureRule{T}, QP, xCellParents, item)
+            update_trafo!(ilocal2global, item)
             
             QP.item = item
+            QP.cell = xCellParents[item]
             QP.region = xItemRegions[item]
             
-            for i in eachindex(qf[iEG].w)
-                eval_trafo!(QP.x, local2global[iEG], qf[iEG].xref[i])
-                QP.xref = qf[iEG].xref[i]
-                
+            for i in eachindex(iqf.w)
+                eval_trafo!(QP.x, ilocal2global, iqf.xref[i])
+                QP.xref = iqf.xref[i]
                 integrand(result, QP)
+                result .*= xItemVolumes[item] * iqf.w[i]
                 for d = 1 : resultdim
-                    integral4items[item + offset[d]] += result[d] * qf[iEG].w[i] * xItemVolumes[item]
+                    integral4items[item + offset[d]] += result[d]
                 end
             end  
         end
-    else # <: AbstractArray{T,2}
-        resultdim = size(integral4items,1)
-        result = zeros(T, resultdim)
-        fill!(integral4items,0)
-        item::Int = 0
-        for it = 1 : length(items)
-            item = items[it]
-            # find index for CellType
-            itemET = xItemGeometries[item]
-            iEG = findfirst(isequal(itemET), EG)
 
-            update_trafo!(local2global[iEG],item)
+        fill!(integral4items,0)
+        for item in items
+            # find index for CellType
+            if ngeoms > 1
+                itemET = xItemGeometries[item]
+                iEG = findfirst(isequal(itemET), EG)
+            end
+
+            _integrate_cell_1d!(integral4items, local2global[iEG], qf[iEG], QP, xCellParents, item)
+        end
+    else # <: AbstractArray{T,2}
+        function _integrate_cell_2d!(integral4items, ilocal2global::L2GTransformer{T}, iqf::QuadratureRule{T}, QP, xCellParents, item)
+            update_trafo!(ilocal2global, item)
             
             QP.item = item
+            QP.cell = xCellParents[item]
             QP.region = xItemRegions[item]
             
-            for i in eachindex(qf[iEG].w)
-                eval_trafo!(QP.x, local2global[iEG], qf[iEG].xref[i])
-                QP.xref = qf[iEG].xref[i]
+            for i in eachindex(iqf.w)
+                eval_trafo!(QP.x, ilocal2global, iqf.xref[i])
+                QP.xref = iqf.xref[i]
                 integrand(result, QP)
+                result .*= xItemVolumes[item] * iqf.w[i]
                 for j = 1 : resultdim
-                    integral4items[j,item + offset[1]] += result[j] * qf[iEG].w[i] * xItemVolumes[item];
+                    integral4items[j, item + offset[1]] += result[j]
                 end
             end  
+        end
+
+        fill!(integral4items,0)
+        for item in items
+            # find index for CellType
+            if ngeoms > 1
+                itemET = xItemGeometries[item]
+                iEG = findfirst(isequal(itemET), EG)
+            end
+
+            _integrate_cell_2d!(integral4items, local2global[iEG], qf[iEG], QP, xCellParents, item)
         end
     end
 end
+
+
 
 """
 $(TYPEDSIGNATURES)

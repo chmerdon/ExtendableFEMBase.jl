@@ -80,7 +80,7 @@ export show_entries
 
 export displace_mesh, displace_mesh!
 
-include("reconstructions.jl")
+include("reconstructionhandlers.jl")
 export ReconstructionHandler, get_rcoefficients!
 
 include("feevaluator.jl")
@@ -92,5 +92,38 @@ export Reconstruct
 include("accumvector.jl")
 export AccumulatingVector
 
+
+#
+# Print default dict for solver parameters into docstrings
+#
+function _myprint(dict::Dict{Symbol,Tuple{Any,String}})
+    lines_out=IOBuffer()
+    for (k,v) in dict
+        if typeof(v[1]) <: String
+            println(lines_out,"  - $(k): $(v[2]). Default: ''$(v[1])''\n")
+        else
+            println(lines_out,"  - $(k): $(v[2]). Default: $(v[1])\n")
+        end
+    end
+    String(take!(lines_out))
+end
+#
+# Update solver params from dict
+#
+function _update_params!(parameters,kwargs)
+    for (k,v) in kwargs
+        parameters[Symbol(k)] = v
+    end
+    return nothing
+end
+
+include("segment_integrator.jl")
+export SegmentIntegrator, initialize!, integrate_segment!
+
+include("point_evaluator.jl")
+export PointEvaluator, evaluate!, eval_func
+
+include("lazy_interpolate.jl")
+export lazy_interpolate!
 
 end # module ExtendableFEMBase.

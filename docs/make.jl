@@ -194,6 +194,8 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
                     "feevaluator.md",
                     "interpolations.md",
                     "quadrature.md",
+                    "pointevaluators.md",
+                    "segmentintegrators.md",
                 ],
             "Tutorial Notebooks" => notebooks,
             "Examples" => generated_examples,

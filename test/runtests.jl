@@ -5,6 +5,8 @@ using ExtendableFEMBase
 include("test_quadrature.jl")
 include("test_interpolators.jl")
 include("test_febasis.jl")
+include("test_segmentintegrator.jl")
+include("test_pointevaluator.jl")
 
 function testgrid(::Type{Edge1D})
     return uniform_refine(simplexgrid([0.0,1//4,2//3,1.0]),1)
@@ -105,6 +107,8 @@ function run_all_tests()
         run_febasis_tests()
         run_quadrature_tests()
         run_interpolator_tests()
+        run_segmentintegrator_tests()
+        run_pointevaluator_tests()
     end
 end
 

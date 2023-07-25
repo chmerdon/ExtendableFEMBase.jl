@@ -3,7 +3,7 @@
 
 ## Standard Interpolations
 
-Each finite element has its standard interpolator that can be applied to some user-defined DataFunction. Instead of interpolating on the full cells, the interpolation can be restricted to faces or edges, by specifying an [Assembly Type](@ref) in the call. 
+Each finite element has its standard interpolator that can be applied to some user-defined DataFunction. Instead of interpolating on the full cells, the interpolation can be restricted to faces or edges. 
 
 It is also possible to interpolate finite element functions on one grid onto a finite element function on another grid (experimental feature, does not work for all finite elements yet and shall be extended to interpolations of operator evaluations as well in future).
 

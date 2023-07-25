@@ -54,6 +54,7 @@ function point_evaluation!(target::AbstractArray{T,1}, FES::FESpace{Tv, Ti, FETy
     for j in items
         cell = xNodeCells[1,j]
         QP.item = cell
+        QP.cell = cell
         QP.region = xCellRegions[cell]
         QP.x .= view(xCoordinates,:,j)
         exact_function(result, QP)
@@ -160,6 +161,7 @@ function ensure_moments!(target::AbstractArray{T,1}, FE::FESpace{Tv, Ti, FEType,
 
     MOMxBASIS::Array{Float64,2} = zeros(Float64,0,0)
     FE_onref = FESpace{FEType_ref}(xgrid_ref)
+    moments_eval::Matrix{Float64} = zeros(Float64,0,0)
     if (bestapprox) # interior dofs are set by best-approximation
         refbasis = get_basis(ON_CELLS, FEType_ref, EG) 
         ndofs_ref = get_ndofs(ON_CELLS, FEType_ref, EG)
@@ -224,7 +226,7 @@ function ensure_moments!(target::AbstractArray{T,1}, FE::FESpace{Tv, Ti, FEType,
     invA::Array{Float64,2} = inv(MOMxINTERIOR)
 
     ## evaluator for moments of exact_function
-    result_f = zeros(T, ncomponents)
+    result_f::Vector{T} = zeros(T, ncomponents)
     function f_times_moments(result, qpinfo)
         fill!(moments_eval,0)
         moments_basis!(moments_eval, qpinfo.xref)
@@ -334,111 +336,6 @@ is only used if the source depends on time.
 """
 function ExtendableGrids.interpolate!(target::FEVectorBlock, source; kwargs...)
     interpolate!(target, ON_CELLS, source; kwargs...)
-end
-
-
-"""
-````
-function ExtendableGrids.interpolate!(
-    target::FEVectorBlock{T1,Tv,Ti},
-    source::FEVectorBlock{T2,Tv,Ti};
-    operator = Identity,
-    postprocess = NoAction(),
-    xtrafo = nothing,
-    items = [],
-    not_in_domain_value = 1e30,
-    use_cellparents::Bool = false) where {T1,T2,Tv,Ti}
-````
-
-Interpolates (operator-evaluations of) the given finite element function into the finite element space assigned to the target FEVectorBlock. 
-(Currently not the most efficient way as it is based on the PointEvaluation pattern and cell search. If CellParents
-are available in the grid components of the target grid, these parent cell information can be used to improve the
-search. To activate this put 'use_cellparents' = true). By some action with kernel (result,input) the operator evaluation (=input) can be
-further postprocessed (done by the called point evaluator).
-
-Note: discontinuous quantities at vertices of the target grid will be evaluted in the first found cell of the
-source grid. No averaging is performed.
-"""
-function ExtendableGrids.interpolate!(
-    target::FEVectorBlock{T1,Tv,Ti},
-    source::FEVectorBlock{T2,Tv,Ti};
-    operator = Identity,
-    postprocess = NoAction(),
-    xtrafo = nothing, 
-    items = [],
-    not_in_domain_value = 1e30,
-    start_cell = 1,
-    only_localsearch = false,
-    use_cellparents::Bool = false,
-    eps = 1e-13) where {T1,T2,Tv,Ti}
-    # wrap point evaluation into function that is put into normal interpolate!
-    xgrid = source.FES.xgrid
-    xdim_source::Int = size(xgrid[Coordinates],1)
-    xdim_target::Int = size(target.FES.xgrid[Coordinates],1)
-    if xdim_source != xdim_target
-        @assert xtrafo !== nothing "grids have different coordinate dimensions, need xtrafo!"
-    end
-    FEType = eltype(source.FES)
-    ncomponents::Int = get_ncomponents(FEType)
-    resultdim::Int = Length4Operator(operator,xdim_source,ncomponents)
-    if !(typeof(postprocess) <: NoAction)
-        resultdim = postprocess.argsizes[1]
-    end
-    PE = PointEvaluator(source, operator, postprocess)
-    xref = zeros(Tv,xdim_source)
-    x_source = zeros(Tv,xdim_source)
-    cell::Int = start_cell
-    lastnonzerocell::Int = start_cell
-    same_cells::Bool = xgrid == target.FES.xgrid
-    CF::CellFinder{Tv,Ti} = CellFinder(xgrid)
-
-    EG = xgrid[GridComponentUniqueGeometries4AssemblyType(ON_CELLS)]
-    quadorder::Int = get_polynomialorder(FEType,EG[1])
-    for j = 2 : length(EG)
-        quadorder = max(quadorder, get_polynomialorder(FEType,EG[j]))
-    end
-
-    if same_cells || use_cellparents == true
-        if same_cells
-            xCellParents = 1 : num_cells(target.FES.xgrid)
-        else
-            xCellParents::Array{Ti,1} = target.FES.xgrid[CellParents]
-        end
-        function point_evaluation_parentgrid!(result, x, target_cell)
-            if same_cells
-                lastnonzerocell = target_cell[4]
-            elseif use_cellparents
-                lastnonzerocell = xCellParents[target_cell[4]]
-            end
-            if xtrafo !== nothing
-                xtrafo(x_source, x)
-                cell = gFindLocal!(xref, CF, x_source; icellstart = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
-            else
-                cell = gFindLocal!(xref, CF, x; icellstart = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
-            end
-            evaluate!(result,PE,xref,cell)
-            return nothing
-        end
-        fe_function = DataFunction(point_evaluation_parentgrid!, [resultdim, xdim_target]; dependencies = "XI", bonus_quadorder = quadorder)
-    else
-        function point_evaluation_arbitrarygrids!(result, x)
-            if xtrafo !== nothing
-                xtrafo(x_source, x)
-                cell = gFindLocal!(xref, CF, x_source; icellstart = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
-            else
-                cell = gFindLocal!(xref, CF, x; icellstart = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
-            end
-            if cell == 0
-                fill!(result, not_in_domain_value)
-            else
-                evaluate!(result,PE,xref,cell)
-                lastnonzerocell = cell
-            end
-            return nothing
-        end
-        fe_function = DataFunction(point_evaluation_arbitrarygrids!, [resultdim, xdim_target]; dependencies = "X", bonus_quadorder = quadorder)
-    end
-    interpolate!(target, ON_CELLS, fe_function; items = items)
 end
 
 

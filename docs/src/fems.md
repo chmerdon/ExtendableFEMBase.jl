@@ -39,7 +39,7 @@ AbstractFiniteElement
 #### Remarks
 - each type depends on one/two or three parameters, the first one is always the number of components (ncomponents) that determines if the
   finite element is scalar- or veector-valued; some elements additionaly require the parameter edim <: Int if they are structurally different in different space dimensions; arbitrary order elements require a third parameter that determines the order
-- each finite elements mainly comes with a set of basis functions in reference coordinates for each applicable AbstractElementGeometry and degrees of freedom maps for each [Assembly Type](@ref) (coded as a string)
+- each finite elements mainly comes with a set of basis functions in reference coordinates for each applicable AbstractElementGeometry and degrees of freedom maps for each mesh entity
 - broken finite elements are possible via the broken switch in the [FESpace](@ref) constructor
 - the type steers how the basis functions are transformed from local to global coordinates and how FunctionOperators are evaluated
 - depending on additional continuity properties of the element types more basis function sets are defined:
