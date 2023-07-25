@@ -228,7 +228,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Custom `fill` function for `FEMatrixBlock` (only fills the block, not the complete FEMatrix).
+Custom `fill` function for `FEMatrixBlock` (only fills the already present nzval in the block, not the complete FEMatrix).
 """
 function Base.fill!(B::FEMatrixBlock{Tv,Ti}, value) where {Tv,Ti}
     cscmat::SparseMatrixCSC{Tv,Ti} = B.entries.cscmatrix
@@ -378,9 +378,8 @@ function addblock_matmul!(A::FEMatrixBlock{Tv}, cscmatB::SparseMatrixCSC{Tv,Ti},
     rowsC::Array{Ti,1} = rowvals(cscmatC)
     valsB::Array{Tv,1} = cscmatB.nzval
     valsC::Array{Tv,1} = cscmatC.nzval
-    bcol::Int = 0
-    row::Int = 0
     arow::Int = 0
+    acol::Int = 0
     if transposed # add (B*C)'= C'*B' to A
         for i = 1:size(cscmatC, 2)
             arow = i + A.offset

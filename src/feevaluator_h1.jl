@@ -147,7 +147,7 @@ end
 # NORMALFLUX H1 (ON_FACES, ON_BFACES)
 function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:NormalFlux,<:AbstractH1FiniteElement})
     # fetch normal of item
-    normal = view(FEBE.coefficients3, :, FEBE.citem[])
+    normal = view(FEBE.coefficients_op, :, FEBE.citem[])
     subset = _update_subset!(FEBE)
     cvals = FEBE.cvals
     refbasisvals = FEBE.refbasisvals
@@ -161,7 +161,7 @@ end
 # NORMALFLUX H1+COEFFICIENTS (ON_FACES, ON_BFACES)
 function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:NormalFlux,<:AbstractH1FiniteElementWithCoefficients})
     # fetch normal of item
-    normal = view(FEBE.coefficients3, :, FEBE.citem[])
+    normal = view(FEBE.coefficients_op, :, FEBE.citem[])
     subset = _update_subset!(FEBE)
     coefficients = _update_coefficients!(FEBE)
     cvals = FEBE.cvals
@@ -317,8 +317,8 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:Tangent
 
     # compute tangent of item
     tangent = FEBE.iteminfo
-    tangent[1] = FEBE.coefficients3[2, FEBE.citem[]]
-    tangent[2] = -FEBE.coefficients3[1, FEBE.citem[]]
+    tangent[1] = FEBE.coefficients_op[2, FEBE.citem[]]
+    tangent[2] = -FEBE.coefficients_op[1, FEBE.citem[]]
 
     for i = 1 : size(cvals,3)
         for dof_i = 1 : size(cvals,2)
@@ -330,158 +330,5 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:Tangent
             end    
         end    
     end  
-    return nothing
-end
-
-
-
-#### RECONSTRUCTION OPERATORS ####
-
-# RECONSTRUCTION IDENTITY H1 >> HDIV
-# Piola transform Hdiv reference basis and multiply Hdiv coefficients and Trafo coefficients
-function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:ReconstructionIdentity,<:Union{AbstractH1FiniteElement, AbstractH1FiniteElementWithCoefficients}})
-
-    L2GM = _update_piola!(FEBE)
-    coeffs = _update_coefficients!(FEBE)
-    subset = _update_subset!(FEBE)
-    det = FEBE.L2G.det # 1 alloc
-    ncomponents = length(FEBE.offsets)
-
-    # get Hdiv basis
-    refbasisvals = FEBE.refbasisvals
-    tempeval = FEBE.refbasisderivvals
-    fill!(tempeval,0)
-    for i = 1 : size(tempeval,3)
-        for dof_i = 1 : size(coeffs,2)
-            for k = 1 : ncomponents
-                for l = 1 : ncomponents
-                    tempeval[k,dof_i,i] += L2GM[k,l] * refbasisvals[i][subset[dof_i],l]
-                end    
-                tempeval[k,dof_i,i] *= coeffs[k,dof_i] / det
-            end
-        end
-    end
-
-    # get local reconstruction coefficients
-    rcoeffs = FEBE.coefficients2
-    get_rcoefficients!(rcoeffs, FEBE.reconst_handler, FEBE.citem[])
-
-    # accumulate
-    cvals = FEBE.cvals
-    fill!(cvals,0)
-    for dof_i = 1 : size(rcoeffs,1), dof_j = 1 : size(rcoeffs,2)
-        if rcoeffs[dof_i,dof_j] != 0
-            for i = 1 : size(cvals,3), k = 1 : size(tempeval,1)
-                cvals[k,dof_i,i] += rcoeffs[dof_i,dof_j] * tempeval[k,dof_j,i]
-            end
-        end
-    end
-
-    return nothing
-end
-
-
-# RECONSTRUCTION NORMALFLUX H1 >> HDIV
-# Hdiv ELEMENTS (just divide by face volume)
-function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:ReconstructionNormalFlux,<:Union{AbstractH1FiniteElement, AbstractH1FiniteElementWithCoefficients}})
-    # get local reconstruction coefficients
-    rcoeffs = FEBE.coefficients2
-    get_rcoefficients!(rcoeffs, FEBE.reconst_handler, FEBE.citem[])
-    refbasisvals = FEBE.refbasisvals
-    xItemVolumes = FEBE.L2G.ItemVolumes
-    cvals = FEBE.cvals
-    fill!(cvals,0)
-    for dof_i = 1 : size(rcoeffs,1), dof_j = 1 : size(rcoeffs,2)
-        if rcoeffs[dof_i,dof_j] != 0
-            for i = 1 : size(cvals,3), k = 1 : size(tempeval,1)
-                cvals[k,dof_i,i] += rcoeffs[dof_i,dof_j] * refbasisvals[i][dof_j,k] / xItemVolumes[FEBE.citem[]]
-            end
-        end
-    end
-    return nothing
-end
-
-
-# RECONSTRUCTION DIVERGENCE OPERATOR
-# H1 ELEMENTS
-# HDIV RECONSTRUCTION
-# Piola transform Hdiv reference basis and multiply Hdiv coefficients and Trafo coefficients
-function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:ReconstructionDivergence,<:Union{AbstractH1FiniteElement, AbstractH1FiniteElementWithCoefficients}})
-    # update transformation
-    _update_piola!(FEBE)
-    coefficients = _update_coefficients!(FEBE)
-    subset = _update_subset!(FEBE)
-    det = FEBE.L2G.det # 1 alloc
-
-    # get local reconstruction coefficients
-    rcoeffs = FEBE.coefficients2
-    get_rcoefficients!(rcoeffs, FEBE.reconst_handler, FEBE.citem[])
-    refbasisderivvals = FEBE.refbasisderivvals
-    offsets2 = FEBE.offsets2
-    xItemVolumes = FEBE.L2G.ItemVolumes
-    cvals = FEBE.cvals
-    fill!(cvals,0)
-    for i = 1 : size(cvals,3)
-        for dof_i = 1 : size(rcoeffs,1)
-            for dof_j = 1 : size(rcoeffs,2)
-                if rcoeffs[dof_i,dof_j] != 0
-                    for j = 1 : size(refbasisderivvals,2)
-                        cvals[1,dof_i,i] += rcoeffs[dof_i,dof_j] * refbasisderivvals[subset[dof_j] + offsets2[j],j,i] * coefficients[1,dof_j]
-                    end  
-                end
-            end
-            cvals[1,dof_i,i] /= det
-        end
-    end  
-    return nothing
-end
-
-
-# RECONSTRUCTION GRADIENT OPERATOR
-# Hdiv ELEMENTS (Piola trafo)
-#
-function update_basis!(FEBE::SingleFEEvaluator{<:Real,<:Real,<:Integer,<:ReconstructionGradient,<:Union{AbstractH1FiniteElement, AbstractH1FiniteElementWithCoefficients}})
-    # update transformation
-    L2GM = _update_piola!(FEBE)
-    L2GAinv = _update_trafo!(FEBE)
-    coefficients = _update_coefficients!(FEBE)
-    subset = _update_subset!(FEBE)
-    det = FEBE.L2G.det # 1 alloc
-
-    # get local reconstruction coefficients
-    rcoeffs = FEBE.coefficients2
-    get_rcoefficients!(rcoeffs, FEBE.reconst_handler, FEBE.citem[])
-
-    # use Piola transformation on basisvals
-    refbasisderivvals = FEBE.refbasisderivvals
-    coefficients = FEBE.coefficients3
-    offsets = FEBE.offsets
-    offsets2 = FEBE.offsets2
-    cvals = FEBE.cvals
-    ndofs = size(rcoeffs,1)
-    ndofs2 = size(rcoeffs,2)
-    edim = size(L2GAinv,1)
-    ncomponents = length(offsets)
-    fill!(cvals,0)
-    for i = 1 : size(cvals,3)
-        # calculate gradients of Hdiv basis functions and save them to coefficients3
-        fill!(coefficients3, 0)
-        for dof_i = 1 : ndofs2, c = 1 : ncomponents, k = 1 : edim
-            # compute duc/dxk
-            for j = 1 : edim, m = 1 : edim
-                coefficients3[k + offsets[c],dof_i] += L2GAinv[k,m] * L2GM[c,j] * refbasisderivvals[subset[dof_i] + offsets2[j],m,i]
-            end    
-            coefficients3[k + FEBE.offsets[c],dof_i] *= coefficients[c,dof_i] / det
-        end
-
-        # accumulate with reconstruction coefficients
-        for dof_i = 1 : ndofs, dof_j = 1 : ndofs2
-            if rcoeffs[dof_i,dof_j] != 0
-                for k = 1 : size(FEBE.cvals,1)
-                    cvals[k,dof_i,i] += rcoeffs[dof_i,dof_j] * coefficients3[k,dof_j]
-                end
-            end
-        end
-    end
     return nothing
 end

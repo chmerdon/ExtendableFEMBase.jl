@@ -190,6 +190,7 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
                     "fespace.md",
                     "fevector.md",
                     "fematrix.md",
+                    "functionoperators.md",
                     "feevaluator.md",
                     "interpolations.md",
                     "quadrature.md",
@@ -205,7 +206,7 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
 end
 
 #make_all(; with_examples = true, run_examples = true, run_notebooks = true)
-make_all(; with_examples = false, run_examples = false, run_notebooks = true)
+make_all(; with_examples = true, run_examples = false, run_notebooks = false)
 
 deploydocs(
     repo = "github.com/chmerdon/ExtendableFEMBase.jl",

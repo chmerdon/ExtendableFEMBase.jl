@@ -18,6 +18,7 @@ struct FEVectorBlock{T,Tv,Ti,FEType,APT} <: AbstractArray{T,1}
     entries::Array{T,1} # shares with parent object
 end
 
+get_ncomponents(FB::FEVectorBlock) = get_ncomponents(get_FEType(FB.FES))
 
 function Base.show(io::IO, FEB::FEVectorBlock; tol = 1e-14)
     @printf(io, "\n");
@@ -36,7 +37,9 @@ end
 """
 $(TYPEDEF)
 
-a plain array but with an additional layer of several FEVectorBlock subdivisions each carrying coefficients for their associated FESpace
+a plain array but with an additional layer of several FEVectorBlock subdivisions each carrying coefficients for their associated FESpace.
+The j-th block can be accessed by getindex(::FEVector, j) or by getindex(::FEVector, tag) if tags are associated.
+The full vector can be accessed via FEVector.entries 
 """
 struct FEVector{T,Tv,Ti} #<: AbstractVector{T}
     FEVectorBlocks::Array{FEVectorBlock{T,Tv,Ti},1}
@@ -56,14 +59,21 @@ Base.setindex!(FEB::FEVectorBlock, v, i::AbstractArray) = (FEB.entries[FEB.offse
 Base.eltype(::FEVector{T}) where {T}  = T
 Base.size(FEF::FEVector)=size(FEF.FEVectorBlocks)
 Base.size(FEB::FEVectorBlock)=FEB.last_index-FEB.offset
+
+
+"""
+$(TYPEDEF)
+
+returns a view of the part of the full FEVector that coressponds to the block. 
+"""
 Base.view(FEB::FEVectorBlock)=view(FEB.entries,FEB.offset+1:FEB.last_index)
 
 function LinearAlgebra.norm(FEV::FEVector, p::Real = 2)
-    return norm(FEV.entries)
+    return norm(FEV.entries, p)
 end
 
 function LinearAlgebra.norm(FEV::FEVectorBlock, p::Real = 2)
-    return norm(view(FEV))
+    return norm(view(FEV), p)
 end
 
 function norms(FEV::FEVector{T}, p::Real = 2) where {T}
@@ -74,7 +84,6 @@ function norms(FEV::FEVector{T}, p::Real = 2) where {T}
     return norms
 end
 
-get_ncomponents(FB::FEVectorBlock) = get_ncomponents(get_FEType(FB.FES))
 
 
 """
@@ -111,11 +120,12 @@ end
 
 """
 ````
-FEVector{T}(FES; name = "auto") where T <: Real
+FEVector{T}(FES; name = nothing, tags = nothing, kwargs...) where T <: Real
 ````
 
 Creates FEVector that has one block if FES is a single FESpace, and a blockwise FEVector if FES is a vector of FESpaces.
-Optionally a name for the vector (as a String), or each of the blocks (as a vector of Strings) can be specified.
+Optionally a name for the vector (as a String) or each of the blocks (as a vector of Strings), or tags (as an Array{Any})
+for the blocks can be specified.
 """
 function FEVector(FES::FESpace{Tv,Ti,FEType,APT}; kwargs...) where {Tv,Ti,FEType,APT}
     return FEVector{Float64}([FES]; kwargs...)
@@ -126,9 +136,10 @@ end
 function FEVector(FES::Array{<:FESpace{Tv,Ti},1}; kwargs...) where {Tv,Ti}
     return FEVector{Float64}(FES; kwargs...)
 end
+
 # main constructor
-function FEVector{T}(FES::Array{<:FESpace{Tv,Ti},1}; name = "auto", tags = [], kwargs...) where {T,Tv,Ti}
-    if name == "auto"
+function FEVector{T}(FES::Array{<:FESpace{Tv,Ti},1}; name = nothing, tags = [], kwargs...) where {T,Tv,Ti}
+    if name === nothing
         names = ["#$j" for j in 1 : length(FES)]
     elseif typeof(name) == String
         names = Array{String,1}(undef, length(FES))
@@ -163,14 +174,14 @@ Custom `show` function for `FEVector` that prints some information on its blocks
 function Base.show(io::IO, FEF::FEVector)
 	println(io,"\nFEVector information")
     println(io,"====================")
-    println(io,"   block  |  ndofs \t| FEType       \t\t| name/tag")
+    println(io,"   block  |  ndofs \t| FEType \t\t (name/tag)")
     for j=1:length(FEF)
         @printf(io," [%5d]  | ",j);
         @printf(io," %6d\t|",FEF[j].FES.ndofs);
         if length(FEF.tags) >= j
-            @printf(io," %s  \t| %s/%s",FEF[j].FES.name,FEF[j].name,FEF.tags[j]);
+            @printf(io," %s  \t\t (%s/%s)\n",FEF[j].FES.name,FEF[j].name,FEF.tags[j]);
         else
-            @printf(io," %s  \t| %s",FEF[j].FES.name,FEF[j].name);
+            @printf(io," %s  \t\t (%s)\n",FEF[j].FES.name,FEF[j].name);
         end
     end    
 end
@@ -180,7 +191,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Custom `append` function for `FEVector` that adds a FEVectorBlock at the end.
+Overloaded `append` function for `FEVector` that adds a FEVectorBlock at the end.
 """
 function Base.append!(FEF::FEVector{T}, FES::FESpace{Tv,Ti,FEType,APT}; name = "", tag = nothing) where {T,Tv,Ti,FEType,APT}
     append!(FEF.entries,zeros(T,FES.ndofs))
@@ -195,12 +206,10 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Custom `fill` function for `FEVectorBlock` (only fills the block, not the complete FEVector).
+Overloaded `fill` function for `FEVectorBlock` (only fills the block, not the complete FEVector).
 """
 function Base.fill!(b::FEVectorBlock, value)
-    for j = b.offset+1 : b.last_index
-        b.entries[j] = value
-    end
+    fill!(view(b), value)
     return nothing
 end
 
@@ -211,12 +220,7 @@ $(TYPEDSIGNATURES)
 Adds FEVectorBlock b to FEVectorBlock a.
 """
 function addblock!(a::FEVectorBlock, b::FEVectorBlock; factor = 1)
-    l::Int = length(b)
-    aoffset::Int = a.offset
-    boffset::Int = b.offset
-    for j = 1 : l
-        a.entries[aoffset+j] += b.entries[boffset+j] * factor
-    end
+    addblock!(a, b.entries; factor = factor, offset = b.offset)
     return nothing
 end
 
@@ -225,10 +229,10 @@ $(TYPEDSIGNATURES)
 
 Adds Array b to FEVectorBlock a.
 """
-function addblock!(a::FEVectorBlock, b::AbstractVector; factor = 1)
+function addblock!(a::FEVectorBlock, b::AbstractVector; factor = 1, offset = 0)
     aoffset::Int = a.offset
     for j = 1 : length(b)
-        a.entries[aoffset+j] += b[j] * factor
+        a.entries[aoffset+j] += b[j + offset] * factor
     end
     return nothing
 end
@@ -240,11 +244,5 @@ $(TYPEDSIGNATURES)
 Scalar product between two FEVEctorBlocks
 """
 function LinearAlgebra.dot(a::FEVectorBlock{T}, b::FEVectorBlock{T}) where {T}
-    aoffset::Int = a.offset
-    boffset::Int = b.offset
-    result::T = 0.0
-    for j = 1 : length(b)
-       result += a.entries[aoffset+j] * b.entries[boffset+j]
-    end
-    return result
+    return dot(view(a), view(b))
 end

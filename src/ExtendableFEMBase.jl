@@ -25,10 +25,6 @@ include("functionoperators.jl")
 export AbstractFunctionOperator
 export StandardFunctionOperator
 export Identity, IdentityComponent
-export ReconstructionIdentity
-export ReconstructionGradient
-export ReconstructionDivergence
-export ReconstructionNormalFlux
 export NormalFlux, NormalFluxDisc, TangentFlux
 export Gradient
 export SymmetricGradient, TangentialGradient
@@ -89,6 +85,9 @@ export ReconstructionHandler, get_rcoefficients!
 
 include("feevaluator.jl")
 export FEEvaluator, update_basis!, eval_febe!
+
+include("reconstructionoperators.jl")
+export Reconstruct
 
 include("accumvector.jl")
 export AccumulatingVector

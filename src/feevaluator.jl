@@ -4,7 +4,6 @@ abstract type FEEvaluator{T <: Real, TvG <: Real, TiG <: Integer} end
 struct SingleFEEvaluator{T <: Real, TvG <: Real, TiG <: Integer, operator, FEType, EG, FType_basis <: Function, FType_coeffs <: Function, FType_subset <: Function, FType_jac <: Function} <: FEEvaluator{T, TvG, TiG}
     citem::Base.RefValue{Int}                   # current item
     FE::FESpace{TvG,TiG,FEType}                 # link to full FE (e.g. for coefficients)
-    FE2::Union{Nothing, FESpace{TvG,TiG}}       # link to other FE (if needed, e.g. for reconstruction)
     L2G::L2GTransformer{TvG, TiG, EG}           # local2global mapper
     L2GAinv::Array{TvG,2}                       # 2nd heap for transformation matrix (e.g. Piola + mapderiv)
     iteminfo::Array{TvG,1}                      # (e.g. current determinant for Hdiv, current tangent)
@@ -19,21 +18,17 @@ struct SingleFEEvaluator{T <: Real, TvG <: Real, TiG <: Integer, operator, FETyp
     offsets::Array{Int,1}                       # offsets for gradient entries of each dof
     offsets2::Array{Int,1}                      # offsets for dof entries of each gradient (on ref)
     cvals::Array{T,3}                           # current operator vals on item
-    coefficients::Array{TvG,2}                    # coefficients for finite element
-    coefficients2::Array{TvG,2}                   # additional coefficients for reconstruction
-    coefficients3::Array{TvG,2}           # coefficients for operator (e.g. TangentialGradient)
+    coefficients::Array{TvG,2}                  # coefficients for finite element
+    coefficients_op::Array{TvG,2}                 # coefficients for operator (e.g. TangentialGradient)
     coeffs_handler::FType_coeffs                # function to call to get coefficients for finite element
     subset_handler::FType_subset                # function to call to get linear independent subset of basis on cell
-    reconst_handler::Union{Nothing, ReconstructionHandler{T, TiG}} # handler for reconstruction coefficients (if needed)
     current_subset::Array{Int,1}                # current indices of subset of linear independent basis functions
     compressiontargets::Array{Int,1}            # some operators allow for compressed storage (e.g. SymmetricGradient)
 end
 
-
-
 """
 ````
-function FEEvaluator(FE::FESpace, operator::StandardFunctionOperator, qrule::QuadratureRule; T = Float64, AT = ON_CELLS)
+function FEEvaluator(FE::FESpace, operator::AbstractFunctionOperator, qrule::QuadratureRule; T = Float64, AT = ON_CELLS, L2G = nothing)
 ````
 
 Constructs a FEEvaluator that handles evaluations of finite element basis function evaluation for the given FESpace, operator
@@ -41,13 +36,21 @@ at the quadrature points of the given QuadratureRule. It has an update! function
 Evaluations can be accessed via FEEvaluator.cvals[j,k,i] where i is the quadrature point id, k is the local dof number and j
 is the component. 
 
-Note that matrix-valued operators evaluations, e.g. for Gradient, are given as a long vector.
+Note that matrix-valued operators evaluations, e.g. for Gradient, are given as a long vector (in component-wise order).
 """
-function FEEvaluator(FE::FESpace{TvG,TiG,FEType,FEAPT}, operator::Type{<:StandardFunctionOperator}, qrule::QuadratureRule{TvR,EG}; T = Float64, AT = ON_CELLS) where {TvG, TiG, TvR, FEType <: AbstractFiniteElement, EG <: AbstractElementGeometry, FEAPT <: AssemblyType}
+function FEEvaluator(
+    FE::FESpace{TvG,TiG,FEType,FEAPT},
+    operator::Type{<:StandardFunctionOperator},
+    qrule::QuadratureRule{TvR,EG};
+    L2G = nothing,
+    T = Float64,
+    AT = ON_CELLS) where {TvG, TiG, TvR, FEType <: AbstractFiniteElement, EG <: AbstractElementGeometry, FEAPT <: AssemblyType}
     
     xref = qrule.xref
     xgrid = FE.xgrid
-    L2G = L2GTransformer(EG, xgrid, AT)
+    if L2G === nothing
+        L2G = L2GTransformer(EG, xgrid, AT)
+    end
     L2GAinv = copy(L2G.A)
 
     # get effective assembly type for basis
@@ -79,11 +82,6 @@ function FEEvaluator(FE::FESpace{TvG,TiG,FEType,FEAPT}, operator::Type{<:Standar
         refbasisvals[i] = zeros(T,ndofs4item_all,ncomponents)
     end    
 
-    #if operator <: Jump
-    #    ndofs4item *=2
-    #    ndofs4item_all *=2
-    #end
-
     # set coefficient handlers needed for basis evaluation
     coefficients = zeros(T,0,0)
     coeff_handler = NothingFunction
@@ -104,7 +102,7 @@ function FEEvaluator(FE::FESpace{TvG,TiG,FEType,FEAPT}, operator::Type{<:Standar
         offsets2 = []
     end
     compressiontargets = _prepare_compressiontargets(operator, FE.xgrid, AT, edim)
-    coefficients3 = _prepare_additional_coefficients(operator, FE.xgrid, AT, edim)
+    coefficients_op = _prepare_additional_coefficients(operator, FE.xgrid, AT, edim)
     current_eval = zeros(T,resultdim,ndofs4item,length(xref))
 
     derivorder = NeededDerivative4Operator(operator)
@@ -118,22 +116,10 @@ function FEEvaluator(FE::FESpace{TvG,TiG,FEType,FEAPT}, operator::Type{<:Standar
             for i = 1 : length(xref), j = 1 : ndofs4item, k = 1 : ncomponents
                 current_eval[k,j,i] = refbasisvals[i][j,k]
             end
-#        elseif operator <: Jump{Identity}
-#            ndofs4item_oneside = size(refbasisvals[1],1)
-#            for i = 1 : length(xref), j = 1 : ndofs4item_oneside, k = 1 : ncomponents
-#                current_eval[k,j,i] = refbasisvals[i][j,k]
-#                current_eval[k,j+ndofs4item_oneside,i] = -refbasisvals[i][j,k]
-#            end
         elseif operator <: IdentityComponent
             for i = 1 : length(xref), j = 1 : ndofs4item
                 current_eval[1,j,i] = refbasisvals[i][j,operator.parameters[1]]
             end
-#        elseif operator <: Jump{IdentityComponent}
-#            ndofs4item_oneside = size(refbasisvals[1],1)
-#            for i = 1 : length(xref), j = 1 : ndofs4item
-#                current_eval[1,j,i] = refbasisvals[i][j,operator.parameters[1]]
-#                current_eval[1,j+ndofs4item_oneside,i] = -refbasisvals[i][j,operator.parameters[1]]
-#            end
         end
         Dcfg = nothing
         Dresult = nothing
@@ -158,92 +144,8 @@ function FEEvaluator(FE::FESpace{TvG,TiG,FEType,FEAPT}, operator::Type{<:Standar
             end
         end
     end
-    #@info operator, AT, FEAT, ndofs4item
 
-    FE2 = nothing
-    coefficients2 = zeros(T,0,0)
-    reconst_handler = nothing
-
-    return SingleFEEvaluator{T,TvG,TiG,operator,FEType,EG,typeof(refbasis),typeof(coeff_handler),typeof(subset_handler),typeof(jacobian_wrap)}(Ref(0),FE,FE2,L2G,L2GAinv,zeros(T,xdim+1),xref,refbasis,refbasisvals,refbasisderivvals,derivorder,Dresult,Dcfg,jacobian_wrap,offsets,offsets2,current_eval,coefficients,coefficients2,coefficients3, coeff_handler, subset_handler, reconst_handler, 1:ndofs4item, compressiontargets)
-end    
-
-
-# constructor for ReconstructionIdentity, ReconstructionDivergence, ReconstructionGradient
-function FEEvaluator(FE::FESpace{TvG,TiG,FEType,FEAPT}, operator::Type{<:Union{<:ReconstructionIdentity{FETypeReconst},ReconstructionNormalFlux{FETypeReconst},ReconstructionDivergence{FETypeReconst},<:ReconstructionGradient{FETypeReconst}}}, qrule::QuadratureRule{TvR,EG}; T = Float64, AT = ON_CELLS) where {TvG, TiG, TvR, FEType <: AbstractFiniteElement, FETypeReconst <: AbstractFiniteElement, EG <: AbstractElementGeometry, FEAPT <: AssemblyType}
-    
-    @debug "Creating FEBasisEvaluator for $operator operator of $FEType on $EG"
-
-    # generate reconstruction space
-    # avoid computation of full dofmap
-    # we will just use local basis functions
-    xgrid = FE.xgrid
-    FE2 = FESpace{FETypeReconst}(xgrid)
-    L2G = L2GTransformer(EG, xgrid,AT)
-    L2GAinv = copy(L2G.A)
-
-    # collect basis function information
-    ncomponents::Int = get_ncomponents(FEType)
-    ncomponents2::Int = get_ncomponents(FETypeReconst)
-    if AT <: Union{ON_BFACES,<:ON_FACES}
-        if FETypeReconst <: AbstractHdivFiniteElement
-            ncomponents2 = 1
-        end
-    end
-    refbasis = get_basis(AT, FEType, EG)
-    refbasis_reconst = get_basis(AT, FETypeReconst, EG)
-    ndofs4item = get_ndofs(AT, FEType, EG)
-    ndofs4item2 = get_ndofs(AT, FETypeReconst, EG)
-    ndofs4item2_all = get_ndofs_all(AT, FETypeReconst, EG)    
-
-    # evaluate reconstruction basis
-    xref = qrule.xref
-    refbasisvals = Array{Array{T,2},1}(undef,length(xref));
-    for i = 1 : length(xref)
-        # evaluate basis functions at quadrature point
-        refbasisvals[i] = zeros(T,ndofs4item2_all,ncomponents2)
-        refbasis_reconst(refbasisvals[i], xref[i])
-    end    
-
-    # set coefficient handlers needed for basis evaluation (for both FEType and FETypereconst)
-    if FETypeReconst <: Union{AbstractH1FiniteElementWithCoefficients, AbstractHdivFiniteElement}
-        coefficients = ones(T,ncomponents,ndofs4item2)
-        coeff_handler = get_coefficients(AT, FE2, EG)
-    else
-        coefficients = zeros(T,0,0)
-        coeff_handler = NothingFunction
-    end    
-    coefficients2 = zeros(T,ndofs4item,ndofs4item2)
-
-    # set subset handler (only relevant if ndofs4item_all > ndofs4item)
-    subset_handler = get_basissubset(AT, FE2, EG)
-
-    # get reconstruction coefficient handlers
-    reconst_handler = ReconstructionHandler(FE,FE2,AT,EG)
-
-    # compute refbasisderivvals and further coefficients needed for operator eval
-    edim = dim_element(EG)
-    xdim = size(FE.xgrid[Coordinates],1)
-    offsets = 0:edim:((ncomponents-1)*edim);
-    offsets2 = 0:ndofs4item2_all:ncomponents*ndofs4item2_all
-    coefficients3 = _prepare_additional_coefficients(operator, FE.xgrid, AT, edim)
-    compressiontargets = _prepare_compressiontargets(operator, FE.xgrid, AT, edim)
-    resultdim = Int(Length4Operator(operator,edim,ncomponents))
-    current_eval = zeros(T,resultdim,ndofs4item,length(xref))
-    derivorder = NeededDerivative4Operator(operator)
-    if derivorder == 0
-        # refbasisderivvals are used as a cache for the reconstruction basis
-        refbasisderivvals = zeros(T,ncomponents,ndofs4item2_all,length(xref));
-        Dcfg = nothing
-        Dresult = nothing
-        jacobian_wrap = NothingFunction
-    elseif derivorder == 1
-        # derivatives of the reconstruction basis on the reference domain are computed
-        refbasisderivvals = zeros(T,ndofs4item2_all*ncomponents2,edim,length(xref));
-        Dresult, Dcfg, jacobian_wrap = _prepare_derivatives(refbasisderivvals, refbasis_reconst, xref, derivorder, ndofs4item2_all, ncomponents2)
-        coefficients3 = zeros(T,resultdim,ndofs4item2)
-    end
-    
-    return SingleFEEvaluator{T,TvG,TiG,operator,FEType,EG,typeof(refbasis),typeof(coeff_handler),typeof(subset_handler),typeof(jacobian_wrap)}(Ref(0),FE,FE2,L2G,L2GAinv,zeros(T,xdim+1),xref,refbasis,refbasisvals,refbasisderivvals,derivorder,Dresult,Dcfg,jacobian_wrap,offsets,offsets2,current_eval,coefficients,coefficients2,coefficients3, coeff_handler, subset_handler, reconst_handler, 1:ndofs4item, compressiontargets)
+    return SingleFEEvaluator{T,TvG,TiG,operator,FEType,EG,typeof(refbasis),typeof(coeff_handler),typeof(subset_handler),typeof(jacobian_wrap)}(Ref(0),FE,L2G,L2GAinv,zeros(T,xdim+1),xref,refbasis,refbasisvals,refbasisderivvals,derivorder,Dresult,Dcfg,jacobian_wrap,offsets,offsets2,current_eval,coefficients,coefficients_op, coeff_handler, subset_handler, 1:ndofs4item, compressiontargets)
 end    
 
 _prepare_additional_coefficients(::Type{<:AbstractFunctionOperator}, xgrid, AT, edim) = zeros(Float64,0,0)
@@ -322,31 +224,6 @@ function _prepare_derivatives(refbasisderivvals, refbasis, xref, derivorder, ndo
     return Dresult, Dcfg, jac_wrap
 end
 
-# ## relocates evaluation points (needs mutable FEB) used by segment integrator/point evaluator
-# function relocate_xref!(FEB::SingleFEEvaluator{<:Real,<:Real,<:Integer,operator,FEType}, new_xref) where {FEType, operator}
-#     for j = 1 : length(FEB.xref[1])
-#         FEB.xref[1][j] = new_xref[j]
-#     end
-#     if FEB.derivorder == 0
-#         # evaluate basis functions at quadrature point
-#         FEB.refbasis(FEB.refbasisvals[1], new_xref)
-#         if FEType <: AbstractH1FiniteElement # also reset cvals for operator evals that stay the same for all cells
-#             if operator <: Identity || operator <: IdentityDisc
-#                 for j = 1 : size(FEB.refbasisvals[1],1), k = 1 : size(FEB.refbasisvals[1],2)
-#                     FEB.cvals[k,j,1] = FEB.refbasisvals[1][j,k]
-#                 end
-#             elseif operator <: IdentityComponent
-#                 for j = 1 : size(FEB.refbasisvals[1],1)
-#                     FEB.cvals[1,j,1] = FEB.refbasisvals[1][j,operator.parameters[1]]
-#                 end
-#             end
-#         end
-#     elseif FEB.derivorder > 0
-#         _prepare_derivatives(FEB.refbasisderivvals, FEB.refbasis, FEB.xref, FEB.derivorder, size(FEB.refbasisvals[1],1), length(FEB.offsets); Dcfg = FEB.Dcfg, Dresult = FEB.Dresult)
-#     end
-#     FEB.citem[] = 0 # reset citem to allows recomputation if FEB.cvals (if multiple consecutive relocations are done in the same cell)
-#     return nothing
-# end
 
 ## relocates evaluation points (needs mutable FEB) used by segment integrator/point evaluator
 function relocate_xref!(FEB::SingleFEEvaluator{<:Real,<:Real,<:Integer,operator,FEType}, new_xref) where {FEType, operator}
@@ -427,7 +304,7 @@ function _update_coefficients!(FEBE::FEEvaluator)
 end
 
 ## general call that checks item (but causes 1 allocations)
-function update_basis!(FEBE::SingleFEEvaluator, item)
+function update_basis!(FEBE::FEEvaluator, item)
     if FEBE.citem[] == item
     else
         FEBE.citem[] = item

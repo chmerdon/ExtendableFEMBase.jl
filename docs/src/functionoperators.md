@@ -1,12 +1,14 @@
 
 # Function Operators
 
-FunctionOperators are abstract types that encode primitive (linear) operators (like Identity, Gradient etc.)
+## StandardFunctionOperators
+
+StandardFunctionOperators are abstract types that encode primitive (linear) operators (like Identity, Gradient etc.)
 used to dispatch different evaluations of finite element basis functions.
 
-## List of primitive operators
+### List of primitive operators
 
-| Function operator                                    | Description                                              | Mathematically                                                            |
+| StandardFunctionOperator                                    | Description                                              | Mathematically                                                            |
 | :--------------------------------------------------- | :------------------------------------------------------- | :------------------------------------------------------------------------ |
 | Identity                                             | identity                                                 | ``v \rightarrow v``                                                       |
 | IdentityComponent{c}                                 | identity of c-th component                               | ``v \rightarrow v_c``                                                     |
@@ -34,26 +36,24 @@ used to dispatch different evaluations of finite element basis functions.
     can be build from the ones available (e.g. the deviator).
 
 
-## Reconstruction Operators
+## ReconstructionOperators
 
-There are special operators (see Table below) that allow to evaluate a usual operator of some discrete
-reconstructed version of a vector-valued testfunction. These operators keep the discrete divergence exactly and so allow
-for gradient-robust discretisations with classical non divergence-conforming ansatz spaces.
-So far such operators are available for the vector-valued Crouzeix-Raviart and Bernardi--Raugel finite element types.
+There are special operators that allow to evaluate a primitive operator of some discrete
+reconstructed version of a testfunction. 
 
+```@autodocs
+Modules = [ExtendableFEMBase]
+Pages = ["reconstructionoperators.jl"]
+Order   = [:type, :function]
+```
 
-| Function operator                                    | Description                                             |
-| :--------------------------------------------------- | :------------------------------------------------------ |
-| ReconstructionIdentity{FEType}                       | reconstruction operator into specified FEType           |
-| ReconstructionDivergence{FEType}                     | divergence of FEType reconstruction operator            |
-| ReconstructionGradient{FEType}                       | gradient of FEType reconstruction operator              |
+### Divergence-free reconstruction operators
+For gradient-robust discretisations of certain classical non divergence-conforming ansatz spaces,
+reconstruction operators are available that map a discretely divergence-free H1 function to a pointwise divergence-free
+Hdiv function. So far such operators are available for the vector-valued Crouzeix-Raviart (H1CR) and Bernardi--Raugel (H1BR) finite element types,
+as well as for the P2-bubble (H1P2B) finite element type in two dimensions.
 
-
-!!! note
-
-    Currently this feature works with FEType = HdivRT0{d} and FEType = HdivBDM1{d} where d is the space dimension. However, solve! on a PDEDescription that includes these
-    operators will only work if the function operators are at spots were it is applied to functions of type H1BR, H1CR or H1P2B.
-    More reconstruction operators will be implemented at some later point.
+**Example:** Reconst{HDIVRT0{d}, Identity} gives the reconstruction of the Identity operator into HDIVRT0 (and is available for H1BR{d} and H1CR{d} for d = 1,2)
 
 
 
