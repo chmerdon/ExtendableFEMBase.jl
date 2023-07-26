@@ -1,3 +1,7 @@
+[![Build status](https://github.com/chmerdon/ExtendableFEMBase.jl/workflows/linux-macos-windows/badge.svg)](https://github.com/chmerdon/ExtendableFEMBase.jl/actions)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://chmerdon.github.io/ExtendableFEMBase.jl/stable/index.html)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://chmerdon.github.io/ExtendableFEMBase.jl/dev/index.html)
+
 # ExtendableFEMBase
 
 This package provides basic finite element structures to setup finite element schemes on ExtendableGrids:
