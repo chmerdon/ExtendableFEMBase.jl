@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>200 : Poisson Problem · ExtendableFEMBase.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ExtendableFEMBase.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../package_index/">Index</a></li><li><a class="tocitem" href="../../fems/">List of Finite Elements</a></li><li><span class="tocitem">Base Structures</span><ul><li><a class="tocitem" href="../../fespace/">FESpace</a></li><li><a class="tocitem" href="../../fevector/">FEVector</a></li><li><a class="tocitem" href="../../fematrix/">FEMatrix</a></li><li><a class="tocitem" href="../../functionoperators/">Function Operators</a></li><li><a class="tocitem" href="../../feevaluator/">FEEvaluator</a></li><li><a class="tocitem" href="../../interpolations/">Finite Element Interpolations</a></li><li><a class="tocitem" href="../../quadrature/">Quadrature</a></li><li><a class="tocitem" href="../../pointevaluators/">PointEvaluator</a></li><li><a class="tocitem" href="../../segmentintegrators/">SegmentIntegrator</a></li></ul></li><li><span class="tocitem">Tutorial Notebooks</span></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../../examples_intro/">About the examples</a></li><li class="is-active"><a class="tocitem" href>200 : Poisson Problem</a></li><li><a class="tocitem" href="../Example210_LowLevelNavierStokes/">210 : Navier-Stokes Problem</a></li><li><a class="tocitem" href="../Example290_InterpolationBetweenMeshes/">290 : Interpolation Between Meshes</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>200 : Poisson Problem</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>200 : Poisson Problem</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="github.com/chmerdon/ExtendableFEMBase.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id=":-Poisson-Problem"><a class="docs-heading-anchor" href="#:-Poisson-Problem">200 : Poisson Problem</a><a id=":-Poisson-Problem-1"></a><a class="docs-heading-anchor-permalink" href="#:-Poisson-Problem" title="Permalink"></a></h1><p>(<a href="https://github.com/chmerdon/ExtendableFEMBase.jl/raw/master/examples/Example200_LowLevelPoisson.jl">source code</a>)</p><p>This example computes the solution <span>$u$</span> of the two-dimensional Poisson problem</p><p class="math-container">\[\begin{aligned}
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>200 : Poisson Problem · ExtendableFEMBase.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ExtendableFEMBase.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../package_index/">Index</a></li><li><a class="tocitem" href="../../fems/">List of Finite Elements</a></li><li><span class="tocitem">Base Structures</span><ul><li><a class="tocitem" href="../../fespace/">FESpace</a></li><li><a class="tocitem" href="../../fevector/">FEVector</a></li><li><a class="tocitem" href="../../fematrix/">FEMatrix</a></li><li><a class="tocitem" href="../../functionoperators/">Function Operators</a></li><li><a class="tocitem" href="../../feevaluator/">FEEvaluator</a></li><li><a class="tocitem" href="../../interpolations/">Finite Element Interpolations</a></li><li><a class="tocitem" href="../../quadrature/">Quadrature</a></li></ul></li><li><span class="tocitem">Advanced Stuff</span><ul><li><a class="tocitem" href="../../pointevaluators/">PointEvaluator</a></li><li><a class="tocitem" href="../../segmentintegrators/">SegmentIntegrator</a></li><li><a class="tocitem" href="../../plots/">Plots</a></li></ul></li><li><span class="tocitem">Tutorial Notebooks</span></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../../examples_intro/">About the examples</a></li><li class="is-active"><a class="tocitem" href>200 : Poisson Problem</a></li><li><a class="tocitem" href="../Example210_LowLevelNavierStokes/">210 : Navier-Stokes Problem</a></li><li><a class="tocitem" href="../Example290_InterpolationBetweenMeshes/">290 : Interpolation Between Meshes</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>200 : Poisson Problem</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>200 : Poisson Problem</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="github.com/chmerdon/ExtendableFEMBase.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id=":-Poisson-Problem"><a class="docs-heading-anchor" href="#:-Poisson-Problem">200 : Poisson Problem</a><a id=":-Poisson-Problem-1"></a><a class="docs-heading-anchor-permalink" href="#:-Poisson-Problem" title="Permalink"></a></h1><p>(<a href="https://github.com/chmerdon/ExtendableFEMBase.jl/raw/master/examples/Example200_LowLevelPoisson.jl">source code</a>)</p><p>This example computes the solution <span>$u$</span> of the two-dimensional Poisson problem</p><p class="math-container">\[\begin{aligned}
 -\Delta u &amp; = f \quad \text{in } \Omega
 \end{aligned}\]</p><p>with right-hand side <span>$f(x,y) \equiv xy$</span> and homogeneous Dirichlet boundary conditions on the unit square domain <span>$\Omega$</span> on a given grid.</p><p>This script measures runtimes for grid generation, assembly and solving (direct/UMFPACK) for different refinement levels.</p><pre><code class="language-julia hljs">module Example200_LowLevelPoisson
 
@@ -165,9 +165,9 @@ end
 
 end #module</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><p><strong>Default output:</strong></p><pre><code class="nohighlight hljs">julia&gt; Example200_LowLevelPoisson.main()
 Assembling...
- 11.723516 seconds (13.64 M allocations: 897.051 MiB, 5.20% gc time, 99.93% compilation time)
+ 11.219104 seconds (13.64 M allocations: 897.192 MiB, 4.80% gc time, 99.94% compilation time)
 Solving linear system...
-  0.094909 seconds (39.59 k allocations: 2.422 MiB, 99.43% compilation time)
+  0.095874 seconds (39.62 k allocations: 2.422 MiB, 99.49% compilation time)
 
 LEVEL = 1, ndofs = 25
 
@@ -195,16 +195,16 @@ LEVEL = 1, ndofs = 25
     │⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣸│ 
     └────────────────────────────────────────┘ 
 Assembling...
-  0.000389 seconds (205 allocations: 28.742 KiB)
+  0.000305 seconds (205 allocations: 28.742 KiB)
 Solving linear system...
-  0.000156 seconds (54 allocations: 16.734 KiB)
+  0.000137 seconds (54 allocations: 16.734 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 1.98e⁻⁵                                  
-   FaceNodes ┤ 0.000117302                              
-    CellDofs ┤■■■■■ 0.00325614                          
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0191521   
-       Solve ┤ 0.000177102                              
+        Grid ┤ 2.01e⁻⁵                                  
+   FaceNodes ┤ 0.0001096                                
+    CellDofs ┤■■■■■ 0.0034669                           
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0192376   
+       Solve ┤ 0.0001544                                
              └                                        ┘ 
 
 LEVEL = 2, ndofs = 81
@@ -233,16 +233,16 @@ LEVEL = 2, ndofs = 81
     │⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣸│ 
     └────────────────────────────────────────┘ 
 Assembling...
-  0.000455 seconds (206 allocations: 56.148 KiB)
+  0.000338 seconds (206 allocations: 56.148 KiB)
 Solving linear system...
-  0.000148 seconds (58 allocations: 58.812 KiB)
+  0.000145 seconds (58 allocations: 58.812 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤■ 1.9e⁻⁵                                  
-   FaceNodes ┤■■■■■■ 0.000105802                        
-    CellDofs ┤■■■■ 6.7801e⁻⁵                            
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.000480506   
-       Solve ┤■■■■■■■■■ 0.000154702                     
+        Grid ┤■ 1.41e⁻⁵                                 
+   FaceNodes ┤■■■■■■■■■ 0.0001073                       
+    CellDofs ┤■■■■■ 5.58e⁻⁵                             
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0003563   
+       Solve ┤■■■■■■■■■■■■ 0.000150401                  
              └                                        ┘ 
 
 LEVEL = 3, ndofs = 289
@@ -271,89 +271,89 @@ LEVEL = 3, ndofs = 289
     │⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣸│ 
     └────────────────────────────────────────┘ 
 Assembling...
-  0.000636 seconds (206 allocations: 120.992 KiB)
+  0.000587 seconds (206 allocations: 120.992 KiB)
 Solving linear system...
-  0.000341 seconds (59 allocations: 217.562 KiB)
+  0.000334 seconds (59 allocations: 217.562 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤■ 1.64e⁻⁵                                 
-   FaceNodes ┤■■■■ 9.0601e⁻⁵                            
-    CellDofs ┤■■■ 7.6301e⁻⁵                             
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.000648209   
-       Solve ┤■■■■■■■■■■■■■■ 0.000346505                
+        Grid ┤■ 1.41e⁻⁵                                 
+   FaceNodes ┤■■■■ 8.59e⁻⁵                              
+    CellDofs ┤■■■ 7.05e⁻⁵                               
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0005982   
+       Solve ┤■■■■■■■■■■■■■■■■ 0.000339401              
              └                                        ┘ 
 
 LEVEL = 4, ndofs = 1089
 
 Assembling...
-  0.001805 seconds (211 allocations: 426.305 KiB)
+  0.001695 seconds (211 allocations: 426.305 KiB)
 Solving linear system...
-  0.001166 seconds (63 allocations: 881.516 KiB)
+  0.001182 seconds (63 allocations: 881.516 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤■ 3.34e⁻⁵                                 
-   FaceNodes ┤■■■ 0.000194603                           
-    CellDofs ┤■■■ 0.000200603                           
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.00181872   
-       Solve ┤■■■■■■■■■■■■■■■■■■ 0.00117492             
+        Grid ┤■ 2.95e⁻⁵                                 
+   FaceNodes ┤■■■ 0.000174                              
+    CellDofs ┤■■■ 0.0001716                             
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0017066   
+       Solve ┤■■■■■■■■■■■■■■■■■■■■ 0.0011899            
              └                                        ┘ 
 
 LEVEL = 5, ndofs = 4225
 
 Assembling...
-  0.006517 seconds (216 allocations: 1.190 MiB)
+  0.006269 seconds (216 allocations: 1.190 MiB)
 Solving linear system...
-  0.025711 seconds (81 allocations: 3.642 MiB, 79.11% gc time)
+  0.005409 seconds (65 allocations: 3.642 MiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.000101402                              
-   FaceNodes ┤■ 0.000658208                             
-    CellDofs ┤■ 0.00075281                              
-    Assembly ┤■■■■■■■■ 0.00653259                       
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.025732   
+        Grid ┤ 8.58e⁻⁵                                  
+   FaceNodes ┤■■■ 0.000578501                           
+    CellDofs ┤■■■ 0.000631                              
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.00628071   
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■ 0.0054204        
              └                                        ┘ 
 
 LEVEL = 6, ndofs = 16641
 
 Assembling...
-  0.028316 seconds (223 allocations: 6.533 MiB)
+  0.027458 seconds (223 allocations: 6.533 MiB)
 Solving linear system...
-  0.025868 seconds (69 allocations: 15.576 MiB)
+  0.024775 seconds (69 allocations: 15.576 MiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.000339805                              
-   FaceNodes ┤■■■ 0.00251823                            
-    CellDofs ┤■■■ 0.00292014                            
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0283346   
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0259078     
+        Grid ┤ 0.0002804                                
+   FaceNodes ┤■■ 0.0021273                              
+    CellDofs ┤■■■ 0.0024254                             
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0274729   
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0247973      
              └                                        ┘ 
 
 LEVEL = 7, ndofs = 66049
 
 Assembling...
-  0.123170 seconds (232 allocations: 20.706 MiB, 10.55% gc time)
+  0.110802 seconds (244 allocations: 20.707 MiB, 9.01% gc time)
 Solving linear system...
-  0.109895 seconds (69 allocations: 66.420 MiB)
+  0.106394 seconds (69 allocations: 66.420 MiB, 6.93% gc time)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.00123202                               
-   FaceNodes ┤■■■ 0.0108592                             
-    CellDofs ┤■■■ 0.0122204                             
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.123208   
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.109953      
+        Grid ┤ 0.001032                                 
+   FaceNodes ┤■■■ 0.00929631                            
+    CellDofs ┤■■■ 0.0101071                             
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.110826   
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.106429    
              └                                        ┘ 
 
 LEVEL = 8, ndofs = 263169
 
 Assembling...
-  0.434271 seconds (226 allocations: 82.631 MiB, 0.60% gc time)
+  0.408423 seconds (226 allocations: 82.631 MiB, 0.91% gc time)
 Solving linear system...
-  0.554669 seconds (69 allocations: 285.247 MiB, 0.46% gc time)
+  0.483590 seconds (69 allocations: 285.247 MiB, 0.77% gc time)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.00504007                               
-   FaceNodes ┤■■■ 0.0526243                             
-    CellDofs ┤■■■ 0.04488                               
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■ 0.434317         
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.55473   
-             └                                        ┘ </code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../examples_intro/">« About the examples</a><a class="docs-footer-nextpage" href="../Example210_LowLevelNavierStokes/">210 : Navier-Stokes Problem »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Wednesday 26 July 2023 20:30">Wednesday 26 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+        Grid ┤ 0.0041218                                
+   FaceNodes ┤■■ 0.0372775                              
+    CellDofs ┤■■ 0.03713                                
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■ 0.40845         
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.483623   
+             └                                        ┘ </code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../examples_intro/">« About the examples</a><a class="docs-footer-nextpage" href="../Example210_LowLevelNavierStokes/">210 : Navier-Stokes Problem »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Wednesday 26 July 2023 21:12">Wednesday 26 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
