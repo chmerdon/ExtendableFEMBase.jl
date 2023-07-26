@@ -123,7 +123,7 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
     if with_examples
         example_jl_dir = joinpath(@__DIR__,"..","examples")
         example_md_dir  = joinpath(@__DIR__,"src","examples")
-        excluded_examples = ["XXX","A05","231","260","401","402"] # excludes just the run of these examples
+        excluded_examples = ["XXX","290"] # excludes just the run of these examples
         image_dir = joinpath(@__DIR__,"src","images")
 
         for example_source in readdir(example_jl_dir)
