@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>200 : Poisson-Problem · ExtendableFEMBase.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ExtendableFEMBase.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../package_index/">Index</a></li><li><a class="tocitem" href="../../fems/">List of Finite Elements</a></li><li><span class="tocitem">Base Structures</span><ul><li><a class="tocitem" href="../../fespace/">FESpace</a></li><li><a class="tocitem" href="../../fevector/">FEVector</a></li><li><a class="tocitem" href="../../fematrix/">FEMatrix</a></li><li><a class="tocitem" href="../../functionoperators/">Function Operators</a></li><li><a class="tocitem" href="../../feevaluator/">FEEvaluator</a></li><li><a class="tocitem" href="../../interpolations/">Finite Element Interpolations</a></li><li><a class="tocitem" href="../../quadrature/">Quadrature</a></li><li><a class="tocitem" href="../../pointevaluators/">PointEvaluator</a></li><li><a class="tocitem" href="../../segmentintegrators/">SegmentIntegrator</a></li></ul></li><li><span class="tocitem">Tutorial Notebooks</span></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../../examples_intro/">About the examples</a></li><li class="is-active"><a class="tocitem" href>200 : Poisson-Problem</a></li><li><a class="tocitem" href="../Example290_InterpolationBetweenMeshes/">290 : Interpolation Between Meshes</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>200 : Poisson-Problem</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>200 : Poisson-Problem</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="github.com/chmerdon/ExtendableFEMBase.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id=":-Poisson-Problem"><a class="docs-heading-anchor" href="#:-Poisson-Problem">200 : Poisson-Problem</a><a id=":-Poisson-Problem-1"></a><a class="docs-heading-anchor-permalink" href="#:-Poisson-Problem" title="Permalink"></a></h1><p>(<a href="https://github.com/chmerdon/ExtendableFEMBase.jl/raw/master/examples/Example200_LowLevelPoisson.jl">source code</a>)</p><p>This example computes the solution <span>$u$</span> of the two-dimensional Poisson problem</p><p class="math-container">\[\begin{aligned}
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>200 : Poisson Problem · ExtendableFEMBase.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ExtendableFEMBase.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../package_index/">Index</a></li><li><a class="tocitem" href="../../fems/">List of Finite Elements</a></li><li><span class="tocitem">Base Structures</span><ul><li><a class="tocitem" href="../../fespace/">FESpace</a></li><li><a class="tocitem" href="../../fevector/">FEVector</a></li><li><a class="tocitem" href="../../fematrix/">FEMatrix</a></li><li><a class="tocitem" href="../../functionoperators/">Function Operators</a></li><li><a class="tocitem" href="../../feevaluator/">FEEvaluator</a></li><li><a class="tocitem" href="../../interpolations/">Finite Element Interpolations</a></li><li><a class="tocitem" href="../../quadrature/">Quadrature</a></li><li><a class="tocitem" href="../../pointevaluators/">PointEvaluator</a></li><li><a class="tocitem" href="../../segmentintegrators/">SegmentIntegrator</a></li></ul></li><li><span class="tocitem">Tutorial Notebooks</span></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../../examples_intro/">About the examples</a></li><li class="is-active"><a class="tocitem" href>200 : Poisson Problem</a></li><li><a class="tocitem" href="../Example290_InterpolationBetweenMeshes/">290 : Interpolation Between Meshes</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>200 : Poisson Problem</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>200 : Poisson Problem</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="github.com/chmerdon/ExtendableFEMBase.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id=":-Poisson-Problem"><a class="docs-heading-anchor" href="#:-Poisson-Problem">200 : Poisson Problem</a><a id=":-Poisson-Problem-1"></a><a class="docs-heading-anchor-permalink" href="#:-Poisson-Problem" title="Permalink"></a></h1><p>(<a href="https://github.com/chmerdon/ExtendableFEMBase.jl/raw/master/examples/Example200_LowLevelPoisson.jl">source code</a>)</p><p>This example computes the solution <span>$u$</span> of the two-dimensional Poisson problem</p><p class="math-container">\[\begin{aligned}
 -\Delta u &amp; = f \quad \text{in } \Omega
 \end{aligned}\]</p><p>with right-hand side <span>$f(x,y) \equiv xy$</span> and homogeneous Dirichlet boundary conditions on the unit square domain <span>$\Omega$</span> on a given grid.</p><p>This script measures runtimes for grid generation, assembly and solving (direct/UMFPACK) for different refinement levels.</p><pre><code class="language-julia hljs">module Example200_LowLevelPoisson
 
@@ -15,30 +15,30 @@ const f = x -&gt; x[1] - x[2]
 
 function main(; maxnref = 8, order = 2, Plotter = nothing)
 
-	# run once for compiling
+	# Finite element type
+	FEType = H1Pk{1,2,order}
+
+	# run once on a tiny mesh for compiling
 	X = LinRange(0,1,4)
-	Y = LinRange(0,1,4)
-	xgrid = simplexgrid(X,Y)
-	xgrid[FaceNodes]
-    FEType = H1Pk{1,2,order}
-    FES = FESpace{FEType}(xgrid)
-	FES[CellDofs]
+	xgrid = simplexgrid(X,X)
+	FES = FESpace{FEType}(xgrid)
 	sol, time_assembly, time_solve = solve_poisson_lowlevel(FES, μ, f)
 
-	# again without compiling
+	# loop over uniform refinements + timings
 	for level = 1 : maxnref
 		X = LinRange(0,1,2^level+1)
-		Y = LinRange(0,1,2^level+1)
-		time_grid = @elapsed xgrid = simplexgrid(X,Y)
+		time_grid = @elapsed xgrid = simplexgrid(X,X)
 		time_facenodes = @elapsed xgrid[FaceNodes]
-		FEType = H1Pk{1,2,order}
 		FES = FESpace{FEType}(xgrid)
 		println(&quot;\nLEVEL = $level, ndofs = $(FES.ndofs)\n&quot;)
+		if level &lt; 4
+			println(stdout, unicode_gridplot(xgrid))
+		end
 		time_dofmap = @elapsed FES[CellDofs]
 		sol, time_assembly, time_solve = solve_poisson_lowlevel(FES, μ, f)
 
 		# plot statistics
-		println(&quot;\n$(barplot([&quot;Grid&quot;, &quot;FaceNodes&quot;, &quot;CellDofs&quot;, &quot;Assembly&quot;, &quot;Solve&quot;], [time_grid, time_facenodes, time_dofmap, time_assembly, time_solve], title=&quot;Runtimes&quot;))&quot;)
+		println(stdout, barplot([&quot;Grid&quot;, &quot;FaceNodes&quot;, &quot;CellDofs&quot;, &quot;Assembly&quot;, &quot;Solve&quot;], [time_grid, time_facenodes, time_dofmap, time_assembly, time_solve], title=&quot;Runtimes&quot;))
 
 		# plot
 		scalarplot(xgrid, view(sol.entries,1:num_nodes(xgrid)); Plotter = Plotter, levels = 5)
@@ -74,225 +74,286 @@ function solve_poisson_lowlevel(FES, μ, f)
 		ExtendableSparse.flush!(A.entries)
 	end
 
-    # solve
+	# solve
 	println(&quot;Solving linear system...&quot;)
-    time_solve = @elapsed @time copyto!(Solution.entries, A.entries \ b.entries)
+	time_solve = @elapsed @time copyto!(Solution.entries, A.entries \ b.entries)
 
 	return Solution, time_assembly, time_solve
 end
 
 function assemble!(A::ExtendableSparseMatrix, b::Vector, FES, f, μ = 1)
-    xgrid = FES.xgrid
-    EG = xgrid[UniqueCellGeometries][1]
-    FEType = eltype(FES)
-    L2G = L2GTransformer(EG, xgrid, ON_CELLS)
+	xgrid = FES.xgrid
+	EG = xgrid[UniqueCellGeometries][1]
+	FEType = eltype(FES)
+	L2G = L2GTransformer(EG, xgrid, ON_CELLS)
 
-    # quadrature formula
+	# quadrature formula
 	qf = QuadratureRule{Float64, EG}(2*(get_polynomialorder(FEType, EG)-1))
 	weights::Vector{Float64} = qf.w
 	xref::Vector{Vector{Float64}} = qf.xref
 	nweights::Int = length(weights)
-    cellvolumes = xgrid[CellVolumes]
+	cellvolumes = xgrid[CellVolumes]
 
 	# FE basis evaluator and dofmap
 	FEBasis_∇ = FEEvaluator(FES, Gradient, qf)
 	∇vals = FEBasis_∇.cvals
 	FEBasis_id = FEEvaluator(FES, Identity, qf)
 	idvals = FEBasis_id.cvals
-    CellDofs = FES[ExtendableFEMBase.CellDofs]
+	CellDofs = FES[ExtendableFEMBase.CellDofs]
 
-    # ASSEMBLY LOOP
-    function barrier(EG, L2G::L2GTransformer)
+	# ASSEMBLY LOOP
+	function barrier(EG, L2G::L2GTransformer)
 		# barrier function to avoid allocations by type dispatch
 
-    	ndofs4cell::Int = get_ndofs(ON_CELLS, FEType, EG)
-    	Aloc = zeros(Float64, ndofs4cell, ndofs4cell)
-        ncells::Int = num_cells(xgrid)
-    	dof_j::Int, dof_k::Int = 0, 0
-        x::Vector{Float64} = zeros(Float64, 2)
+		ndofs4cell::Int = get_ndofs(ON_CELLS, FEType, EG)
+		Aloc = zeros(Float64, ndofs4cell, ndofs4cell)
+		ncells::Int = num_cells(xgrid)
+		dof_j::Int, dof_k::Int = 0, 0
+		x::Vector{Float64} = zeros(Float64, 2)
 
-        for cell = 1 : ncells
+		for cell = 1 : ncells
 			# update FE basis evaluators
-	        FEBasis_∇.citem[] = cell
-	        update_basis!(FEBasis_∇)
+			FEBasis_∇.citem[] = cell
+			update_basis!(FEBasis_∇)
 
 			# assemble local stiffness matrix
-	        for j = 1 : ndofs4cell, k = j : ndofs4cell
+			for j = 1 : ndofs4cell, k = j : ndofs4cell
 				temp = 0
 				for qp = 1 : nweights
 					temp += weights[qp] * dot(view(∇vals,:,j,qp), view(∇vals,:,k,qp))
 				end
 				Aloc[j,k] = temp
-	        end
-	        Aloc .*= μ * cellvolumes[cell]
+			end
+			Aloc .*= μ * cellvolumes[cell]
 
 			# add local matrix to global matrix
-	        for j = 1 : ndofs4cell
-	            dof_j = CellDofs[j, cell]
-	            for k = j : ndofs4cell
-	                dof_k = CellDofs[k, cell]
-	                if abs(Aloc[j,k]) &gt; 1e-15
-	                    # write into sparse matrix, only lines with allocations
-	                    rawupdateindex!(A, +, Aloc[j,k], dof_j, dof_k)
-	                    if k &gt; j
-	                        rawupdateindex!(A, +, Aloc[j,k], dof_k, dof_j)
-	                    end
-	                end
-	            end
-	        end
-	        fill!(Aloc, 0)
+			for j = 1 : ndofs4cell
+				dof_j = CellDofs[j, cell]
+				for k = j : ndofs4cell
+					dof_k = CellDofs[k, cell]
+					if abs(Aloc[j,k]) &gt; 1e-15
+						# write into sparse matrix, only lines with allocations
+						rawupdateindex!(A, +, Aloc[j,k], dof_j, dof_k)
+						if k &gt; j
+							rawupdateindex!(A, +, Aloc[j,k], dof_k, dof_j)
+						end
+					end
+				end
+			end
+			fill!(Aloc, 0)
 
 			# assemble right-hand side
-            update_trafo!(L2G, cell)
-            for j = 1 : ndofs4cell
-                # right-hand side
-                temp = 0
-                for qp = 1 : nweights
-                    # get global x for quadrature point
-                    eval_trafo!(x, L2G, xref[qp])
-                    # evaluate (f(x), v_j(x))
-                    temp += weights[qp] * idvals[1, j, qp] * f(x)
-                end
+			update_trafo!(L2G, cell)
+			for j = 1 : ndofs4cell
+				# right-hand side
+				temp = 0
+				for qp = 1 : nweights
+					# get global x for quadrature point
+					eval_trafo!(x, L2G, xref[qp])
+					# evaluate (f(x), v_j(x))
+					temp += weights[qp] * idvals[1, j, qp] * f(x)
+				end
 				# write into global vector
-                dof_j = CellDofs[j, cell]
-                b[dof_j] += temp * cellvolumes[cell]
-            end
-        end
-    end
-    barrier(EG, L2G)
-    flush!(A)
+				dof_j = CellDofs[j, cell]
+				b[dof_j] += temp * cellvolumes[cell]
+			end
+		end
+	end
+	barrier(EG, L2G)
+	flush!(A)
 end
 
 end #module</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><p><strong>Default output:</strong></p><pre><code class="nohighlight hljs">julia&gt; Example200_LowLevelPoisson.main()
 Assembling...
- 13.646161 seconds (13.31 M allocations: 876.740 MiB, 5.21% gc time, 99.98% compilation time)
+ 11.780881 seconds (13.64 M allocations: 897.411 MiB, 5.67% gc time, 99.94% compilation time)
 Solving linear system...
-  0.120992 seconds (39.24 k allocations: 2.404 MiB, 99.50% compilation time)
+  0.094931 seconds (39.31 k allocations: 2.404 MiB, 99.31% compilation time)
 
 LEVEL = 1, ndofs = 25
 
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀gridplot⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+    ┌────────────────────────────────────────┐ 
+    │⡏⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⢉⢽│ 
+    │⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⢸│ 
+    │⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⢸│ 
+    │⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⢸│ 
+    │⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡇⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸│ 
+    │⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡏⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⢉⢽│ 
+    │⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⢸│ 
+    │⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⢸│ 
+    │⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⢸│ 
+    │⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡇⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸│ 
+    │⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣸│ 
+    └────────────────────────────────────────┘ 
 Assembling...
-  0.000347 seconds (205 allocations: 28.742 KiB)
+  0.000336 seconds (205 allocations: 28.742 KiB)
 Solving linear system...
-  0.000121 seconds (54 allocations: 16.734 KiB)
-
+  0.000211 seconds (54 allocations: 16.734 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 2.6501e⁻⁵                                
-   FaceNodes ┤ 0.000177901                              
-    CellDofs ┤ 5.0701e⁻⁵                                
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0231213   
-       Solve ┤ 0.000133002                              
+        Grid ┤ 1.82e⁻⁵                                  
+   FaceNodes ┤ 0.000126003                              
+    CellDofs ┤■■■■■ 0.00348057                          
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0194098   
+       Solve ┤ 0.000234604                              
              └                                        ┘ 
 
 LEVEL = 2, ndofs = 81
 
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀gridplot⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+    ┌────────────────────────────────────────┐ 
+    │⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⢽│ 
+    │⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⢸│ 
+    │⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⢸│ 
+    │⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⢸│ 
+    │⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⣇⠔⠁⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⢽│ 
+    │⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⢸│ 
+    │⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⢸│ 
+    │⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⢸│ 
+    │⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⣇⠔⠁⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⢽│ 
+    │⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⢸│ 
+    │⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⢸│ 
+    │⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⢸│ 
+    │⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⣇⠔⠁⠀⠀⠀⠀⠀⠀⠀⣇⠔⠁⠀⠀⠀⠀⠀⠀⢸│ 
+    │⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⠝⡏⠉⠉⠉⠉⠉⠉⠉⢉⢽│ 
+    │⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⠀⡇⠀⠀⠀⠀⠀⢀⠔⠁⢸│ 
+    │⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⠀⡇⠀⠀⠀⢀⠔⠁⠀⠀⢸│ 
+    │⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⠀⡇⠀⢀⠔⠁⠀⠀⠀⠀⢸│ 
+    │⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣸│ 
+    └────────────────────────────────────────┘ 
 Assembling...
-  0.000408 seconds (206 allocations: 56.148 KiB)
+  0.000395 seconds (206 allocations: 56.148 KiB)
 Solving linear system...
-  0.000171 seconds (58 allocations: 58.812 KiB)
-
+  0.000141 seconds (58 allocations: 58.812 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤■■■ 5.4501e⁻⁵                             
-   FaceNodes ┤■■■■■■■ 0.000115801                       
-    CellDofs ┤■■■■ 5.75e⁻⁵                              
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.000431004   
-       Solve ┤■■■■■■■■■■■ 0.000180301                   
+        Grid ┤■ 2.0601e⁻⁵                               
+   FaceNodes ┤■■■■■■■■■ 0.000140802                     
+    CellDofs ┤■■■■■■ 8.7601e⁻⁵                          
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.000423108   
+       Solve ┤■■■■■■■■■ 0.000147102                     
              └                                        ┘ 
 
 LEVEL = 3, ndofs = 289
 
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀gridplot⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+    ┌────────────────────────────────────────┐ 
+    │⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⢽│ 
+    │⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⢸│ 
+    │⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢼│ 
+    │⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⢹│ 
+    │⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⢸│ 
+    │⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⢽│ 
+    │⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⢸│ 
+    │⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢼│ 
+    │⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⢹│ 
+    │⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⢸│ 
+    │⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⢽│ 
+    │⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⢸│ 
+    │⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢼│ 
+    │⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⢹│ 
+    │⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⠀⣇⠔⠁⠀⢸│ 
+    │⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⠝⡏⠉⠉⢉⢽│ 
+    │⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⠀⡇⢀⠔⠁⢸│ 
+    │⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢤⡷⠥⠤⠤⢼│ 
+    │⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⠁⡇⠀⢀⠔⢹│ 
+    │⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣸│ 
+    └────────────────────────────────────────┘ 
 Assembling...
-  0.000658 seconds (206 allocations: 120.992 KiB)
+  0.000599 seconds (206 allocations: 120.992 KiB)
 Solving linear system...
-  0.000300 seconds (59 allocations: 217.562 KiB)
-
+  0.000334 seconds (59 allocations: 217.562 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤■ 1.31e⁻⁵                                 
-   FaceNodes ┤■■■ 7.91e⁻⁵                               
-    CellDofs ┤■■■ 6.53e⁻⁵                               
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.000669706   
-       Solve ┤■■■■■■■■■■■■ 0.000308603                  
+        Grid ┤■ 1.55e⁻⁵                                 
+   FaceNodes ┤■■■■■ 0.000111002                         
+    CellDofs ┤■■■■ 9.1402e⁻⁵                            
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.000613312   
+       Solve ┤■■■■■■■■■■■■■■■ 0.000340706               
              └                                        ┘ 
 
 LEVEL = 4, ndofs = 1089
 
 Assembling...
-  0.002001 seconds (211 allocations: 426.305 KiB)
+  0.001791 seconds (211 allocations: 426.305 KiB)
 Solving linear system...
-  0.001161 seconds (63 allocations: 881.516 KiB)
-
+  0.001140 seconds (63 allocations: 881.516 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 2.94e⁻⁵                                  
-   FaceNodes ┤■■■■ 0.000258403                          
-    CellDofs ┤■■■ 0.000229302                           
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.00201252   
-       Solve ┤■■■■■■■■■■■■■■■■ 0.00117051               
+        Grid ┤■ 3.2301e⁻⁵                               
+   FaceNodes ┤■■■ 0.000206903                           
+    CellDofs ┤■■■ 0.000208404                           
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.00180543   
+       Solve ┤■■■■■■■■■■■■■■■■■■ 0.00114922             
              └                                        ┘ 
 
 LEVEL = 5, ndofs = 4225
 
 Assembling...
-  0.007064 seconds (216 allocations: 1.190 MiB)
+  0.006592 seconds (216 allocations: 1.190 MiB)
 Solving linear system...
-  0.005580 seconds (65 allocations: 3.642 MiB)
-
+  0.005708 seconds (65 allocations: 3.642 MiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.000103501                              
-   FaceNodes ┤■■■ 0.000704806                           
-    CellDofs ┤■■■ 0.000778607                           
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.00707757   
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■ 0.00559375         
+        Grid ┤ 8.9802e⁻⁵                                
+   FaceNodes ┤■■■ 0.000677812                           
+    CellDofs ┤■■■ 0.000756014                           
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.00660662   
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■ 0.00572501       
              └                                        ┘ 
 
 LEVEL = 6, ndofs = 16641
 
 Assembling...
-  0.030376 seconds (223 allocations: 6.533 MiB)
+  0.028461 seconds (223 allocations: 6.533 MiB)
 Solving linear system...
-  0.033880 seconds (69 allocations: 15.576 MiB)
-
+  0.026661 seconds (69 allocations: 15.576 MiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.000275202                              
-   FaceNodes ┤■■ 0.00230042                             
-    CellDofs ┤■■ 0.00291383                             
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0303906      
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0339003   
+        Grid ┤ 0.000325806                              
+   FaceNodes ┤■■■ 0.00252615                            
+    CellDofs ┤■■■ 0.00292025                            
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0284789   
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0266911     
              └                                        ┘ 
 
 LEVEL = 7, ndofs = 66049
 
 Assembling...
-  0.132016 seconds (244 allocations: 20.707 MiB, 12.62% gc time)
+  0.207991 seconds (4.35 k allocations: 20.963 MiB, 17.59% gc time, 29.93% compilation time)
 Solving linear system...
-  0.160366 seconds (69 allocations: 66.420 MiB, 7.95% gc time)
-
+  0.127675 seconds (69 allocations: 66.420 MiB, 12.57% gc time)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.00154381                               
-   FaceNodes ┤■■ 0.0109183                              
-    CellDofs ┤■■ 0.0129783                              
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■ 0.132046        
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.160451   
+        Grid ┤ 0.00123442                               
+   FaceNodes ┤■■ 0.0109633                              
+    CellDofs ┤■■ 0.0120669                              
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.208029   
+       Solve ┤■■■■■■■■■■■■■■■■■■ 0.127738               
              └                                        ┘ 
 
 LEVEL = 8, ndofs = 263169
 
 Assembling...
-  0.497247 seconds (226 allocations: 82.631 MiB, 1.47% gc time)
+  0.450598 seconds (226 allocations: 82.631 MiB, 1.93% gc time)
 Solving linear system...
-  0.745018 seconds (69 allocations: 285.247 MiB, 0.95% gc time)
-
+  0.555881 seconds (69 allocations: 285.247 MiB, 0.92% gc time)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.00552995                               
-   FaceNodes ┤■■ 0.0493348                              
-    CellDofs ┤■■ 0.0503848                              
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■ 0.497297             
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.745069   
-             └                                        ┘ </code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../examples_intro/">« About the examples</a><a class="docs-footer-nextpage" href="../Example290_InterpolationBetweenMeshes/">290 : Interpolation Between Meshes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Wednesday 26 July 2023 13:05">Wednesday 26 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+        Grid ┤ 0.00488039                               
+   FaceNodes ┤■■■ 0.0537053                             
+    CellDofs ┤■■ 0.0452507                              
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■ 0.450647         
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.555943   
+             └                                        ┘ </code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../examples_intro/">« About the examples</a><a class="docs-footer-nextpage" href="../Example290_InterpolationBetweenMeshes/">290 : Interpolation Between Meshes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Wednesday 26 July 2023 20:21">Wednesday 26 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
