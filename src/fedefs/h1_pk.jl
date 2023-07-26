@@ -4,7 +4,7 @@
 abstract type H1PK{ncomponents,edim,order} <: AbstractH1FiniteElement where {ncomponents<:Int,edim<:Int,order<:Int}
 ````
 
-Continuous piecewise polynomials of arbitrary order >= 1.
+Continuous piecewise polynomials of arbitrary order >= 1 with ncomponents components in edim space dimensions.
 
 allowed ElementGeometries:
 - Edge1D
@@ -19,25 +19,29 @@ end
 get_ncomponents(FEType::Type{<:H1Pk}) = FEType.parameters[1]
 get_edim(FEType::Type{<:H1Pk}) = FEType.parameters[2]
 
+## number of dofs on different geometries
 get_ndofs(::Type{<:AssemblyType}, FEType::Type{H1Pk{n,e,order}}, EG::Type{<:AbstractElementGeometry0D}) where {n,e,order} = n
 get_ndofs(::Type{<:AssemblyType}, FEType::Type{H1Pk{n,e,order}}, EG::Type{<:AbstractElementGeometry1D}) where {n,e,order} = (1 + order)*n
 get_ndofs(::Type{<:AssemblyType}, FEType::Type{H1Pk{n,e,order}}, EG::Type{<:Triangle2D}) where {n,e,order} = Int(n*(2 + order)*(1 + order)/2)
 
-get_polynomialorder(::Type{H1Pk{n,e,order}}, ::Type{<:AbstractElementGeometry1D}) where {n,e,order} = order
-get_polynomialorder(::Type{H1Pk{n,e,order}}, ::Type{<:AbstractElementGeometry2D}) where {n,e,order} = order
-get_polynomialorder(::Type{H1Pk{n,e,order}}, ::Type{<:AbstractElementGeometry3D}) where {n,e,order} = order
+## polynomial order on different geometries
+get_polynomialorder(::Type{H1Pk{n,e,order}}, ::Type{<:AbstractElementGeometry}) where {n,e,order} = order
 
+## dofmap patterns on different geometries
 get_dofmap_pattern(::Type{H1Pk{n,e,order}}, ::Type{<:CellDofs}, EG::Type{<:Triangle2D}) where {n,e,order} = (order == 1) ? "N1" : ((order == 2) ? "N1F$(order-1)" : "N1F$(order-1)I$(Int((order-2)*(order-1)/2))")
 get_dofmap_pattern(::Type{H1Pk{n,e,order}}, ::Type{<:CellDofs}, EG::Type{<:AbstractElementGeometry1D}) where {n,e,order} = (order == 1) ? "N1" : "N1I$(order-1)"
 get_dofmap_pattern(::Type{H1Pk{n,e,order}}, ::Union{Type{FaceDofs},Type{BFaceDofs}}, EG::Type{<:AbstractElementGeometry0D}) where {n,e,order} = "N1"
 get_dofmap_pattern(::Type{H1Pk{n,e,order}}, ::Union{Type{FaceDofs},Type{BFaceDofs}}, EG::Type{<:AbstractElementGeometry1D}) where {n,e,order} = (order == 1) ? "N1" : "N1I$(order-1)"
 
+## on which geometries it is defined
 isdefined(FEType::Type{<:H1Pk}, ::Type{<:AbstractElementGeometry1D}) = true
 isdefined(FEType::Type{<:H1Pk}, ::Type{<:Triangle2D}) = true
 
+## offset for interior dofs
 interior_dofs_offset(::Type{<:AssemblyType}, ::Type{<:H1Pk}, ::Type{Edge1D}) = 2
 interior_dofs_offset(::Type{<:AssemblyType}, ::Type{H1Pk{n,e,o}}, ::Type{Triangle2D}) where {n,e,o} = 3*o
 
+## standard interpolation at nodes = node evaluation
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,H1Pk{ncomponents,edim,order},APT}, ::Type{AT_NODES}, exact_function!; items = [], kwargs...) where {ncomponents,edim,order,Tv,Ti,APT}
     coffset = size(FE.xgrid[Coordinates],2)
     if edim == 1
@@ -56,6 +60,7 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,H1Pk{ncomponents
     point_evaluation!(Target, FE, AT_NODES, exact_function!; items = items, component_offset = coffset, kwargs...)
 end
 
+## standard interpolation on edges
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,H1Pk{ncomponents,edim,order},APT}, ::Type{ON_EDGES}, exact_function!; items = [], kwargs...) where {ncomponents,edim,order,Tv,Ti,APT}
     # edim = get_edim(FEType)
     # if edim == 3
@@ -68,6 +73,7 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,H1Pk{ncomponents
     # end
 end
 
+## standard interpolation on faces = preserve face moments up to order-2
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,H1Pk{ncomponents,edim,order},APT}, ::Type{ON_FACES}, exact_function!; items = [], kwargs...) where {ncomponents,edim,order,Tv,Ti,APT}
     # edim = get_edim(FEType)
     if edim == 2
@@ -90,7 +96,7 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,H1Pk{ncomponents
     end
 end
 
-
+## standard interpolation on cells = perserve cell moments up to order-3
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,H1Pk{ncomponents,edim,order},APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {ncomponents,edim,order,Tv,Ti,APT}
     if edim == 2
          # delegate cell faces to face interpolation
@@ -124,6 +130,7 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv,Ti,H1Pk{ncomponents
 end
 
 
+## basis at Vertex0D
 function get_basis(::Type{<:AssemblyType},::Type{H1Pk{ncomponents,edim,order}}, ::Type{<:Vertex0D}) where {ncomponents,edim,order}
     function closure(refbasis,xref)
         for k = 1 : ncomponents
@@ -132,6 +139,7 @@ function get_basis(::Type{<:AssemblyType},::Type{H1Pk{ncomponents,edim,order}}, 
     end
 end
 
+## basis on Edge1D
 function get_basis(::Type{<:AssemblyType}, ::Type{H1Pk{ncomponents,edim,order}}, ::Type{<:Edge1D}) where {ncomponents,edim,order}
     coeffs::Array{Rational{Int},1} = 0//1:(1//order):1//1
     # node functions first, then interior functions
@@ -167,7 +175,7 @@ function get_basis(::Type{<:AssemblyType}, ::Type{H1Pk{ncomponents,edim,order}},
     return closure
 end
 
-
+## basis on Triangle2D
 function get_basis(::Type{<:AssemblyType}, FEType::Type{H1Pk{ncomponents,edim,order}}, EG::Type{<:Triangle2D}) where {ncomponents,edim,order}
     coeffs::Array{Rational{Int},1} = 0//1:(1//order):1//1
     ndofs = get_ndofs(ON_CELLS,H1Pk{1,edim,order},EG) # dofs of one component
@@ -187,7 +195,7 @@ function get_basis(::Type{<:AssemblyType}, FEType::Type{H1Pk{ncomponents,edim,or
     end
     function closure(refbasis, xref)
         fill!(refbasis,0)
-        # store first nodal bais function (overwritten later by last basis function)
+        # store first nodal basis function (overwritten later by last basis function)
         refbasis[end] = 1//1 - xref[1] - xref[2]
         # nodal functions
         for j = 1 : 3 
@@ -269,8 +277,7 @@ function get_basis(::Type{<:AssemblyType}, FEType::Type{H1Pk{ncomponents,edim,or
 end
 
 
-
-# we need to change the ordering of the face dofs on faces that have a negative orientation sign
+## if order > 2 on Triangl2D we need to change the ordering of the face dofs on faces that have a negative orientation sign
 function get_basissubset(::Type{ON_CELLS}, FE::FESpace{Tv,Ti,H1Pk{ncomponents,edim,order},APT}, EG::Type{<:Triangle2D})  where {ncomponents,edim,order,Tv,Ti,APT}
     if order < 3
         return NothingFunction # no reordering needed

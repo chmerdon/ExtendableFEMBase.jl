@@ -244,7 +244,7 @@ function relocate_xref!(FEB::SingleFEEvaluator{<:Real,<:Real,<:Integer,operator,
             FEB.refbasis(FEB.refbasisvals[j], FEB.xref[j])
         end
         if FEType <: AbstractH1FiniteElement # also reset cvals for operator evals that stay the same for all cells
-            if operator <: Identity || operator <: IdentityDisc
+            if operator <: Identity
                 for qp = 1 : nqp
                     for j = 1 : size(FEB.refbasisvals[1],1), k = 1 : size(FEB.refbasisvals[1],2)
                         FEB.cvals[k,j,qp] = FEB.refbasisvals[qp][j,k]

@@ -80,6 +80,9 @@ export show_entries
 
 export displace_mesh, displace_mesh!
 
+include("plots.jl")
+export unicode_gridplot, unicode_scalarplot
+
 include("reconstructionhandlers.jl")
 export ReconstructionHandler, get_rcoefficients!
 
