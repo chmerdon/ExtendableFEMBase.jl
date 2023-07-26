@@ -303,7 +303,15 @@ function _update_coefficients!(FEBE::FEEvaluator)
     return coefficients
 end
 
-## general call that checks item (but causes 1 allocations)
+
+"""
+````
+function update_basis!(FEBE::FEEvaluator, item::Integer)
+````
+
+Sets FEBE.citem[] = item and updates the basis.
+
+"""
 function update_basis!(FEBE::FEEvaluator, item)
     if FEBE.citem[] == item
     else
@@ -313,7 +321,14 @@ function update_basis!(FEBE::FEEvaluator, item)
 end
 
 
-## error function
+"""
+````
+function update_basis!(FEBE::SingleFEEvaluator)
+````
+
+Updates the basis for the current item FEBE.citem[].
+
+"""
 function update_basis!(FEBE::SingleFEEvaluator{<:Real,<: Real,<:Integer,operator,FEType}) where {operator, FEType}
     @error "no update_basis! available for operator $operator of $FEType"
 end
@@ -331,7 +346,7 @@ include("feevaluator_hcurl.jl")
     eval_febe!(result, FEBE::FEBasisEvaluator, j::Int, i::Int, offset::Int = 0, factor = 1)
 ````
 
-Evaluate the j-th basis function of the FEBasisEvaluator at the i-th quadrature point adn writes the (possibly vector-valued) evaluation into result (beginning at offset and with the specified factor).
+Evaluate the j-th basis function of the FEBasisEvaluator at the i-th quadrature point and writes the (possibly vector-valued) evaluation into result (beginning at offset and with the specified factor).
 
 """
 function eval_febe!(result, FEBE::FEEvaluator, j::Int, i, offset = 0, factor = 1)

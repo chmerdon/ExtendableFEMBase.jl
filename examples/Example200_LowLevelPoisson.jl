@@ -12,6 +12,9 @@ This example computes the solution ``u`` of the two-dimensional Poisson problem
 with right-hand side ``f(x,y) \equiv xy`` and homogeneous Dirichlet boundary conditions
 on the unit square domain ``\Omega`` on a given grid.
 
+This script measures runtimes for grid generation, assembly and solving (direct/UMFPACK)
+for different refinement levels.
+
 =#
 
 module Example200_LowLevelPoisson
@@ -26,33 +29,36 @@ using UnicodePlots
 const μ = 1.0
 const f = x -> x[1] - x[2]
 
-function main(; nref = 7, order = 2, Plotter = nothing)
+function main(; maxnref = 8, order = 2, Plotter = nothing)
 
-	## prepare grid
-	X = LinRange(0,1,2^nref+1)
-	Y = LinRange(0,1,2^nref+1)
+	## run once for compiling
+	X = LinRange(0,1,4)
+	Y = LinRange(0,1,4)
 	xgrid = simplexgrid(X,Y)
 	xgrid[FaceNodes]
     FEType = H1Pk{1,2,order}
     FES = FESpace{FEType}(xgrid)
 	FES[CellDofs]
-
-	## solve
 	sol, time_assembly, time_solve = solve_poisson_lowlevel(FES, μ, f)
 
 	## again without compiling
-	time_grid = @elapsed @time xgrid = simplexgrid(X,Y)
-	time_facenodes = @elapsed @time xgrid[FaceNodes]
-    FEType = H1Pk{1,2,order}
-    FES = FESpace{FEType}(xgrid)
-	time_dofmap = @elapsed @time FES[CellDofs]
-	sol, time_assembly, time_solve = solve_poisson_lowlevel(FES, μ, f)
+	for level = 1 : maxnref
+		X = LinRange(0,1,2^level+1)
+		Y = LinRange(0,1,2^level+1)
+		time_grid = @elapsed xgrid = simplexgrid(X,Y)
+		time_facenodes = @elapsed xgrid[FaceNodes]
+		FEType = H1Pk{1,2,order}
+		FES = FESpace{FEType}(xgrid)
+		println("\nLEVEL = $level, ndofs = $(FES.ndofs)\n")
+		time_dofmap = @elapsed FES[CellDofs]
+		sol, time_assembly, time_solve = solve_poisson_lowlevel(FES, μ, f)
 
-	## plot statistics
-	@info "$(barplot(["Grid", "FaceNodes", "CellDofs", "Assembly", "Solve"], [time_grid, time_facenodes, time_dofmap, time_assembly, time_solve], title="Runtimes"))"
+		## plot statistics
+		println("\n$(barplot(["Grid", "FaceNodes", "CellDofs", "Assembly", "Solve"], [time_grid, time_facenodes, time_dofmap, time_assembly, time_solve], title="Runtimes"))")
 
-	## plot
-	scalarplot(xgrid, view(sol.entries,1:num_nodes(xgrid)); Plotter = Plotter, levels = 5)
+		## plot
+		scalarplot(xgrid, view(sol.entries,1:num_nodes(xgrid)); Plotter = Plotter, levels = 5)
+	end
 
 	return sol
 end
@@ -63,13 +69,12 @@ function solve_poisson_lowlevel(FES, μ, f)
 	FES = Solution[1].FES
 	A = FEMatrix(FES, FES)
 	b = FEVector(FES)
-	println("Assembling operators...")
-	time_assembly = @elapsed begin
-		@time assemble!(A.entries, b.entries, FES, f, μ)
+	println("Assembling...")
+	time_assembly = @elapsed @time begin
+		assemble!(A.entries, b.entries, FES, f, μ)
 
 		## fix boundary dofs
-		println("Assembling boundary data...")
-		@time begin
+		begin
 			BFaceDofs::Adjacency{Int32} = FES[ExtendableFEMBase.BFaceDofs]
 			nbfaces::Int = num_sources(BFaceDofs)
 			AM::ExtendableSparseMatrix{Float64,Int64} = A.entries
