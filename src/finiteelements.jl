@@ -160,7 +160,7 @@ end
 ## used if no coefficient handler or subset handler is needed (to have a single Function type for all)
 const NothingFunction = (x,y) -> nothing
 
-get_polynomialorder(::Type{<:AbstractFiniteElement}, ::Type{Vertex0D}) = 1
+#get_polynomialorder(::Type{<:AbstractFiniteElement}, ::Type{Vertex0D}) = 1
 get_ncomponents(FES::FESpace) = get_ncomponents(get_FEType(FES))
 
 # default coefficient functions that can be overwritten by finite element that has non-default coefficients

@@ -16,8 +16,8 @@ function lazy_interpolate!(
 Interpolates (operator-evaluations of) the given finite element function into the finite element space assigned to the target FEVectorBlock. 
 (Currently not the most efficient way as it is based on the PointEvaluation pattern and cell search. If CellParents
 are available in the grid components of the target grid, these parent cell information can be used to improve the
-search. To activate this put 'use_cellparents' = true). By some action with kernel (result,input) the operator evaluation (=input) can be
-further postprocessed (done by the called point evaluator).
+search. To activate this put 'use_cellparents' = true). By some given kernel function (result, input, qpinfo)
+the operator evaluation (=input) can be further postprocessed.
 
 Note: discontinuous quantities at vertices of the target grid will be evaluted in the first found cell of the
 source grid. No averaging is performed.

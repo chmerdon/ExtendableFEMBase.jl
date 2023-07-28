@@ -26,6 +26,9 @@ struct SingleFEEvaluator{T <: Real, TvG <: Real, TiG <: Integer, operator, FETyp
     compressiontargets::Array{Int,1}            # some operators allow for compressed storage (e.g. SymmetricGradient)
 end
 
+
+Base.getindex(FEB::FEEvaluator, c, dof, qp) = FEB.cvals[c,dof,qp]
+
 """
 ````
 function FEEvaluator(FE::FESpace, operator::AbstractFunctionOperator, qrule::QuadratureRule; T = Float64, AT = ON_CELLS, L2G = nothing)

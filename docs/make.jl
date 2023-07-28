@@ -123,7 +123,8 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
     if with_examples
         example_jl_dir = joinpath(@__DIR__,"..","examples")
         example_md_dir  = joinpath(@__DIR__,"src","examples")
-        excluded_examples = ["XXX","290"] # excludes just the run of these examples
+        fully_excluded_examples = ["XXX"] # excludes just the run of these examples
+        run_excluded_examples = ["XXX"] # excludes just the run of these examples
         image_dir = joinpath(@__DIR__,"src","images")
 
         for example_source in readdir(example_jl_dir)
@@ -133,35 +134,37 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
             end
             if example_source[1:7] == "Example" && ext==".jl"
                 number = example_source[8:10]
-                source_url="https://github.com/chmerdon/ExtendableFEMBase.jl/raw/master/examples/"*example_source
-                preprocess(buffer)=replace_source_url(buffer,source_url)|>hashify_block_comments
-                    Literate.markdown(joinpath(@__DIR__,"..","examples",example_source),
-                                example_md_dir,
-                                documenter=false,
-                                execute=false,
-                                info=false,
-                                preprocess=preprocess)
+                if !(number in fully_excluded_examples)
+                    source_url="https://github.com/chmerdon/ExtendableFEMBase.jl/raw/master/examples/"*example_source
+                    preprocess(buffer)=replace_source_url(buffer,source_url)|>hashify_block_comments
+                        Literate.markdown(joinpath(@__DIR__,"..","examples",example_source),
+                                    example_md_dir,
+                                    documenter=false,
+                                    execute=false,
+                                    info=false,
+                                    preprocess=preprocess)
 
-                filename = example_md_dir * "/" * base * ".md"
-                if (run_examples) && !(number in excluded_examples) # exclude these examples for now (because they take long or require extra packages)
-                    # generate default main run output file 
-                    include(example_jl_dir * "/" * example_source)
-                    @time open(filename, "a") do io
-                        redirect_stdout(io) do
-                            println("**Default output:**")
-                            println("```")
-                            println("julia> $base.main()")
-                            eval(Meta.parse("$base.main()"))
-                            println("```")
+                    filename = example_md_dir * "/" * base * ".md"
+                    if (run_examples) && !(number in run_excluded_examples) # exclude these examples for now (because they take long or require extra packages)
+                        # generate default main run output file 
+                        include(example_jl_dir * "/" * example_source)
+                        @time open(filename, "a") do io
+                            redirect_stdout(io) do
+                                println("**Default output:**")
+                                println("```")
+                                println("julia> $base.main()")
+                                eval(Meta.parse("$base.main()"))
+                                println("```")
+                            end
                         end
                     end
-                end
-                for k = 1 : 4
-                    imgfile = "../images/" * base * "_$k.png"
-                    if isfile(image_dir * "/" * base * "_$k.png")
-                        open(filename, "a") do io
-                            redirect_stdout(io) do
-                                println("![]($imgfile)")
+                    for k = 1 : 4
+                        imgfile = "../images/" * base * "_$k.png"
+                        if isfile(image_dir * "/" * base * "_$k.png")
+                            open(filename, "a") do io
+                                redirect_stdout(io) do
+                                    println("![]($imgfile)")
+                                end
                             end
                         end
                     end

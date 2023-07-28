@@ -20,11 +20,10 @@ ExtendableFEMBase.NeededDerivative4Operator(::Type{Reconstruct{FETypeR, O}}) whe
 ExtendableFEMBase.Length4Operator(::Type{Reconstruct{FETypeR, O}}, xdim, nc) where {FETypeR, O} = Length4Operator(O, xdim, nc)
 ExtendableFEMBase.DefaultName4Operator(::Type{Reconstruct{FETypeR, O}}) where {FETypeR, O} = "R(" * DefaultName4Operator(O) * ")"
 
-struct FEReconstEvaluator{T,TvG,TiG,FEType,FEBType,O<:ReconstructionOperator} <: FEEvaluator{T,TvG,TiG}
+struct FEReconstEvaluator{T,TvG,TiG,FEType,FEType2,stdop,O<:ReconstructionOperator} <: FEEvaluator{T,TvG,TiG}
     citem::Base.RefValue{Int}                       # current item
     FE::FESpace{TvG,TiG,FEType}                     # link to full FE (e.g. for coefficients)
-    FE2::FESpace{TvG,TiG}                   # link to other reconstruction FE
-    FEB::FEBType                                    # FEBasisEvaluator for stdop in reconstruction space
+    FEB::SingleFEEvaluator{T,TvG,TiG,stdop,FEType2}                # FEBasisEvaluator for stdop in reconstruction space
     cvals::Array{T,3}                               # current operator vals on item (reconstruction)
     coefficients::Array{TvG,2}                      # additional coefficients for reconstruction
     reconst_handler::ReconstructionHandler{T, TiG}  # handler for reconstruction coefficients
@@ -39,7 +38,7 @@ function FEEvaluator(
     T = Float64,
     AT = ON_CELLS) where {TvG, TiG, TvR, FEType <: AbstractFiniteElement, stdop <: StandardFunctionOperator, FETypeReconst <: AbstractFiniteElement, EG <: AbstractElementGeometry, FEAPT <: AssemblyType}
     
-    @info "Creating FEBasisEvaluator for reconstruction of $stdop operator of $FEType into $FETypeReconst on $EG"
+    @debug "Creating FEBasisEvaluator for reconstruction of $stdop operator of $FEType into $FETypeReconst on $EG"
 
     ## generate FESpace for reconstruction
     xgrid = FE.xgrid
@@ -69,13 +68,12 @@ function FEEvaluator(
     ## reconstruction coefficient handler
     reconst_handler = ReconstructionHandler(FE,FE2,AT,EG)
 
-    return FEReconstEvaluator{T,TvG,TiG,FEType,typeof(FEB),operator}(FEB.citem, FE, FE2, FEB, cvals, coefficients2, reconst_handler)
+    return FEReconstEvaluator{T,TvG,TiG,FEType,FETypeReconst,stdop,operator}(FEB.citem, FE, FEB, cvals, coefficients2, reconst_handler)
 end    
 
 function update_basis!(FEBE::FEReconstEvaluator)
-
     ## evaluate standard operator in reconstruction basis (->cvals_reconst)
-    update_basis!(FEBE.FEB, FEBE.citem[])
+    update_basis!(FEBE.FEB)
     cvals_reconst = FEBE.FEB.cvals
 
     # get local reconstruction coefficients

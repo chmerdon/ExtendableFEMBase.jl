@@ -137,10 +137,6 @@ function Base.show(io::IO, FEM::FEMatrix{TvM,TiM,TvG,TiG,nbrow,nbcol,nbtotal}) w
         @printf(io, " %s (%s, %s)\n",FEM[j].name,FEM[j].FES.name,FEM[j].FESY.name);
     end    
     println(io,"\n    nnzvals = $(length(FEM.entries.cscmatrix.nzval))")
-    if size(FEM.entries,1) == size(FEM.entries,2)
-        println(io,"  cond(*,1) = $(cond(FEM.entries.cscmatrix,1))")
-        println(io,"cond(*,Inf) = $(cond(FEM.entries.cscmatrix,Inf))")
-    end
     println(io,"\n$(UnicodePlots.spy(sparse(FEM.entries.cscmatrix)))")
 end
 

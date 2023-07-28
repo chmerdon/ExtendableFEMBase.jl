@@ -21,3 +21,12 @@ nodevalues!
 nodevalues
 nodevalues_view
 ```
+
+## Lazy Interpolation
+
+To interpolate between different finite element spaces and meshes, there is a lazy interpolation routine that
+works in all cases (but is not very efficient as it involves a PointeEvaluator and CellFinder):
+
+```@docs
+lazy_interpolate!
+```

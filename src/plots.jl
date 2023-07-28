@@ -20,6 +20,7 @@ function unicode_gridplot(
         xgrid::ExtendableGrid;
         title = "gridplot",
         resolution = (40,20),
+        autoscale = true,
         color = (200,200,200),
         bface_color = (255,0,0),
         CanvasType = BrailleCanvas,
@@ -29,6 +30,18 @@ function unicode_gridplot(
     coords = xgrid[Coordinates]
     ex = extrema(view(coords,1,:))
     ey = extrema(view(coords,2,:))
+
+    if autoscale
+        wx = ex[2] - ex[1]
+        wy = ey[2] - ey[1]
+        rescale = wx/wy * (resolution[1]/(2*resolution[2]))
+        if rescale > 1
+            resolution = (resolution[1], Int(ceil(resolution[2]/rescale)))
+        else
+            resolution = (Int(ceil(resolution[1]/rescale)), resolution[2])
+        end
+    end
+
     canvas = CanvasType(resolution[2], resolution[1],            # number of rows and columns (characters)
                        origin_y=ey[1], origin_x=ex[1],              # position in virtual space
                        height=ey[2]-ey[1], width=ex[2]-ex[1]; blend = false, kwargs...)    # size of the virtual space
