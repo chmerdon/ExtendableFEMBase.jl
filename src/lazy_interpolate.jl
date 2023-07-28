@@ -62,9 +62,9 @@ function lazy_interpolate!(
            x = qpinfo.x
            if xtrafo !== nothing
                xtrafo(x_source, x)
-               cell = gFindLocal!(xref, CF, x_source; icell = xCellParents[qpinfo.cell], eps = eps, trybrute = !only_localsearch)
+               cell = gFindLocal!(xref, CF, x_source; icellstart = xCellParents[qpinfo.cell], eps = eps, trybrute = !only_localsearch)
            else
-               cell = gFindLocal!(xref, CF, x; icell = xCellParents[qpinfo.cell], eps = eps, trybrute = !only_localsearch)
+               cell = gFindLocal!(xref, CF, x; icellstart = xCellParents[qpinfo.cell], eps = eps, trybrute = !only_localsearch)
            end
            evaluate!(result,PE,xref,cell)
            return nothing
@@ -75,9 +75,9 @@ function lazy_interpolate!(
             x = qpinfo.x
             if xtrafo !== nothing
                 xtrafo(x_source, x)
-                cell = gFindLocal!(xref, CF, x_source; icell = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
+                cell = gFindLocal!(xref, CF, x_source; icellstart = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
             else
-                cell = gFindLocal!(xref, CF, x; icell = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
+                cell = gFindLocal!(xref, CF, x; icellstart = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
             end
             if cell == 0
                 fill!(result, not_in_domain_value)

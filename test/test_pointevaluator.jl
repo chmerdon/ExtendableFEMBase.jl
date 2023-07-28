@@ -24,7 +24,7 @@ function test_pointevaluation()
     eval = zeros(Float64,1)
     x = [0.15234,0.2234] # point inside the cell
     xref = [0.0,0.0]
-    cell = gFindLocal!(xref, CF, x; icell = 1)
+    cell = gFindLocal!(xref, CF, x; icellstart = 1)
     evaluate!(eval, PE, xref, cell)
     return abs(eval[1] - sum(x))
 end
