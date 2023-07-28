@@ -60,11 +60,12 @@ function lazy_interpolate!(
        end
        function point_evaluation_parentgrid!(result, qpinfo)
            x = qpinfo.x
+           cell = xCellParents[qpinfo.cell]
            if xtrafo !== nothing
                xtrafo(x_source, x)
-               cell = gFindLocal!(xref, CF, x_source; icellstart = xCellParents[qpinfo.cell], eps = eps, trybrute = !only_localsearch)
+               cell = gFindLocal!(xref, CF, x_source;  icellstart = cell, eps = eps, trybrute = !only_localsearch)
            else
-               cell = gFindLocal!(xref, CF, x; icellstart = xCellParents[qpinfo.cell], eps = eps, trybrute = !only_localsearch)
+               cell = gFindLocal!(xref, CF, x; icellstart = cell, eps = eps, trybrute = !only_localsearch)
            end
            evaluate!(result,PE,xref,cell)
            return nothing
