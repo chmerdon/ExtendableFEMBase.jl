@@ -689,7 +689,7 @@ function integrate!(
         end
 
         fill!(integral4items,0)
-        for item in items
+        for item::Int in items
             # find index for CellType
             if ngeoms > 1
                 itemET = xItemGeometries[item]
@@ -718,7 +718,7 @@ function integrate!(
         end
 
         fill!(integral4items,0)
-        for item in items
+        for item::Int in items
             # find index for CellType
             if ngeoms > 1
                 itemET = xItemGeometries[item]

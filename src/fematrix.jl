@@ -25,7 +25,7 @@ end
 
 function Base.show(io::IO, FEB::FEMatrixBlock; tol = 1e-14)
     @printf(io, "\n");
-    for j=1:FEB.offset+1:FEB.last_indexX
+    for j=1:FEB.offset+1:FEB.last_index
         for k=1:FEB.offsetY+1:FEB.last_indexY
             if FEB.entries[j,k] > tol
                 @printf(io, " +%.1e",FEB.entries[j,k]);
@@ -117,7 +117,7 @@ $(TYPEDSIGNATURES)
 
 Custom `size` function for `FEMatrixBlock` that gives a tuple with the size of the block (that coressponds to the number of degrees of freedoms in X and Y)
 """
-Base.size(FEB::FEMatrixBlock) = (FEB.last_indexX-FEB.offset,FEB.last_indexY-FEB.offsetY)
+Base.size(FEB::FEMatrixBlock) = (FEB.last_index-FEB.offset,FEB.last_indexY-FEB.offsetY)
 
 """
 $(TYPEDSIGNATURES)
@@ -232,7 +232,7 @@ function Base.fill!(B::FEMatrixBlock{Tv,Ti}, value) where {Tv,Ti}
     valsB::Array{Tv,1} = cscmat.nzval
     for col = B.offsetY+1:B.last_indexY
         for r in nzrange(cscmat, col)
-            if rows[r] > B.offset && rows[r] <= B.last_indexX
+            if rows[r] > B.offset && rows[r] <= B.last_index
                 valsB[r] = value
             end
         end
@@ -290,7 +290,7 @@ function addblock!(A::FEMatrixBlock{Tv,Ti}, B::FEMatrixBlock{Tv,Ti}; factor = 1,
         for col = B.offsetY+1:B.last_indexY
             arow = col - B.offsetY + A.offset
             for r in nzrange(cscmat, col)
-                if rows[r] > B.offset && rows[r] <= B.last_indexX
+                if rows[r] > B.offset && rows[r] <= B.last_index
                     acol = rows[r] - B.offset + A.offsetY
                     ## add B[rows[r], col] to A[col, rows[r]]
                     _addnz(AM,arow,acol,valsB[r],factor)
@@ -301,7 +301,7 @@ function addblock!(A::FEMatrixBlock{Tv,Ti}, B::FEMatrixBlock{Tv,Ti}; factor = 1,
         for col = B.offsetY+1:B.last_indexY
             acol = col - B.offsetY + A.offsetY
             for r in nzrange(cscmat, col)
-                if rows[r] > B.offset && rows[r] <= B.last_indexX
+                if rows[r] > B.offset && rows[r] <= B.last_index
                     arow = rows[r] - B.offset + A.offset
                     ## add B[rows[r], col] to A[rows[r], col]
                     _addnz(AM,arow,acol,valsB[r],factor)
@@ -419,7 +419,7 @@ function addblock_matmul!(a::FEVectorBlock{Tv}, B::FEMatrixBlock{Tv,Ti}, b::FEVe
             acol = col-B.offsetY+a.offset
             for r in nzrange(cscmat, col)
                 row = rows[r]
-                if row > B.offset && row <= B.last_indexX
+                if row > B.offset && row <= B.last_index
                     brow = row - B.offset + b.offset
                     a.entries[acol] += valsB[r] * b.entries[brow] * factor 
                 end
@@ -432,7 +432,7 @@ function addblock_matmul!(a::FEVectorBlock{Tv}, B::FEMatrixBlock{Tv,Ti}, b::FEVe
             bcol = col-B.offsetY+b.offset
             for r in nzrange(cscmat, col)
                 row = rows[r]
-                if row > B.offset && row <= B.last_indexX
+                if row > B.offset && row <= B.last_index
                     arow = row - B.offset + a.offset
                     a.entries[arow] += valsB[r] * b.entries[bcol] * factor 
                 end
@@ -459,7 +459,7 @@ function addblock_matmul!(a::AbstractVector{Tv}, B::FEMatrixBlock{Tv,Ti}, b::Abs
             bcol = col-B.offsetY
             for r in nzrange(cscmat, col)
                 row = rows[r]
-                if row > B.offset && row <= B.last_indexX
+                if row > B.offset && row <= B.last_index
                     arow = row - B.offset
                     a[bcol] += valsB[r] * b[arow] * factor 
                 end
@@ -470,7 +470,7 @@ function addblock_matmul!(a::AbstractVector{Tv}, B::FEMatrixBlock{Tv,Ti}, b::Abs
             bcol = col-B.offsetY
             for r in nzrange(cscmat, col)
                 row = rows[r]
-                if row > B.offset && row <= B.last_indexX
+                if row > B.offset && row <= B.last_index
                     arow = row - B.offset
                     a[arow] += valsB[r] * b[bcol] * factor 
                 end

@@ -262,16 +262,32 @@ function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<
         nedges4EG[j] = num_edges(EG[j])
     end
 
-    if FES.broken == true
-        xItemDofs = SerialVariableTargetAdjacency(Ti)
-    else
-        xItemDofs = VariableTargetAdjacency(Ti)
-    end
     itemEG = EG[1]
-    cpattern::Array{DofMapPatternSegment,1} = dofmap4EG[1].segments
     iEG::Int = 1
-    k::Int = 0
-    itemdofs::Array{Ti,1} = zeros(Ti,maxdofs4item)
+
+    ## get total dofnumber for pre--allocation
+    dofmap_totallength = 0
+    colstarts = zeros(Ti, nsubitems + 1)
+    for subitem = 1 : nsubitems
+        itemEG = xItemGeometries[subitem]
+        if length(EG) > 1
+            iEG = findfirst(isequal(itemEG), EG)
+        end
+        colstarts[subitem] = dofmap_totallength + 1
+        dofmap_totallength += get_ndofs(dofmap4EG[iEG])
+    end
+    colstarts[end] = dofmap_totallength+1
+
+    if FES.broken
+        FES[DM] = SerialVariableTargetAdjacency(colstarts)
+        return FES[DM]
+    end
+
+    colentries = zeros(Ti, dofmap_totallength)
+    xItemDofs = VariableTargetAdjacency{Ti}(colentries, colstarts)
+
+    cpattern::Array{DofMapPatternSegment,1} = dofmap4EG[1].segments
+    l::Int = 0
     offset::Int = 0
     pos::Int = 0
     q::Int = 0
@@ -283,18 +299,19 @@ function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<
             iEG = findfirst(isequal(itemEG), EG)
         end
         cpattern = dofmap4EG[iEG].segments
+        l = length(cpattern)
         if has_interiordofs[iEG]
             item_with_interiordofs += 1
         end
         for c = 1 : ncomponents
             offset = (c-1)*offset4component
-            for k = 1 : length(cpattern)
+            for k = 1 : l
                 q = cpattern[k].ndofs
                 if cpattern[k].type <: DofTypeNode && cpattern[k].each_component
                      for n = 1 : nnodes4EG[iEG]
                         for m = 1 : q
                             pos += 1
-                            itemdofs[pos] = xItemNodes[n,item] + offset + (m-1)*nnodes
+                            xItemDofs.colentries[pos] = xItemNodes[n,item] + offset + (m-1)*nnodes
                         end
                     end
                     offset += nnodes*q
@@ -302,7 +319,7 @@ function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<
                     for n = 1 : nfaces4EG[iEG]
                         for m = 1 : q
                             pos += 1
-                            itemdofs[pos] = xItemFaces[n,item] + offset + (m-1)*nfaces
+                            xItemDofs.colentries[pos] = xItemFaces[n,item] + offset + (m-1)*nfaces
                         end
                     end
                     offset += nfaces*q
@@ -310,27 +327,27 @@ function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<
                     for n = 1 : nedges4EG[iEG]
                         for m = 1 : q
                             pos += 1
-                            itemdofs[pos] = xItemEdges[n,item] + offset + (m-1)*nedges
+                            xItemDofs.colentries[pos] = xItemEdges[n,item] + offset + (m-1)*nedges
                         end
                     end
                     offset += nedges*q
                 elseif cpattern[k].type <: DofTypeInterior && cpattern[k].each_component
                     for m = 1 : q
                         pos += 1
-                        itemdofs[pos] = sub2sup(item_with_interiordofs) + offset
+                        xItemDofs.colentries[pos] = sub2sup(item_with_interiordofs) + offset
                         offset += nitems
                     end
                 end
             end
         end
         offset = ncomponents*offset4component
-        for k = 1 : length(cpattern)
+        for k = 1 : l
             q = cpattern[k].ndofs
             if cpattern[k].type <: DofTypeFace && !cpattern[k].each_component
                 for n = 1 : nfaces4EG[iEG]
                     for m = 1 : q
                         pos += 1
-                        itemdofs[pos] = xItemFaces[n,item] + offset + (m-1)*nfaces
+                        xItemDofs.colentries[pos] = xItemFaces[n,item] + offset + (m-1)*nfaces
                     end
                 end
                 offset += nfaces*q
@@ -338,24 +355,18 @@ function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<
                 for n = 1 : nedges4EG[iEG]
                     for m = 1 : q
                         pos += 1
-                        itemdofs[pos] = xItemEdges[n,item] + offset + (m-1)*nedges
+                        xItemDofs.colentries[pos] = xItemEdges[n,item] + offset + (m-1)*nedges
                     end
                 end
                 offset += nedges*q
             elseif cpattern[k].type <: DofTypeInterior && !cpattern[k].each_component
                 for m = 1 : q
                     pos += 1
-                    itemdofs[pos] = sub2sup(item_with_interiordofs) + offset
+                    xItemDofs.colentries[pos] = sub2sup(item_with_interiordofs) + offset
                     offset += nitems
                 end
             end
         end
-        if FES.broken
-            append!(xItemDofs,pos)
-        else
-            append!(xItemDofs,view(itemdofs,1:pos))
-        end
-        pos = 0
     end
     # save dofmap
     FES[DM] = xItemDofs
