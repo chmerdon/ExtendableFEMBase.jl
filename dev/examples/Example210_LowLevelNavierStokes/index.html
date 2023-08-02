@@ -376,68 +376,68 @@ end
 
 end #module</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><p><strong>Default output:</strong></p><pre><code class="nohighlight hljs">julia&gt; Example210_LowLevelNavierStokes.main()
 Creating grid...
-  0.000136 seconds (153 allocations: 54.453 KiB)
+  0.000290 seconds (153 allocations: 54.453 KiB)
 Creating FESpace...
-  0.188186 seconds (289.59 k allocations: 19.648 MiB, 98.52% compilation time)
+  0.259212 seconds (289.64 k allocations: 19.660 MiB, 97.71% compilation time)
 Initializing system...
-  3.016506 seconds (3.00 M allocations: 193.630 MiB, 4.81% gc time, 99.88% compilation time)
-  1.679623 seconds (1.51 M allocations: 111.119 MiB, 3.91% gc time, 91.37% compilation time)
+  3.807357 seconds (2.99 M allocations: 197.571 MiB, 2.19% gc time, 99.87% compilation time)
+  2.121884 seconds (1.51 M allocations: 111.135 MiB, 2.37% gc time, 91.73% compilation time)
 Prepare boundary conditions...
-  8.937752 seconds (6.78 M allocations: 450.246 MiB, 4.06% gc time, 99.84% compilation time)
+  9.739105 seconds (5.26 M allocations: 343.719 MiB, 2.00% gc time, 99.84% compilation time)
 
 ITERATION 1
 =============
 Solving linear system...
-  0.154284 seconds (245 allocations: 83.904 MiB, 22.72% gc time, 4.49% compilation time)
-linear residual = 1.2409849547040626e-15
+  0.185916 seconds (245 allocations: 83.904 MiB, 13.65% gc time, 5.49% compilation time)
+linear residual = 1.2130108807271572e-15
 Updating linear system...
-  0.236592 seconds (66.75 k allocations: 12.847 MiB, 58.71% compilation time)
-nonlinear residual = 0.1222501140854554
+  0.286239 seconds (66.75 k allocations: 12.840 MiB, 57.80% compilation time)
+nonlinear residual = 0.12245078849698351
 
 ITERATION 2
 =============
 Solving linear system...
-  0.118790 seconds (192 allocations: 49.001 MiB, 11.23% gc time, 5.74% compilation time)
-linear residual = 1.770787696762069e-14
+  0.122827 seconds (82 allocations: 48.996 MiB)
+linear residual = 1.5055449328511096e-14
 Updating linear system...
-  0.097717 seconds (15 allocations: 8.269 MiB)
-nonlinear residual = 0.03438674749707003
+  0.117677 seconds (15 allocations: 8.269 MiB)
+nonlinear residual = 0.03448159677122835
 
 ITERATION 3
 =============
 Solving linear system...
-  0.108572 seconds (86 allocations: 48.996 MiB, 10.06% gc time)
-linear residual = 1.0731660686535238e-15
+  0.151777 seconds (195 allocations: 49.001 MiB, 12.29% gc time, 5.23% compilation time)
+linear residual = 1.081768756497182e-15
 Updating linear system...
-  0.097201 seconds (15 allocations: 8.269 MiB)
-nonlinear residual = 0.0011018426981475133
+  0.122463 seconds (15 allocations: 8.269 MiB)
+nonlinear residual = 0.0012765626416380898
 
 ITERATION 4
 =============
 Solving linear system...
-  0.107468 seconds (86 allocations: 48.996 MiB, 9.84% gc time)
-linear residual = 1.0631648642290553e-15
+  0.145046 seconds (87 allocations: 48.996 MiB, 13.05% gc time)
+linear residual = 1.4219634461913534e-15
 Updating linear system...
-  0.097652 seconds (15 allocations: 8.269 MiB)
-nonlinear residual = 1.0715126096788832e-5
+  0.123030 seconds (15 allocations: 8.269 MiB)
+nonlinear residual = 1.4014844129102414e-5
 
 ITERATION 5
 =============
 Solving linear system...
-  0.099434 seconds (86 allocations: 48.996 MiB, 2.90% gc time)
-linear residual = 1.0740269916345858e-15
+  0.123664 seconds (82 allocations: 48.996 MiB)
+linear residual = 1.060392023400696e-15
 Updating linear system...
-  0.097488 seconds (15 allocations: 8.269 MiB)
-nonlinear residual = 4.030019988355817e-9
+  0.117478 seconds (15 allocations: 8.269 MiB)
+nonlinear residual = 6.9807541060936774e-9
 
 ITERATION 6
 =============
 Solving linear system...
-  0.099492 seconds (86 allocations: 48.996 MiB, 2.88% gc time)
-linear residual = 1.0293391766847716e-15
+  0.135219 seconds (89 allocations: 48.996 MiB, 10.49% gc time)
+linear residual = 1.08382382352464e-15
 Updating linear system...
-  0.097496 seconds (15 allocations: 8.269 MiB)
-nonlinear residual = 1.0678528430337422e-15
+  0.118835 seconds (15 allocations: 8.269 MiB)
+nonlinear residual = 1.2619844050224305e-15
 
-l2 error velo = 0.38605133038179756
-l2 error pressure = 0.20006755549266816</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Example200_LowLevelPoisson/">« 200 : Poisson Problem</a><a class="docs-footer-nextpage" href="../Example290_InterpolationBetweenMeshes/">290 : Interpolation Between Meshes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Wednesday 2 August 2023 17:07">Wednesday 2 August 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+l2 error velo = 0.3860513303817961
+l2 error pressure = 0.20006755549266722</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Example200_LowLevelPoisson/">« 200 : Poisson Problem</a><a class="docs-footer-nextpage" href="../Example290_InterpolationBetweenMeshes/">290 : Interpolation Between Meshes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Wednesday 2 August 2023 17:24">Wednesday 2 August 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
