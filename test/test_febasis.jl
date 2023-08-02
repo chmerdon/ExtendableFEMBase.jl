@@ -5,10 +5,10 @@ function run_febasis_tests()
         println("============================")
         println("Testing Interpolations in 1D")
         println("============================")
-        for order = 1 : 5
+        for order = 1 : 6
             test_vertex_values(Edge1D, H1Pk{1,1,order}, order)
         end
-        for order in 1 : 4
+        for order in 1 : 5
             test_vertex_values(Triangle2D, H1Pk{1,2,order}, order)
         end
         test_vertex_values(Parallelogram2D, H1Q1{1}, 1)

@@ -207,14 +207,16 @@ function ensure_moments!(target::AbstractArray{T,1}, FE::FESpace{Tv, Ti, FEType,
             return nothing
         end   
 
-        MOMxBASIS = reshape(integrate(xgrid_ref, ON_CELLS, momentbasis_times_refbasis, ndofs_ref*ndofs_moment; quadorder = 2*order_FE), (ndofs_ref, ndofs_moment))
+        MOMxBASIS_temp = integrate(xgrid_ref, ON_CELLS, momentbasis_times_refbasis, ndofs_ref*ndofs_moment; quadorder = 2*order_FE)
+        MOMxBASIS = reshape(MOMxBASIS_temp, (ndofs_ref, ndofs_moment))
         MOMxBASIS ./= xgrid_ref[CellVolumes][1]
 
         ## extract quadratic matrix for interior dofs
-        MOMxINTERIOR = zeros(length(idofs),size(MOMxBASIS,2))
-        for j = 1 : length(idofs), k = 1 : size(MOMxBASIS,2)
-            MOMxINTERIOR[j,k] = MOMxBASIS[idofs[j],k]
-        end
+        MOMxINTERIOR = view(MOMxBASIS,idofs,1:nmoments)
+        #zeros(length(idofs),size(MOMxBASIS,2))
+        #for j = 1 : length(idofs), k = 1 : size(MOMxBASIS,2)
+        #    MOMxINTERIOR[j,k] = MOMxBASIS[idofs[j],k]
+        #end
 
         moments_eval = zeros(Float64,nmoments,ncomponents)
     end
@@ -222,7 +224,7 @@ function ensure_moments!(target::AbstractArray{T,1}, FE::FESpace{Tv, Ti, FEType,
     ### get permutation of dofs on reference EG and real cells
     subset_handler = get_basissubset(AT, FE, EG)
     current_subset = Array{Int,1}(1:size(MOMxBASIS,1))
-    doforder_ref::Array{Int,1} = FE_onref[CellDofs][:,1]
+    #doforder_ref::Array{Int,1} = FE_onref[CellDofs][:,1]
     invA::Array{Float64,2} = inv(MOMxINTERIOR)
 
     ## evaluator for moments of exact_function
@@ -253,10 +255,9 @@ function ensure_moments!(target::AbstractArray{T,1}, FE::FESpace{Tv, Ti, FEType,
         if subset_handler != NothingFunction
             subset_handler(current_subset, item)
         end
-
         for m::Int = 1 : nmoments, exdof = 1 : interior_offset, c = 1 : ncomponents
             localdof = coffset*(c-1)+exdof
-            edgemoments[m,item] -= target[xItemDofs[localdof,item]] * MOMxBASIS[doforder_ref[current_subset[localdof]],m] * xItemVolumes[item]
+            edgemoments[m,item] -= target[xItemDofs[localdof,item]] * MOMxBASIS[current_subset[localdof],m] * xItemVolumes[item]
         end
         for m::Int = 1 : nmoments
             localdof = idofs[m]

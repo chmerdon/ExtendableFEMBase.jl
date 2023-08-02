@@ -260,7 +260,14 @@ function get_basis(::Type{<:AssemblyType}, FEType::Type{H1Pk{ncomponents,edim,or
             refbasis[3*order+1,1] = refbasis[end]*xref[1]*xref[2]*(refbasis[end]-1//4)*128//1
             refbasis[3*order+2,1] = refbasis[end]*xref[1]*xref[2]*(xref[1]-1//4)*128//1
             refbasis[3*order+3,1] = refbasis[end]*xref[1]*xref[2]*(xref[2]-1//4)*128//1
-        elseif order > 4
+        elseif order == 5
+            refbasis[3*order+1,1] = refbasis[end]*xref[1]*xref[2]*(refbasis[end]-1//5)*(refbasis[end]-2//5)*3125//6
+            refbasis[3*order+2,1] = refbasis[end]*xref[1]*xref[2]*(xref[1]-1//5)*(xref[1]-2//5)*3125//6
+            refbasis[3*order+3,1] = refbasis[end]*xref[1]*xref[2]*(xref[2]-1//5)*(xref[2]-2//5)*3125//6
+            refbasis[3*order+4,1] = refbasis[end]*xref[1]*xref[2]*(refbasis[end]-1//5)*(xref[1]-1//5)*3125//4
+            refbasis[3*order+5,1] = refbasis[end]*xref[1]*xref[2]*(xref[1]-1//5)*(xref[2]-1//5)*3125//4
+            refbasis[3*order+6,1] = refbasis[end]*xref[1]*xref[2]*(xref[2]-1//5)*(refbasis[end]-1//5)*3125//4
+        elseif order > 5
             interior_basis(view(refbasis,3*order+1:ncomponents*ndofs,:),xref)
             for k = 3*order+1:ndofs
                 refbasis[k,1] *= (1-xref[1]-xref[2])*xref[1]*xref[2]*27//1

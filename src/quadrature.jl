@@ -84,7 +84,15 @@ function VertexRule(ET::Type{Triangle2D}, order = 1; T = Float64)
        push!(xref,[1//2, 1//4])
        push!(xref,[1//4, 1//2])
     end
-    if order > 4
+    if order == 5
+       push!(xref,[1//5, 1//5])
+       push!(xref,[3//5, 1//5])
+       push!(xref,[1//5, 3//5])
+       push!(xref,[2//5, 1//5])
+       push!(xref,[2//5, 2//5])
+       push!(xref,[1//5, 2//5])
+    end
+    if order > 5
         @warn "VertexRule for order > 4 on $ET not yet implemented"
     end
     w = ones(Int, length(xref)) // length(xref)
