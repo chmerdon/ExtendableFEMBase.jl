@@ -212,11 +212,11 @@ function ensure_moments!(target::AbstractArray{T,1}, FE::FESpace{Tv, Ti, FEType,
         MOMxBASIS ./= xgrid_ref[CellVolumes][1]
 
         ## extract quadratic matrix for interior dofs
-        MOMxINTERIOR = view(MOMxBASIS,idofs,1:nmoments)
-        #zeros(length(idofs),size(MOMxBASIS,2))
-        #for j = 1 : length(idofs), k = 1 : size(MOMxBASIS,2)
-        #    MOMxINTERIOR[j,k] = MOMxBASIS[idofs[j],k]
-        #end
+        #MOMxINTERIOR = view(MOMxBASIS,idofs,1:nmoments)  # inverting this in line 228 does not work in julia 1.6 !!!
+        MOMxINTERIOR = zeros(length(idofs),size(MOMxBASIS,2))
+        for j = 1 : length(idofs), k = 1 : size(MOMxBASIS,2)
+           MOMxINTERIOR[j,k] = MOMxBASIS[idofs[j],k]
+        end
 
         moments_eval = zeros(Float64,nmoments,ncomponents)
     end
