@@ -69,6 +69,7 @@ function point_evaluation_broken!(target::AbstractArray{T,1}, FES::FESpace{Tv, T
     xCoordinates = FES.xgrid[Coordinates]
     xCellNodes = FES.xgrid[CellNodes]
     xCellDofs = FES[CellDofs]
+    xCellRegions = FES.xgrid[CellRegions]
 
     ncomponents = get_ncomponents(FEType)
     if items == []
@@ -76,22 +77,19 @@ function point_evaluation_broken!(target::AbstractArray{T,1}, FES::FESpace{Tv, T
     end
     nnodes_on_cell::Int = 0
     # interpolate at nodes
+    QP = QPInfos(FES.xgrid; time = time)
+    result = zeros(T,ncomponents)
     for cell in items
         nnodes_on_cell = num_targets(xCellNodes, cell)
-        if is_itemdependent(exact_function)
-            exact_function.item[1] = cell
-            exact_function.item[2] = cell
-            exact_function.item[3] = xCellRegions[cell]
-        end
+        QP.item = cell
+        QP.cell = cell
+        QP.region = xCellRegions[cell]
         for n = 1 : nnodes_on_cell
             j = xCellNodes[n,cell]
-            if is_xdependent(exact_function)
-                exact_function.x .= view(xCoordinates,:,j)
-            end
-    
-            eval_data!(exact_function)
+            QP.x .= view(xCoordinates,:,j)
+            exact_function(result, QP)
             for k = 1 : ncomponents
-                target[xCellDofs[1,cell]+n-1+(k-1)*nnodes_on_cell] = exact_function.val[k]
+                target[xCellDofs[1,cell]+n-1+(k-1)*nnodes_on_cell] = result[k]
             end    
          end
     end
