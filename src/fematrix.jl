@@ -246,10 +246,13 @@ $(TYPEDSIGNATURES)
 
 Adds FEMatrix B to FEMatrix A.
 """
-function add!(A::FEMatrix{Tv,Ti}, B::FEMatrix{Tv,Ti}; factor = 1, transpose::Bool = false) where {Tv,Ti}
-    AM::ExtendableSparseMatrix{Tv,Ti} = A.entries
-    BM::ExtendableSparseMatrix{Tv,Ti} = B.entries
-    cscmat::SparseMatrixCSC{Tv,Ti} = BM.cscmatrix
+function add!(A::FEMatrix{Tv,Ti}, B::FEMatrix{Tv,Ti}; kwargs...) where {Tv,Ti}
+    add!(A.entries, B.entries; kwargs...) 
+end
+function add!(AM::ExtendableSparseMatrix{Tv,Ti}, BM::ExtendableSparseMatrix{Tv,Ti}; kwargs...) where {Tv,Ti}
+    add!(AM, BM.cscmatrix; kwargs...)
+end
+function add!(AM::ExtendableSparseMatrix{Tv,Ti}, cscmat::SparseMatrixCSC{Tv,Ti}; factor = 1, transpose::Bool = false) where {Tv,Ti}
     rows::Array{Ti,1} = rowvals(cscmat)
     valsB::Array{Tv,1} = cscmat.nzval
     ncols::Int = size(cscmat,2)

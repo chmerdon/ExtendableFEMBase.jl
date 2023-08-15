@@ -86,7 +86,6 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
     end
     FES_args = [sol[j].FES for j in ind_args]
     nargs = length(FES_args)
-    FETypes_args = [eltype(F) for F in FES_args]
     xgrid = FES_args[1].xgrid
     EGs = xgrid[UniqueCellGeometries]
     AT = ON_CELLS
@@ -145,14 +144,13 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
         QPinfo.xref = xref
         update_trafo!(L2G, item)
         eval_trafo!(QPinfo.x, L2G, xref)
-
         # evaluate operator
         fill!(input_args,0)
         for id = 1 : nargs
             for j = 1 : size(BE_args[id].cvals, 2)
                 dof_j = itemdofs_args[id][j, item]
                 for d = 1 : op_lengths_args[id]
-                    input_args[d + op_offsets_args[id]] += sol[id][dof_j] * BE_args[id].cvals[d, j, 1]
+                    input_args[d + op_offsets_args[id]] += sol[ind_args[id]][dof_j] * BE_args[id].cvals[d, j, 1]
                 end
             end
         end
