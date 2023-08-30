@@ -244,7 +244,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Adds FEMatrix B to FEMatrix A.
+Adds FEMatrix/ExtendableSparseMatrix/CSCMatrix B to FEMatrix A.
 """
 function add!(A::FEMatrix{Tv,Ti}, B::FEMatrix{Tv,Ti}; kwargs...) where {Tv,Ti}
     add!(A.entries, B.entries; kwargs...) 
@@ -272,6 +272,7 @@ function add!(AM::ExtendableSparseMatrix{Tv,Ti}, cscmat::SparseMatrixCSC{Tv,Ti};
             end
         end
     end
+    flush!(AM)
     return nothing
 end
 
@@ -312,6 +313,7 @@ function addblock!(A::FEMatrixBlock{Tv,Ti}, B::FEMatrixBlock{Tv,Ti}; factor = 1,
             end
         end
     end
+    flush!(AM)
     return nothing
 end
 
@@ -355,6 +357,7 @@ function addblock!(A::FEMatrixBlock{Tv}, cscmat::SparseArrays.SparseMatrixCSC{Tv
             end
         end
     end
+    flush!(AM)
     return nothing
 end
 
@@ -402,6 +405,7 @@ function addblock_matmul!(A::FEMatrixBlock{Tv}, cscmatB::SparseMatrixCSC{Tv,Ti},
             end
         end
     end
+    flush!(AM)
     return nothing
 end
 

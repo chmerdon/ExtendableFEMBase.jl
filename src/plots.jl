@@ -73,7 +73,7 @@ function unicode_gridplot(
     ebfr = extrema(bfaceregions)
     nbfaces = size(bfacenodes,2)
     for j in 1 : nbfaces
-        cscale = (bfaceregions[j] - ebfr[1])/(ebfr[2] - ebfr[1])
+        cscale = (bfaceregions[j] - ebfr[1])/(ebfr[2] - ebfr[1] + 1)
         c = Int.(round.(bface_color .* cscale))
         lines!(canvas, coords[1,bfacenodes[1,j]], coords[2,bfacenodes[1,j]], coords[1,bfacenodes[2,j]], coords[2,bfacenodes[2,j]]; color = c)                 # pixel space
     end

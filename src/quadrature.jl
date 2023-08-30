@@ -673,7 +673,7 @@ function integrate!(
     end
     itemET::ElementGeometries = xItemGeometries[1]
     iEG::Int = 1
-    QP = QPInfos(grid; time = time)
+    QP = QPInfos(grid; time = time, kwargs...)
 
     resultdim::Int = (typeof(integral4items) <: AbstractArray{T,1}) ? length(offset) : size(integral4items,1)
     result::Vector{T} = zeros(T, resultdim)

@@ -200,7 +200,7 @@ function Base.append!(FEF::FEVector{T}, FES::FESpace{Tv,Ti,FEType,APT}; name = "
     if tag !== nothing
         push!(FEF.tags, tag)
     end
-    return nothing
+    return length(FEF)
 end
 
 """
@@ -231,7 +231,7 @@ Adds Array b to FEVectorBlock a.
 """
 function addblock!(a::FEVectorBlock, b::AbstractVector; factor = 1, offset = 0)
     aoffset::Int = a.offset
-    for j = 1 : length(b)
+    for j = 1 : length(a)
         a.entries[aoffset+j] += b[j + offset] * factor
     end
     return nothing

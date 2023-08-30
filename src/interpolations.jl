@@ -50,7 +50,7 @@ function point_evaluation!(target::AbstractArray{T,1}, FES::FESpace{Tv, Ti, FETy
     xCellRegions = FES.xgrid[CellRegions]
     cell::Ti = 0
     result = zeros(T,ncomponents)
-    QP = QPInfos(FES.xgrid; time = time)
+    QP = QPInfos(FES.xgrid; time = time, kwargs...)
     for j in items
         cell = xNodeCells[1,j]
         QP.item = cell
