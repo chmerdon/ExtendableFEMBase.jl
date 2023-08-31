@@ -86,35 +86,73 @@ end
 ````
 function unicode_scalarplot(
     u::FEVectorBlock; 
-    component = 1,
-    resolution = (40,40),
+    components = 1:get_ncomponents(u),
+    abs = false,
+    resolution = (30,30),
     colormap = :viridis,
     title = u.name,
     kwargs...)
 ````
 
-Plots a component of the finite element function in the FEVectorBlock u by
-using a lazy_interpolate! onto a coarse uniform mesh and UnicodePlots.jl heatmap.
+Plots components of the finite element function in the FEVectorBlock u by
+using a lazy_interpolate! onto a coarse uniform mesh and UnicodePlots.jl
+lineplot or heatmap for 1D or 2D, respectively.
+
+In 1D all components all plotted in the same lineplot, while
+in 2D all components are plotted in a separate heatmap.
+
+If abs = true, only the absolute value over the components is plotted.
 """
 function unicode_scalarplot(
         u::FEVectorBlock; 
-        component = 1,
-        resolution = (40,40),
-        colormap = :viridis,
+        components = 1:get_ncomponents(u),
+        abs = false,
+        resolution = (30,30),
+        colormap = :viridis,        # only used for 2D plots
         title = u.name,
         kwargs...)
 
     xgrid = u.FES.xgrid
     coords = xgrid[Coordinates]
-    ex = extrema(view(coords,1,:))
-    ey = extrema(view(coords,2,:))
+    dim = size(coords, 1)
 
-	X = LinRange(0,1,resolution[1])
-	Y = LinRange(0,1,resolution[2])
-	xgrid_plot = simplexgrid(X,Y)
+    if dim == 1
+        ex = extrema(view(coords,1,:))
+        X = LinRange(ex[1],ex[2],resolution[1])
+        xgrid_plot = simplexgrid(X)
+    elseif dim == 2
+        ex = extrema(view(coords,1,:))
+        ey = extrema(view(coords,2,:))
 
-    I = FEVector(FESpace{H1P1{1}}(xgrid_plot))
-    lazy_interpolate!(I[1], [u], [(1, IdentityComponent{component})])
-    
-    return heatmap(reshape(I.entries, (resolution[1], resolution[2]))', xfact=(ex[2]-ex[1])/(resolution[1]-1), yfact=(ey[2]-ey[1])/(resolution[2]-1), xoffset=ex[1], yoffset=ey[1], title = title, colormap=colormap, kwargs...)
+        X = LinRange(ex[1],ex[2],resolution[1])
+        Y = LinRange(ey[1],ey[2],resolution[2])
+        xgrid_plot = simplexgrid(X,Y)
+    else
+        @warn "sorry, no unicode_scalarplat available for dimension $dim" 
+        return nothing
+    end
+
+    I = [FEVector(FESpace{H1P1{1}}(xgrid_plot)) for c in components]
+    if abs
+        lazy_interpolate!(I[1][1], [u], [(1, Identity)]; postprocess = (result, input, qpinfo) -> (result[1] = sqrt(sum(view(input,components).^2))), not_in_domain_value = 0)
+    else
+        for c = 1 : length(components)
+            lazy_interpolate!(I[c][1], [u], [(1, IdentityComponent{components[c]})]; postprocess = standard_kernel, not_in_domain_value = 0)
+        end
+    end
+
+    if dim == 1
+        plt = nothing
+        for c = 1 : length(components)
+            if c == 1
+                plt = lineplot(X, view(I[c][1]), name = title * "[$(components[c])]")
+            else
+                lineplot!(plt, X, view(I[c][1]), name = title * "[$(components[c])]")
+            end
+        end
+        return plt
+    elseif dim == 2
+        plts = [heatmap(reshape(view(I[c][1]), (resolution[1], resolution[2]))', xfact=(ex[2]-ex[1])/(resolution[1]-1), yfact=(ey[2]-ey[1])/(resolution[2]-1), xoffset=ex[1], yoffset=ey[1], title = title * "[$(components[c])]", colormap=colormap) for c = 1 : length(components)]
+        return UnicodePlots.gridplot(map(i -> plts[i], 1:length(components)); layout=(1, nothing))        
+    end
 end

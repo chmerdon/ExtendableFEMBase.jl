@@ -11,6 +11,7 @@ using ForwardDiff
 using DocStringExtensions
 using Printf
 using UnicodePlots
+using Term
 
 
 include("qpinfos.jl")
