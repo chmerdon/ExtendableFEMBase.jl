@@ -1,6 +1,25 @@
 
 # Finite Element Interpolations
 
+## Source functions and QPInfo
+
+The functions that can be interpolated with the methods below are expected to have a certain interface, i.e.:
+```julia
+function f!(result, qpinfo) end
+```
+The qpinfo argument communicates vast information of the current quadrature point:
+
+| qpinfo child       | Type               | Description         |
+| :----------------  | :----------------  |  :---------------- |
+| qpinfo.x           | Vector{Real}       | space coordinates of quadrature point |
+| qpinfo.time        | Real               | current time |
+| qpinfo.item        | Integer            | current item that contains qpinfo.x |
+| qpinfo.region      | Integer            | region number of item |
+| qpinfo.xref        | Vector{Real}       | reference coordinates within item of qpinfo.x |
+| qpinfo.volume      | Real               | volume of item |
+| qpinfo.params      | Vector{Any}        | parameters that can be transfered via keyword arguments |
+
+
 ## Standard Interpolations
 
 Each finite element has its standard interpolator that can be applied to some user-defined DataFunction. Instead of interpolating on the full cells, the interpolation can be restricted to faces or edges. 

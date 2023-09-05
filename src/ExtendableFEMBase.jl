@@ -100,25 +100,25 @@ export AccumulatingVector
 #
 # Print default dict for solver parameters into docstrings
 #
-function _myprint(dict::Dict{Symbol,Tuple{Any,String}})
-    lines_out=IOBuffer()
-    for (k,v) in dict
-        if typeof(v[1]) <: String
-            println(lines_out,"  - $(k): $(v[2]). Default: ''$(v[1])''\n")
-        else
-            println(lines_out,"  - $(k): $(v[2]). Default: $(v[1])\n")
-        end
-    end
-    String(take!(lines_out))
+function _myprint(dict::Dict{Symbol, Tuple{Any, String}})
+	lines_out = IOBuffer()
+	for (k, v) in dict
+		if typeof(v[1]) <: String
+			println(lines_out, "  - $(k): $(v[2]). Default: ''$(v[1])''\n")
+		else
+			println(lines_out, "  - $(k): $(v[2]). Default: $(v[1])\n")
+		end
+	end
+	String(take!(lines_out))
 end
 #
 # Update solver params from dict
 #
-function _update_params!(parameters,kwargs)
-    for (k,v) in kwargs
-        parameters[Symbol(k)] = v
-    end
-    return nothing
+function _update_params!(parameters, kwargs)
+	for (k, v) in kwargs
+		parameters[Symbol(k)] = v
+	end
+	return nothing
 end
 
 include("segment_integrator.jl")

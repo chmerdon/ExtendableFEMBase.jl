@@ -18,7 +18,7 @@ $(TYPEDEF)
 
 identity operator: evaluates only the c-th component of the finite element function.
 """
-abstract type IdentityComponent{c} <: StandardFunctionOperator where {c<:Int} end # 1*v_h(c)
+abstract type IdentityComponent{c} <: StandardFunctionOperator where {c <: Int} end # 1*v_h(c)
 """
 $(TYPEDEF)
 
@@ -154,7 +154,7 @@ DefaultName4Operator(::Type{Trace}) = "tr"
 DefaultName4Operator(::Type{Deviator}) = "dev"
 
 function Base.show(io::Core.IO, FO::Type{<:AbstractFunctionOperator})
-    print(io,"$(DefaultName4Operator(FO))")
+	print(io, "$(DefaultName4Operator(FO))")
 end
 
 # length for operator result
@@ -162,16 +162,16 @@ Length4Operator(::Type{<:Identity}, xdim::Int, ncomponents::Int) = ncomponents
 Length4Operator(::Type{<:IdentityComponent}, xdim::Int, ncomponents::Int) = 1
 Length4Operator(::Type{<:NormalFlux}, xdim::Int, ncomponents::Int) = 1
 Length4Operator(::Type{<:TangentFlux}, xdim::Int, ncomponents::Int) = 1
-Length4Operator(::Type{<:Divergence}, xdim::Int, ncomponents::Int) = Int(ceil(ncomponents/xdim))
+Length4Operator(::Type{<:Divergence}, xdim::Int, ncomponents::Int) = Int(ceil(ncomponents / xdim))
 Length4Operator(::Type{Trace}, xdim::Int, ncomponents::Int) = ceil(sqrt(ncomponents))
-Length4Operator(::Type{CurlScalar}, xdim::Int, ncomponents::Int) = ((xdim == 2) ? xdim*ncomponents : Int(ceil(xdim*(ncomponents/xdim))))
+Length4Operator(::Type{CurlScalar}, xdim::Int, ncomponents::Int) = ((xdim == 2) ? xdim * ncomponents : Int(ceil(xdim * (ncomponents / xdim))))
 Length4Operator(::Type{Curl2D}, xdim::Int, ncomponents::Int) = 1
 Length4Operator(::Type{Curl3D}, xdim::Int, ncomponents::Int) = 3
-Length4Operator(::Type{<:Gradient}, xdim::Int, ncomponents::Int) = xdim*ncomponents
+Length4Operator(::Type{<:Gradient}, xdim::Int, ncomponents::Int) = xdim * ncomponents
 Length4Operator(::Type{TangentialGradient}, xdim::Int, ncomponents::Int) = 1
-Length4Operator(::Type{<:SymmetricGradient}, xdim::Int, ncomponents::Int) = ((xdim == 2) ? 3 : 6)*Int(ceil(ncomponents/xdim))
-Length4Operator(::Type{<:Hessian}, xdim::Int, ncomponents::Int) = xdim*xdim*ncomponents
-Length4Operator(::Type{<:SymmetricHessian}, xdim::Int, ncomponents::Int) = ((xdim == 2) ? 3 : 6)*ncomponents
+Length4Operator(::Type{<:SymmetricGradient}, xdim::Int, ncomponents::Int) = ((xdim == 2) ? 3 : 6) * Int(ceil(ncomponents / xdim))
+Length4Operator(::Type{<:Hessian}, xdim::Int, ncomponents::Int) = xdim * xdim * ncomponents
+Length4Operator(::Type{<:SymmetricHessian}, xdim::Int, ncomponents::Int) = ((xdim == 2) ? 3 : 6) * ncomponents
 Length4Operator(::Type{<:Laplacian}, xdim::Int, ncomponents::Int) = ncomponents
 
 
@@ -187,10 +187,10 @@ abstract type OperatorPair{<:StandardFunctionOperator,<:StandardFunctionOperator
 
 allows to evaluate two operators in place of one, e.g. OperatorPair{Identity,Gradient}.
 """
-abstract type OperatorPair{OP1 <:StandardFunctionOperator,OP2 <: StandardFunctionOperator} <: StandardFunctionOperator end
+abstract type OperatorPair{OP1 <: StandardFunctionOperator, OP2 <: StandardFunctionOperator} <: StandardFunctionOperator end
 Length4Operator(OP::Type{<:OperatorPair}, xdim::Int, ncomponents::Int) = Length4Operator(OP.parameters[1], xdim, ncomponents) + Length4Operator(OP.parameters[2], xdim, ncomponents)
-QuadratureOrderShift4Operator(OP::Type{<:OperatorPair}) = max(QuadratureOrderShift4Operator(OP.parameters[1]),QuadratureOrderShift4Operator(OP.parameters[2]))
-DefaultName4Operator(OP::Type{<:OperatorPair}) = "(" * DefaultName4Operator(OP.parameters[1]) * "," *  DefaultName4Operator(OP.parameters[2]) * ")"
+QuadratureOrderShift4Operator(OP::Type{<:OperatorPair}) = max(QuadratureOrderShift4Operator(OP.parameters[1]), QuadratureOrderShift4Operator(OP.parameters[2]))
+DefaultName4Operator(OP::Type{<:OperatorPair}) = "(" * DefaultName4Operator(OP.parameters[1]) * "," * DefaultName4Operator(OP.parameters[2]) * ")"
 
 
 """
@@ -200,7 +200,7 @@ abstract type OperatorTriple{<:StandardFunctionOperator,<:StandardFunctionOperat
 
 allows to evaluate three operators in place of one, e.g. OperatorTriple{Identity,Gradient,Hessian}.
 """
-abstract type OperatorTriple{OP1 <:StandardFunctionOperator,OP2 <: StandardFunctionOperator,OP3 <: StandardFunctionOperator} <: StandardFunctionOperator end
-Length4Operator(OP::Type{<:OperatorTriple}, xdim::Int, ncomponents::Int) = Length4Operator(OP.parameters[1], xdim, ncomponents) + Length4Operator(OP.parameters[2], xdim, ncomponents) +  + Length4Operator(OP.parameters[3], xdim, ncomponents)
-QuadratureOrderShift4Operator(OP::Type{<:OperatorTriple}) = max(max(QuadratureOrderShift4Operator(OP.parameters[1]),QuadratureOrderShift4Operator(OP.parameters[2])),QuadratureOrderShift4Operator(OP.parameters[3]))
-DefaultName4Operator(OP::Type{<:OperatorTriple}) = "(" * DefaultName4Operator(OP.parameters[1]) * "," *  DefaultName4Operator(OP.parameters[2]) * "," *  DefaultName4Operator(OP.parameters[3]) * ")"
+abstract type OperatorTriple{OP1 <: StandardFunctionOperator, OP2 <: StandardFunctionOperator, OP3 <: StandardFunctionOperator} <: StandardFunctionOperator end
+Length4Operator(OP::Type{<:OperatorTriple}, xdim::Int, ncomponents::Int) = Length4Operator(OP.parameters[1], xdim, ncomponents) + Length4Operator(OP.parameters[2], xdim, ncomponents) + +Length4Operator(OP.parameters[3], xdim, ncomponents)
+QuadratureOrderShift4Operator(OP::Type{<:OperatorTriple}) = max(max(QuadratureOrderShift4Operator(OP.parameters[1]), QuadratureOrderShift4Operator(OP.parameters[2])), QuadratureOrderShift4Operator(OP.parameters[3]))
+DefaultName4Operator(OP::Type{<:OperatorTriple}) = "(" * DefaultName4Operator(OP.parameters[1]) * "," * DefaultName4Operator(OP.parameters[2]) * "," * DefaultName4Operator(OP.parameters[3]) * ")"
