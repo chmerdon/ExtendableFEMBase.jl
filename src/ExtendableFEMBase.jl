@@ -58,7 +58,7 @@ export HDIVRT0, HDIVBDM1, HDIVRT1, HDIVBDM2
 export HDIVRTkENRICH
 
 export AbstractHcurlFiniteElement
-export HCURLN0
+export HCURLN0, HCURLN1
 
 export get_assemblytype
 export get_polynomialorder, get_ndofs, get_ndofs_all

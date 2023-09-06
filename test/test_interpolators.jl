@@ -13,6 +13,7 @@ function run_interpolator_tests()
 
     TestCatalog2D = [
         HCURLN0{2},
+        HCURLN1{2},
         HDIVRT0{2},
         HDIVBDM1{2},
         HDIVRT1{2},
@@ -32,7 +33,7 @@ function run_interpolator_tests()
         H1Pk{2,2,4},
         H1Pk{2,2,5}
         ]
-    ExpectedOrders2D = [0,0,1,1,2,0,1,1,1,1,1,1,2,2,2,3,3,4,5]
+    ExpectedOrders2D = [0,1,0,1,1,2,0,1,1,1,1,1,1,2,2,2,3,3,4,5]
 
     TestCatalog3D = [
         HCURLN0{3},

@@ -238,5 +238,6 @@ Its standard interpolation of a given functions preserves its tangential face/ed
 
 ```@docs
 HCURLN0
+HCURLN1
 ```
 

@@ -5,7 +5,8 @@ abstract type L2P0{ncomponents} <: AbstractH1FiniteElement where {ncomponents<:I
 
 Piecewise constant polynomials on cells.
 
-allowed on every ElementGeometry
+allowed ElementGeometries:
+- any
 """
 abstract type L2P0{ncomponents} <: AbstractH1FiniteElement where {ncomponents <: Int} end
 

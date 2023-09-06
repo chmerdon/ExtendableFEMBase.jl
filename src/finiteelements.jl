@@ -308,6 +308,7 @@ include("fedefs/h1_pk.jl");
 
 # Hcurl-conforming elements
 include("fedefs/hcurl_n0.jl");
+include("fedefs/hcurl_n1.jl");
 
 
 
