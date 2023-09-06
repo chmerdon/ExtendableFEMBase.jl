@@ -165,9 +165,9 @@ end
 
 end #module</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><p><strong>Default output:</strong></p><pre><code class="nohighlight hljs">julia&gt; Example200_LowLevelPoisson.main()
 Assembling...
- 11.142022 seconds (13.73 M allocations: 902.759 MiB, 5.72% gc time, 99.94% compilation time)
+ 14.875867 seconds (13.72 M allocations: 901.586 MiB, 5.07% gc time, 99.95% compilation time)
 Solving linear system...
-  0.091930 seconds (39.70 k allocations: 2.426 MiB, 99.56% compilation time)
+  0.149206 seconds (39.81 k allocations: 2.427 MiB, 19.91% gc time, 99.70% compilation time)
 
 LEVEL = 1, ndofs = 25
 
@@ -195,16 +195,16 @@ LEVEL = 1, ndofs = 25
     │⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣸│ 
     └────────────────────────────────────────┘ 
 Assembling...
-  0.000238 seconds (200 allocations: 28.383 KiB)
+  0.000319 seconds (200 allocations: 28.383 KiB)
 Solving linear system...
-  0.000094 seconds (54 allocations: 16.734 KiB)
+  0.000125 seconds (54 allocations: 16.734 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 1.56e⁻⁵                                  
-   FaceNodes ┤ 7.7801e⁻⁵                                
-    CellDofs ┤■■■■■ 0.00332723                          
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0188652   
-       Solve ┤ 0.000109701                              
+        Grid ┤ 1.6099e⁻⁵                                
+   FaceNodes ┤ 0.000165299                              
+    CellDofs ┤■■■■■ 0.00443527                          
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0247519   
+       Solve ┤ 0.000139699                              
              └                                        ┘ 
 
 LEVEL = 2, ndofs = 81
@@ -233,16 +233,16 @@ LEVEL = 2, ndofs = 81
     │⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣀⣇⣔⣁⣀⣀⣀⣀⣀⣀⣸│ 
     └────────────────────────────────────────┘ 
 Assembling...
-  0.000295 seconds (200 allocations: 55.195 KiB)
+  0.000392 seconds (200 allocations: 55.195 KiB)
 Solving linear system...
-  0.000134 seconds (58 allocations: 58.812 KiB)
+  0.000146 seconds (58 allocations: 58.812 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤■ 1.64e⁻⁵                                 
-   FaceNodes ┤■■■■■■■ 8.5801e⁻⁵                         
-    CellDofs ┤■■■■ 4.2501e⁻⁵                            
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.000315403   
-       Solve ┤■■■■■■■■■■■■ 0.000139101                  
+        Grid ┤■■ 2.92e⁻⁵                                
+   FaceNodes ┤■■■■■■■ 0.000107797                       
+    CellDofs ┤■■■■ 5.5299e⁻⁵                            
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.00041439   
+       Solve ┤■■■■■■■■■■ 0.000153496                    
              └                                        ┘ 
 
 LEVEL = 3, ndofs = 289
@@ -271,89 +271,89 @@ LEVEL = 3, ndofs = 289
     │⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣀⣇⣔⣁⣀⣸│ 
     └────────────────────────────────────────┘ 
 Assembling...
-  0.000557 seconds (200 allocations: 120.289 KiB)
+  0.000633 seconds (200 allocations: 120.289 KiB)
 Solving linear system...
-  0.000329 seconds (59 allocations: 217.562 KiB)
+  0.000335 seconds (59 allocations: 217.562 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤■ 1.4901e⁻⁵                               
-   FaceNodes ┤■■■■ 7.64e⁻⁵                              
-    CellDofs ┤■■■ 5.8001e⁻⁵                             
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.000566106   
-       Solve ┤■■■■■■■■■■■■■■■■ 0.000334303              
+        Grid ┤■ 1.5e⁻⁵                                  
+   FaceNodes ┤■■■ 7.1598e⁻⁵                             
+    CellDofs ┤■■ 5.9398e⁻⁵                              
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.000643284   
+       Solve ┤■■■■■■■■■■■■■■ 0.000343291                
              └                                        ┘ 
 
 LEVEL = 4, ndofs = 1089
 
 Assembling...
-  0.001744 seconds (203 allocations: 422.586 KiB)
+  0.002133 seconds (203 allocations: 422.586 KiB)
 Solving linear system...
-  0.001159 seconds (63 allocations: 881.516 KiB)
+  0.001395 seconds (63 allocations: 881.516 KiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤■ 3.37e⁻⁵                                 
-   FaceNodes ┤■■■ 0.000173002                           
-    CellDofs ┤■■■ 0.000165202                           
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.00175512   
-       Solve ┤■■■■■■■■■■■■■■■■■■■ 0.00116741            
+        Grid ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.104953   
+   FaceNodes ┤ 0.000278293                              
+    CellDofs ┤ 0.000188595                              
+    Assembly ┤■ 0.00215505                              
+       Solve ┤ 0.00140517                               
              └                                        ┘ 
 
 LEVEL = 5, ndofs = 4225
 
 Assembling...
-  0.006530 seconds (208 allocations: 1.187 MiB)
+  0.008347 seconds (208 allocations: 1.187 MiB)
 Solving linear system...
-  0.005205 seconds (65 allocations: 3.642 MiB)
+  0.006841 seconds (65 allocations: 3.642 MiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 9.5001e⁻⁵                                
-   FaceNodes ┤■■■ 0.000601506                           
-    CellDofs ┤■■■ 0.000597906                           
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.00654267   
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■ 0.00521795         
+        Grid ┤ 0.000122597                              
+   FaceNodes ┤■■ 0.000707083                            
+    CellDofs ┤■■ 0.000637384                            
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.00836129   
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■ 0.00685673        
              └                                        ┘ 
 
 LEVEL = 6, ndofs = 16641
 
 Assembling...
-  0.028126 seconds (213 allocations: 6.522 MiB)
+  0.036909 seconds (213 allocations: 6.522 MiB)
 Solving linear system...
-  0.025344 seconds (69 allocations: 15.576 MiB)
+  0.036381 seconds (69 allocations: 15.576 MiB)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.000345703                              
-   FaceNodes ┤■■ 0.00222542                             
-    CellDofs ┤■■■ 0.00246082                            
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0281383   
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0253624      
+        Grid ┤ 0.000376191                              
+   FaceNodes ┤■■ 0.00283853                             
+    CellDofs ┤■■ 0.00304003                             
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.036937   
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.0364203  
              └                                        ┘ 
 
 LEVEL = 7, ndofs = 66049
 
 Assembling...
-  0.126702 seconds (234 allocations: 20.700 MiB, 12.86% gc time)
+  0.156893 seconds (226 allocations: 20.700 MiB, 12.42% gc time)
 Solving linear system...
-  0.116711 seconds (69 allocations: 66.420 MiB, 10.99% gc time)
+  0.171860 seconds (69 allocations: 66.420 MiB, 10.72% gc time)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.00121071                               
-   FaceNodes ┤■■ 0.0097789                              
-    CellDofs ┤■■ 0.0099324                              
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.126732   
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.116751     
+        Grid ┤ 0.00177116                               
+   FaceNodes ┤■■ 0.0121108                              
+    CellDofs ┤■■ 0.0108121                              
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.15693       
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.171905   
              └                                        ┘ 
 
 LEVEL = 8, ndofs = 263169
 
 Assembling...
-  0.433605 seconds (214 allocations: 82.609 MiB, 0.95% gc time)
+  0.526833 seconds (214 allocations: 82.609 MiB, 1.39% gc time)
 Solving linear system...
-  0.506823 seconds (69 allocations: 285.247 MiB, 0.82% gc time)
+  0.803630 seconds (69 allocations: 285.247 MiB, 0.87% gc time)
                               Runtimes                  
              ┌                                        ┐ 
-        Grid ┤ 0.00490195                               
-   FaceNodes ┤■■■ 0.0439918                             
-    CellDofs ┤■■ 0.0379102                              
-    Assembly ┤■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.433638       
-       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.506866   
-             └                                        ┘ </code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../examples_intro/">« About the examples</a><a class="docs-footer-nextpage" href="../Example210_LowLevelNavierStokes/">210 : Navier-Stokes Problem »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Tuesday 5 September 2023 16:02">Tuesday 5 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+        Grid ┤ 0.00623085                               
+   FaceNodes ┤■■ 0.0529161                              
+    CellDofs ┤■ 0.038614                                
+    Assembly ┤■■■■■■■■■■■■■■■■■■■■ 0.526866             
+       Solve ┤■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 0.803676   
+             └                                        ┘ </code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../examples_intro/">« About the examples</a><a class="docs-footer-nextpage" href="../Example210_LowLevelNavierStokes/">210 : Navier-Stokes Problem »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Wednesday 6 September 2023 10:07">Wednesday 6 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
