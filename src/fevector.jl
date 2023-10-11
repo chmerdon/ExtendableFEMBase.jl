@@ -114,10 +114,6 @@ Custom `length` function for `FEVectorBlock` that gives the coressponding number
 """
 Base.length(FEB::FEVectorBlock) = FEB.last_index - FEB.offset
 
-function FEVector(name::Union{String, Array{String, 1}}, FES)
-	return FEVector(FES; name = name)
-end
-
 """
 ````
 FEVector{T}(FES; name = nothing, tags = nothing, kwargs...) where T <: Real
@@ -138,13 +134,17 @@ function FEVector(FES::Array{<:FESpace{Tv, Ti}, 1}; kwargs...) where {Tv, Ti}
 end
 
 # main constructor
-function FEVector{T}(FES::Array{<:FESpace{Tv, Ti}, 1}; name = nothing, tags = [], kwargs...) where {T, Tv, Ti}
+function FEVector{T}(FES::Array{<:FESpace{Tv, Ti}, 1}; entries = nothing, name = nothing, tags = [], kwargs...) where {T, Tv, Ti}
 	if name === nothing
-		names = ["#$j" for j in 1:length(FES)]
+		if length(tags) >= length(FES)
+			names = ["$(tags[j])" for j in 1:length(FES)]
+		else
+			names = ["#$j" for j in 1:length(FES)]
+		end
 	elseif typeof(name) == String
 		names = Array{String, 1}(undef, length(FES))
 		for j ∈ 1:length(FES)
-			names[j] = name * " [#$j]"
+			names[j] = name * (length(FES) == 1 ? "" : " [#$j]")
 		end
 	else
 		names = name
@@ -155,7 +155,9 @@ function FEVector{T}(FES::Array{<:FESpace{Tv, Ti}, 1}; name = nothing, tags = []
 	for j ∈ 1:length(FES)
 		ndofs += FES[j].ndofs
 	end
-	entries = zeros(T, ndofs)
+	if entries === nothing
+		entries = zeros(T, ndofs)
+	end
 	Blocks = Array{FEVectorBlock{T, Tv, Ti}, 1}(undef, length(FES))
 	offset = 0
 	for j ∈ 1:length(FES)

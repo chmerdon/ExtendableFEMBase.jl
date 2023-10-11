@@ -157,7 +157,7 @@ function ExtendableFEMBase.get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{2, o
 	end
 end
 
-function ExtendableFEMBase.get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{2, order, true}}, EG::Type{<:Tetrahedron3D}) where {order}
+function ExtendableFEMBase.get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{3, order, true}}, EG::Type{<:Tetrahedron3D}) where {order}
 	@assert order in 1:3
 	refbasisRT0 = zeros(Real, 4, 3)
 	refbasisRT1 = zeros(Real, 3, 3) # only bubbles
