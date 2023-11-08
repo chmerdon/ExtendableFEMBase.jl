@@ -791,7 +791,7 @@ function continuify(
 		end
 	end
 	FEScont = FESpace{FETypeC}(xgrid; broken = broken)
-	target = FEVector(name, FEScont)
+	target = FEVector(FEScont)
 	xItemDofsC::DofMapTypes{Ti} = target[1].FES[CellDofs]
 	target_offset::Int = broken ? Int(get_ndofs(ON_CELLS, FETypeC, EG[1]) / cvals_resultdim) : target[1].FES.coffset
 
