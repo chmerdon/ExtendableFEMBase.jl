@@ -16,7 +16,7 @@ function test_pointevaluation()
     ## and can be evaluated correctly within the cell
     xgrid = grid_triangle([-1.0 0.0; 1.0 0.0; 0.0 1.0]')
     FES = FESpace{H1P1{1}}(xgrid)
-    Iu = FEVector("Iu",FES)
+    Iu = FEVector(FES)
     interpolate!(Iu[1], (result,qpinfo) -> (result[1] = qpinfo.x[1] + qpinfo.x[2];))
     PE = PointEvaluator([(1, Identity)])
     initialize!(PE, Iu)
