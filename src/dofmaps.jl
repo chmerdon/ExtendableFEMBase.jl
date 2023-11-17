@@ -387,7 +387,7 @@ function init_broken_dofmap!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Union{Type{B
 	dofmap4cellEG::Array{ParsedDofMap, 1} = Array{ParsedDofMap, 1}(undef, length(cellEG))
 	dofmap4EG::Array{ParsedDofMap, 1} = Array{ParsedDofMap, 1}(undef, length(EG))
 	for j ∈ 1:length(cellEG)
-		pattern = get_dofmap_pattern(FEType, DM, cellEG[j])
+		pattern = get_dofmap_pattern(FEType, CellDofs, cellEG[j])
 		dofmap4cellEG[j] = ParsedDofMap(pattern, ncomponents, cellEG[j])
 	end
 	for j ∈ 1:length(EG)

@@ -125,7 +125,7 @@ include("segment_integrator.jl")
 export SegmentIntegrator, initialize!, integrate_segment!
 
 include("point_evaluator.jl")
-export PointEvaluator, evaluate!, eval_func
+export PointEvaluator, evaluate!, evaluate_bary!, eval_func
 
 include("lazy_interpolate.jl")
 export lazy_interpolate!

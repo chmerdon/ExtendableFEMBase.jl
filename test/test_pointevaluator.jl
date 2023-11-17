@@ -6,8 +6,7 @@ function run_pointevaluator_tests()
         println("======================")
         println("Testing PointEvaluator")
         println("======================")
-        error = test_pointevaluation()
-        @test error < 1e-15
+        test_pointevaluation()
     end
 end
 
@@ -25,6 +24,9 @@ function test_pointevaluation()
     x = [0.15234,0.2234] # point inside the cell
     xref = [0.0,0.0]
     cell = gFindLocal!(xref, CF, x; icellstart = 1)
-    evaluate!(eval, PE, xref, cell)
-    return abs(eval[1] - sum(x))
+    evaluate_bary!(eval, PE, xref, cell)
+    @test abs(eval[1] - sum(x)) < 1e-15
+
+    evaluate!(eval, PE, x)
+    @test abs(eval[1] - sum(x)) < 1e-15
 end

@@ -4,8 +4,11 @@ mutable struct PointEvaluator{Tv <: Real, UT, KFT <: Function}
 	kernel::KFT
 	BE_args::Any
 	L2G::Any
+	CF::Any
 	eval_selector::Any
+	evaluator_bary::Any
 	evaluator::Any
+	xref::Vector{Tv}
 	parameters::Dict{Symbol, Any}
 end
 
@@ -47,7 +50,7 @@ function PointEvaluator(kernel, u_args, ops_args, sol = nothing; Tv = Float64, k
 	parameters = Dict{Symbol, Any}(k => v[1] for (k, v) in default_peval_kwargs())
 	_update_params!(parameters, kwargs)
 	@assert length(u_args) == length(ops_args)
-	PE = PointEvaluator{Tv, typeof(u_args[1]), typeof(kernel)}(u_args, ops_args, kernel, nothing, nothing, nothing, nothing, parameters)
+	PE = PointEvaluator{Tv, typeof(u_args[1]), typeof(kernel)}(u_args, ops_args, kernel, nothing, nothing, nothing, nothing, nothing, nothing, zeros(Tv, 2), parameters)
 	if sol !== nothing
 		initialize!(PE, sol)
 	end
@@ -87,6 +90,7 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
 	FES_args = [sol[j].FES for j in ind_args]
 	nargs = length(FES_args)
 	xgrid = FES_args[1].xgrid
+	Ti = eltype(xgrid[CellNodes])
 	EGs = xgrid[UniqueCellGeometries]
 	AT = ON_CELLS
 	gridAT = ExtendableFEMBase.EffAT4AssemblyType(get_AT(FES_args[1]), AT)
@@ -94,6 +98,8 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
 	itemregions = xgrid[CellRegions]
 	itemgeometries = xgrid[CellGeometries]
 
+	O.CF = CellFinder(xgrid)
+	O.xref = zeros(T, size(xgrid[Coordinates],1))
 
 	O.BE_args = Array{Array{<:FEEvaluator, 1}, 1}([])
 	O.L2G = []
@@ -115,14 +121,14 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
 	input_args = zeros(T, op_offsets_args[end])
 
 	FEATs_args = [ExtendableFEMBase.EffAT4AssemblyType(get_AT(FES_args[j]), AT) for j ∈ 1:nargs]
-	itemdofs_args::Array{Union{Adjacency{Int32}, SerialVariableTargetAdjacency{Int32}}, 1} = [FES_args[j][Dofmap4AssemblyType(FEATs_args[j])] for j ∈ 1:nargs]
+	itemdofs_args::Array{Union{Adjacency{Ti}, SerialVariableTargetAdjacency{Ti}}, 1} = [FES_args[j][Dofmap4AssemblyType(FEATs_args[j])] for j ∈ 1:nargs]
 	kernel = O.kernel
 
 	function eval_selector(item)
 		return findfirst(==(itemgeometries[item]), EGs)
 	end
 
-	function _evaluate!(
+	function _evaluate_bary!(
 		result,
 		BE_args::Array{<:FEEvaluator, 1},
 		L2G::L2GTransformer,
@@ -160,7 +166,25 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
 
 		return nothing
 	end
+
+	## initialize cell finder
+	CF = CellFinder(xgrid)
+	xref = zeros(T, size(xgrid[Coordinates],1))
+	function _evaluate!(
+		result,
+		BE_args::Array{<:FEEvaluator, 1},
+		L2G::L2GTransformer,
+		x
+	)
+
+
+		# evaluate in barycentric coordinates
+		_evaluate_bary!(result, BE_args, L2G, xref, item)
+
+		return nothing
+	end
 	O.evaluator = _evaluate!
+	O.evaluator_bary = _evaluate_bary!
 	O.eval_selector = eval_selector
 
 	return nothing
@@ -169,7 +193,7 @@ end
 
 """
 ````
-function evaluate!(
+function evaluate_bary!(
 	result,
 	PE::PointEvaluator,
 	xref, 
@@ -179,7 +203,7 @@ function evaluate!(
 
 Evaluates the PointEvaluator at the specified reference coordinates in the cell with the specified item number.
 """
-function evaluate!(
+function evaluate_bary!(
 	result,
 	PE::PointEvaluator,
 	xref,
@@ -190,19 +214,58 @@ function evaluate!(
 	j = PE.eval_selector(item)
 
 	## evaluate
-	PE.evaluator(result, PE.BE_args[j], PE.L2G[j], xref, item)
+	PE.evaluator_bary(result, PE.BE_args[j], PE.L2G[j], xref, item)
+end
+
+"""
+````
+function evaluate!(
+	result,
+	PE::PointEvaluator,
+	x
+	)
+````
+
+Evaluates the PointEvaluator at the specified coordinates x.
+(To do so it internally calls CellFinder to find the cell and the barycentric
+coordinates of x and calls evaluate_bary!.)
+"""
+function evaluate!(
+	result,
+	PE::PointEvaluator,
+	x
+)
+
+	# find cell
+	item = gFindLocal!(PE.xref, PE.CF, x)
+
+	## find cell geometry id
+	j = PE.eval_selector(item)
+
+	## evaluate
+	PE.evaluator_bary(result, PE.BE_args[j], PE.L2G[j], PE.xref, item)
 end
 
 
 
 """
 ````
+function eval_func_bary(PE::PointEvaluator)
+````
+
+Yields the function (result, xref, item) -> evaluate_bary!(result,PE,xref,item).
+"""
+function eval_func_bary(PE::PointEvaluator)
+	return (result, xref, item) -> evaluate_bary!(result, PE, xref, item)
+end
+
+"""
+````
 function eval_func(PE::PointEvaluator)
 ````
 
-Yields the function (result, xref, item) -> evaluate!(result,PE,xref,item)
-that can be, e.g., used in a vectorplot.
+Yields the function (result, x) -> evaluate!(result,PE,x).
 """
 function eval_func(PE::PointEvaluator)
-	return (result, xref, item) -> evaluate!(result, PE, xref, item)
+	return (result, x) -> evaluate!(result, PE, x)
 end
