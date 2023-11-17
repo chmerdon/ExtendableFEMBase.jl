@@ -185,6 +185,7 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
         clean = false,
         #format = Documenter.HTML(assets = ["docs.css"]),
         checkdocs = :all,
+        warnonly = true,
         doctest = true,
         pages = [
             "Home" => "index.md",

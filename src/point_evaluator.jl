@@ -233,11 +233,12 @@ coordinates of x and calls evaluate_bary!.)
 function evaluate!(
 	result,
 	PE::PointEvaluator,
-	x
+	x;
+	kwargs...
 )
 
 	# find cell
-	item = gFindLocal!(PE.xref, PE.CF, x)
+	item = gFindLocal!(PE.xref, PE.CF, x; kwargs...)
 
 	## find cell geometry id
 	j = PE.eval_selector(item)
@@ -266,6 +267,6 @@ function eval_func(PE::PointEvaluator)
 
 Yields the function (result, x) -> evaluate!(result,PE,x).
 """
-function eval_func(PE::PointEvaluator)
-	return (result, x) -> evaluate!(result, PE, x)
+function eval_func(PE::PointEvaluator; kwargs...)
+	return (result, x) -> evaluate!(result, PE, x; kwargs...)
 end
