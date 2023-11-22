@@ -515,13 +515,13 @@ function init_broken_dofmap!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Union{Type{B
 									local_dofs[nldofs] = xCellDofs[celldofoffset+(local_nodes[k]-1)*q+dof, cell]
 								end
 							end
-							celldofoffset += q * nfacenodes
+							celldofoffset += q * ncellnodes
 						elseif cpattern[s].type <: DofTypeInterior && cpattern[s].each_component
 							for dof ∈ 1:q
 								nldofs += 1
 								local_dofs[nldofs] = xCellDofs[celldofoffset+(local_face-1)*q+dof, cell]
 							end
-							celldofoffset += q
+							celldofoffset += q * ncellfaces
 						elseif cpattern[s].type <: DofTypeEdge && cpattern[s].each_component
 							for k ∈ 1:nfaceedges
 								for dof ∈ 1:q
@@ -529,12 +529,12 @@ function init_broken_dofmap!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Union{Type{B
 									local_dofs[nldofs] = xCellDofs[celldofoffset+(local_edges[k]-1)*q+dof, cell]
 								end
 							end
-							celldofoffset += q * nfaceedges
+							celldofoffset += q * ncelledges
 						end
 					end
 					# increase celldofoffset for interior component dofs in cell pattern
 					for s ∈ 1:length(ccellpattern)
-						if ccellpattern[s].type <: DofTypeInterior && cpattern[s].each_component
+						if ccellpattern[s].type <: DofTypeInterior && ccellpattern[s].each_component
 							celldofoffset += ccellpattern[s].ndofs
 						end
 					end
@@ -562,7 +562,7 @@ function init_broken_dofmap!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Union{Type{B
 								local_dofs[nldofs] = xCellDofs[celldofoffset+(local_nodes[k]-1)*q+dof, cell]
 							end
 						end
-						celldofoffset += q * nfacenodes
+						celldofoffset += q * ncellnodes
 					elseif cpattern[s].type <: DofTypeInterior && !cpattern[s].each_component
 						for dof ∈ 1:q
 							nldofs += 1
@@ -576,7 +576,7 @@ function init_broken_dofmap!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Union{Type{B
 								local_dofs[nldofs] = xCellDofs[celldofoffset+(local_edges[k]-1)*q+dof, cell]
 							end
 						end
-						celldofoffset += q * nfaceedges
+						celldofoffset += q * ncelledges
 					end
 				end
 			end

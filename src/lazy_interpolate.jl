@@ -83,7 +83,7 @@ function lazy_interpolate!(
 			if cell == 0
 				fill!(result, not_in_domain_value)
 			else
-				evaluate!(result, PE, xref, cell)
+				evaluate_bary!(result, PE, xref, cell)
 				lastnonzerocell = cell
 			end
 			return nothing
