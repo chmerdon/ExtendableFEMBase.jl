@@ -67,7 +67,7 @@ function lazy_interpolate!(
 			else
 				cell = gFindLocal!(xref, CF, x; icellstart = cell, eps = eps, trybrute = !only_localsearch)
 			end
-			evaluate!(result, PE, xref, cell)
+			evaluate_bary!(result, PE, xref, cell)
 			return nothing
 		end
 		fe_function = point_evaluation_parentgrid!

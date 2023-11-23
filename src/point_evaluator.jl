@@ -5,6 +5,7 @@ mutable struct PointEvaluator{Tv <: Real, UT, KFT <: Function}
 	BE_args::Any
 	L2G::Any
 	CF::Any
+	lastitem::Int
 	eval_selector::Any
 	evaluator_bary::Any
 	evaluator::Any
@@ -50,7 +51,7 @@ function PointEvaluator(kernel, u_args, ops_args, sol = nothing; Tv = Float64, k
 	parameters = Dict{Symbol, Any}(k => v[1] for (k, v) in default_peval_kwargs())
 	_update_params!(parameters, kwargs)
 	@assert length(u_args) == length(ops_args)
-	PE = PointEvaluator{Tv, typeof(u_args[1]), typeof(kernel)}(u_args, ops_args, kernel, nothing, nothing, nothing, nothing, nothing, nothing, zeros(Tv, 2), parameters)
+	PE = PointEvaluator{Tv, typeof(u_args[1]), typeof(kernel)}(u_args, ops_args, kernel, nothing, nothing, nothing, 1, nothing, nothing, nothing, zeros(Tv, 2), parameters)
 	if sol !== nothing
 		initialize!(PE, sol)
 	end
@@ -236,9 +237,10 @@ function evaluate!(
 	x;
 	kwargs...
 )
-
-	# find cell
-	item = gFindLocal!(PE.xref, PE.CF, x; kwargs...)
+	# find correct cell (start from cell of last evaluation)
+	item = gFindLocal!(PE.xref, PE.CF, x; icellstart = PE.lastitem, kwargs...)
+	@assert item > 0
+	PE.lastitem = item
 
 	## find cell geometry id
 	j = PE.eval_selector(item)

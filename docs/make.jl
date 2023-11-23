@@ -183,7 +183,7 @@ function make_all(; with_examples::Bool = true, run_examples = true, run_noteboo
         authors="Christian Merdon",
         repo = "github.com/chmerdon/ExtendableFEMBase.jl",
         clean = false,
-        #format = Documenter.HTML(assets = ["docs.css"]),
+        format = Documenter.HTML(size_threshold = 250000),
         checkdocs = :all,
         warnonly = true,
         doctest = true,
