@@ -143,7 +143,7 @@ function FEEvaluator(
 		elseif operator <: SymmetricHessian
 			cl = maximum(compressiontargets)
 			for n ∈ 1:ncomponents
-				append!(compressiontargets, compressiontargets .+ cl)
+				append!(compressiontargets, compressiontargets .+ n*cl)
 			end
 		end
 	end

@@ -4,6 +4,7 @@ using ExtendableFEMBase
 
 include("test_quadrature.jl")
 include("test_interpolators.jl")
+include("test_operators.jl")
 include("test_febasis.jl")
 include("test_segmentintegrator.jl")
 include("test_pointevaluator.jl")
@@ -105,6 +106,7 @@ end
 function run_all_tests()
     begin
         run_febasis_tests()
+        run_operator_tests()
         run_quadrature_tests()
         run_interpolator_tests()
         run_segmentintegrator_tests()

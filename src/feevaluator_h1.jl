@@ -298,7 +298,32 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Curl
 		for dof_i ∈ 1:size(cvals, 2)
 			for j ∈ 1:size(L2GAinv, 2)
 				cvals[1, dof_i, i] -= L2GAinv[2, j] * refbasisderivvals[subset[dof_i], j, i]  # -du1/dy
-				cvals[1, dof_i, i] += L2GAinv[1, j] * refbasisderivvals[subset[dof_i]+FEBE.offsets2[2], j, i]  # du2/dx
+				cvals[1, dof_i, i] += L2GAinv[1, j] * refbasisderivvals[subset[dof_i]+offsets2[2], j, i]  # du2/dx
+			end
+		end
+	end
+	return nothing
+end
+
+
+# CURL3D H1
+function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Curl3D, <:AbstractH1FiniteElement})
+	L2GAinv = _update_trafo!(FEBE)
+	subset = _update_subset!(FEBE)
+	cvals = FEBE.cvals
+	offsets = FEBE.offsets
+	offsets2 = FEBE.offsets2
+	refbasisderivvals = FEBE.refbasisderivvals
+	fill!(cvals, 0)
+	for i ∈ 1:size(cvals, 3)
+		for dof_i ∈ 1:size(cvals, 2)
+			for k ∈ 1:3
+				cvals[1, dof_i, i] += L2GAinv[2, k] * refbasisderivvals[subset[dof_i]+offsets2[3], k, i] # du3/dx2
+				cvals[1, dof_i, i] -= L2GAinv[3, k] * refbasisderivvals[subset[dof_i]+offsets2[2], k, i] # - du2/dx3
+				cvals[2, dof_i, i] += L2GAinv[3, k] * refbasisderivvals[subset[dof_i]+offsets2[1], k, i] # du1/dx3
+				cvals[2, dof_i, i] -= L2GAinv[1, k] * refbasisderivvals[subset[dof_i]+offsets2[3], k, i] # - du3/dx1
+				cvals[3, dof_i, i] += L2GAinv[1, k] * refbasisderivvals[subset[dof_i]+offsets2[2], k, i] # du2/dx1
+				cvals[3, dof_i, i] -= L2GAinv[2, k] * refbasisderivvals[subset[dof_i]+offsets2[1], k, i] # - du1/dx2
 			end
 		end
 	end
