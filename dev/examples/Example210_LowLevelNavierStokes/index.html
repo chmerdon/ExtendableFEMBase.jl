@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>210 : Navier-Stokes Problem · ExtendableFEMBase.jl</title><meta name="title" content="210 : Navier-Stokes Problem · ExtendableFEMBase.jl"/><meta property="og:title" content="210 : Navier-Stokes Problem · ExtendableFEMBase.jl"/><meta property="twitter:title" content="210 : Navier-Stokes Problem · ExtendableFEMBase.jl"/><meta name="description" content="Documentation for ExtendableFEMBase.jl."/><meta property="og:description" content="Documentation for ExtendableFEMBase.jl."/><meta property="twitter:description" content="Documentation for ExtendableFEMBase.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ExtendableFEMBase.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../package_index/">Index</a></li><li><a class="tocitem" href="../../fems/">List of Finite Elements</a></li><li><span class="tocitem">Base Structures</span><ul><li><a class="tocitem" href="../../fespace/">FESpace</a></li><li><a class="tocitem" href="../../fevector/">FEVector</a></li><li><a class="tocitem" href="../../fematrix/">FEMatrix</a></li><li><a class="tocitem" href="../../functionoperators/">Function Operators</a></li><li><a class="tocitem" href="../../feevaluator/">FEEvaluator</a></li><li><a class="tocitem" href="../../interpolations/">Finite Element Interpolations</a></li><li><a class="tocitem" href="../../quadrature/">Quadrature</a></li></ul></li><li><span class="tocitem">Advanced Stuff</span><ul><li><a class="tocitem" href="../../pointevaluators/">PointEvaluator</a></li><li><a class="tocitem" href="../../segmentintegrators/">SegmentIntegrator</a></li><li><a class="tocitem" href="../../plots/">Plots</a></li></ul></li><li><span class="tocitem">Tutorial Notebooks</span></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../../examples_intro/">About the examples</a></li><li><a class="tocitem" href="../Example200_LowLevelPoisson/">200 : Poisson Problem</a></li><li class="is-active"><a class="tocitem" href>210 : Navier-Stokes Problem</a></li><li><a class="tocitem" href="../Example280_BasisPlotter/">280 : Basis-Plotter</a></li><li><a class="tocitem" href="../Example290_InterpolationBetweenMeshes/">290 : Interpolation Between Meshes</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>210 : Navier-Stokes Problem</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>210 : Navier-Stokes Problem</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="github.com/chmerdon/ExtendableFEMBase.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id=":-Navier-Stokes-Problem"><a class="docs-heading-anchor" href="#:-Navier-Stokes-Problem">210 : Navier-Stokes Problem</a><a id=":-Navier-Stokes-Problem-1"></a><a class="docs-heading-anchor-permalink" href="#:-Navier-Stokes-Problem" title="Permalink"></a></h1><p>(<a href="https://github.com/chmerdon/ExtendableFEMBase.jl/raw/master/examples/Example210_LowLevelNavierStokes.jl">source code</a>)</p><p>Consider the Navier-Stokes problem that seeks <span>$u$</span> and <span>$p$</span> such that</p><p class="math-container">\[\begin{aligned}
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>210 : Navier-Stokes Problem · ExtendableFEMBase.jl</title><meta name="title" content="210 : Navier-Stokes Problem · ExtendableFEMBase.jl"/><meta property="og:title" content="210 : Navier-Stokes Problem · ExtendableFEMBase.jl"/><meta property="twitter:title" content="210 : Navier-Stokes Problem · ExtendableFEMBase.jl"/><meta name="description" content="Documentation for ExtendableFEMBase.jl."/><meta property="og:description" content="Documentation for ExtendableFEMBase.jl."/><meta property="twitter:description" content="Documentation for ExtendableFEMBase.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ExtendableFEMBase.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../package_index/">Index</a></li><li><a class="tocitem" href="../../fems/">List of Finite Elements</a></li><li><span class="tocitem">Base Structures</span><ul><li><a class="tocitem" href="../../fespace/">FESpace</a></li><li><a class="tocitem" href="../../fevector/">FEVector</a></li><li><a class="tocitem" href="../../fematrix/">FEMatrix</a></li><li><a class="tocitem" href="../../functionoperators/">Function Operators</a></li><li><a class="tocitem" href="../../feevaluator/">FEEvaluator</a></li><li><a class="tocitem" href="../../interpolations/">Finite Element Interpolations</a></li><li><a class="tocitem" href="../../quadrature/">Quadrature</a></li></ul></li><li><span class="tocitem">Advanced Stuff</span><ul><li><a class="tocitem" href="../../pointevaluators/">PointEvaluator</a></li><li><a class="tocitem" href="../../segmentintegrators/">SegmentIntegrator</a></li><li><a class="tocitem" href="../../plots/">Plots</a></li></ul></li><li><span class="tocitem">Tutorial Notebooks</span></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../../examples_intro/">About the examples</a></li><li><a class="tocitem" href="../Example200_LowLevelPoisson/">200 : Poisson Problem</a></li><li class="is-active"><a class="tocitem" href>210 : Navier-Stokes Problem</a></li><li><a class="tocitem" href="../Example280_BasisPlotter/">280 : Basis-Plotter</a></li><li><a class="tocitem" href="../Example290_InterpolationBetweenMeshes/">290 : Interpolation Between Meshes</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>210 : Navier-Stokes Problem</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>210 : Navier-Stokes Problem</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="github.com/chmerdon/ExtendableFEMBase.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="210-:-Navier-Stokes-Problem"><a class="docs-heading-anchor" href="#210-:-Navier-Stokes-Problem">210 : Navier-Stokes Problem</a><a id="210-:-Navier-Stokes-Problem-1"></a><a class="docs-heading-anchor-permalink" href="#210-:-Navier-Stokes-Problem" title="Permalink"></a></h1><p>(<a href="https://github.com/chmerdon/ExtendableFEMBase.jl/raw/master/examples/Example210_LowLevelNavierStokes.jl">source code</a>)</p><p>Consider the Navier-Stokes problem that seeks <span>$u$</span> and <span>$p$</span> such that</p><p class="math-container">\[\begin{aligned}
 	- \mu \Delta u + (u \cdot \nabla) u + \nabla p &amp;= f\\
 			\mathrm{div}(u) &amp; = 0.
 \end{aligned}\]</p><p>The weak formulation seeks <span>$u \in V := H^1_0(\Omega)$</span> and <span>$p \in Q := L^2_0(\Omega)$</span> such that</p><p class="math-container">\[\begin{aligned}
@@ -376,68 +376,68 @@ end
 
 end #module</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><p><strong>Default output:</strong></p><pre><code class="nohighlight hljs">julia&gt; Example210_LowLevelNavierStokes.main()
 Creating grid...
-  0.000087 seconds (153 allocations: 54.453 KiB)
+  0.000080 seconds (153 allocations: 54.453 KiB)
 Creating FESpace...
-  0.129277 seconds (280.37 k allocations: 19.160 MiB, 98.25% compilation time)
+  0.128639 seconds (280.37 k allocations: 19.172 MiB, 98.32% compilation time)
 Initializing system...
-  2.001079 seconds (2.91 M allocations: 188.883 MiB, 2.40% gc time, 99.88% compilation time)
-  1.102101 seconds (1.48 M allocations: 109.963 MiB, 2.12% gc time, 91.76% compilation time)
+  1.956900 seconds (2.91 M allocations: 188.993 MiB, 2.97% gc time, 99.88% compilation time)
+  1.104201 seconds (1.48 M allocations: 109.979 MiB, 3.60% gc time, 91.82% compilation time)
 Prepare boundary conditions...
-  5.292055 seconds (5.07 M allocations: 332.429 MiB, 1.08% gc time, 99.82% compilation time)
+  5.278444 seconds (5.07 M allocations: 332.557 MiB, 2.58% gc time, 99.82% compilation time)
 
 ITERATION 1
 =============
 Solving linear system...
-  0.092050 seconds (140 allocations: 83.900 MiB, 22.48% gc time)
+  0.107531 seconds (245 allocations: 83.904 MiB, 29.78% gc time, 4.51% compilation time)
 linear residual = 1.2435514591003242e-15
 Updating linear system...
-  0.190297 seconds (65.44 k allocations: 12.793 MiB, 7.62% gc time, 55.75% compilation time)
+  0.157667 seconds (65.22 k allocations: 12.759 MiB, 59.70% compilation time)
 nonlinear residual = 0.12243729545803447
 
 ITERATION 2
 =============
 Solving linear system...
-  0.064750 seconds (82 allocations: 48.996 MiB)
+  0.080716 seconds (192 allocations: 49.001 MiB, 13.23% gc time, 6.05% compilation time)
 linear residual = 6.504510889763777e-15
 Updating linear system...
-  0.063425 seconds (15 allocations: 8.269 MiB)
+  0.063501 seconds (15 allocations: 8.269 MiB)
 nonlinear residual = 0.0338087017282979
 
 ITERATION 3
 =============
 Solving linear system...
-  0.071723 seconds (87 allocations: 48.996 MiB, 14.00% gc time)
+  0.068122 seconds (86 allocations: 48.996 MiB, 11.41% gc time)
 linear residual = 1.0680673191224762e-15
 Updating linear system...
-  0.070757 seconds (15 allocations: 8.269 MiB)
+  0.063677 seconds (15 allocations: 8.269 MiB)
 nonlinear residual = 0.0008373203782890171
 
 ITERATION 4
 =============
 Solving linear system...
-  0.074333 seconds (82 allocations: 48.996 MiB)
+  0.066074 seconds (86 allocations: 48.996 MiB, 11.20% gc time)
 linear residual = 1.2413555256131198e-15
 Updating linear system...
-  0.062980 seconds (15 allocations: 8.269 MiB)
+  0.063488 seconds (15 allocations: 8.269 MiB)
 nonlinear residual = 7.05288922821406e-6
 
 ITERATION 5
 =============
 Solving linear system...
-  0.070494 seconds (89 allocations: 48.996 MiB, 10.93% gc time)
+  0.070474 seconds (86 allocations: 48.996 MiB, 3.06% gc time)
 linear residual = 1.0779088405768764e-15
 Updating linear system...
-  0.063121 seconds (15 allocations: 8.269 MiB)
+  0.063784 seconds (15 allocations: 8.269 MiB)
 nonlinear residual = 1.4815898617766198e-9
 
 ITERATION 6
 =============
 Solving linear system...
-  0.066920 seconds (87 allocations: 48.996 MiB, 3.82% gc time)
+  0.059508 seconds (86 allocations: 48.996 MiB, 3.51% gc time)
 linear residual = 1.032492231270758e-15
 Updating linear system...
-  0.063129 seconds (15 allocations: 8.269 MiB)
+  0.064275 seconds (15 allocations: 8.269 MiB)
 nonlinear residual = 1.0532251087808128e-15
 
 l2 error velo = 0.38605133038179734
-l2 error pressure = 0.20006755549266803</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Example200_LowLevelPoisson/">« 200 : Poisson Problem</a><a class="docs-footer-nextpage" href="../Example280_BasisPlotter/">280 : Basis-Plotter »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.1.2 on <span class="colophon-date" title="Thursday 23 November 2023 09:40">Thursday 23 November 2023</span>. Using Julia version 1.9.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+l2 error pressure = 0.20006755549266803</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Example200_LowLevelPoisson/">« 200 : Poisson Problem</a><a class="docs-footer-nextpage" href="../Example280_BasisPlotter/">280 : Basis-Plotter »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.0 on <span class="colophon-date" title="Wednesday 29 November 2023 11:07">Wednesday 29 November 2023</span>. Using Julia version 1.9.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
