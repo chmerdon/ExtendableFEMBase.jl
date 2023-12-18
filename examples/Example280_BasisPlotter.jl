@@ -1,9 +1,10 @@
-#= 
+#=
 
 # 280 : Basis-Plotter
 ([source code](SOURCE_URL))
 
-This example plots all the basis functions of a H1 finite element on Edge1D or Triangle2D.
+This example plots all the basis functions of a H1 finite element on Edge1D or Triangle2D
+as unicode plots
 
 =#
 

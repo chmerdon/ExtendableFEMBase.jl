@@ -1,4 +1,4 @@
-#= 
+#=
 
 # 200 : Poisson Problem
 ([source code](SOURCE_URL))
@@ -12,8 +12,12 @@ This example computes the solution ``u`` of the two-dimensional Poisson problem
 with right-hand side ``f(x,y) \equiv xy`` and homogeneous Dirichlet boundary conditions
 on the unit square domain ``\Omega`` on a given grid.
 
-This script measures runtimes for grid generation, assembly and solving (direct/UMFPACK)
+When run, this script also measures runtimes for grid generation, assembly and solving (direct/UMFPACK)
 for different refinement levels.
+
+The computed solution for the default parameters looks like this:
+
+![](example200.jpg)
 
 =#
 
@@ -41,6 +45,7 @@ function main(; maxnref = 8, order = 2, Plotter = nothing)
 	sol, time_assembly, time_solve = solve_poisson_lowlevel(FES, μ, f)
 
 	## loop over uniform refinements + timings
+	plt = GridVisualizer(; Plotter = Plotter, layout = (1, 1), clear = true, resolution = (500, 500))
 	for level ∈ 1:maxnref
 		X = LinRange(0, 1, 2^level + 1)
 		time_grid = @elapsed xgrid = simplexgrid(X, X)
@@ -57,10 +62,10 @@ function main(; maxnref = 8, order = 2, Plotter = nothing)
 		println(stdout, barplot(["Grid", "FaceNodes", "CellDofs", "Assembly", "Solve"], [time_grid, time_facenodes, time_dofmap, time_assembly, time_solve], title = "Runtimes"))
 
 		## plot
-		scalarplot(xgrid, view(sol.entries, 1:num_nodes(xgrid)); Plotter = Plotter, levels = 5)
+		scalarplot!(plt[1,1], xgrid, view(sol.entries, 1:num_nodes(xgrid)), levels = 5)
 	end
 
-	return sol
+	return sol, plt
 end
 
 
@@ -177,6 +182,12 @@ function assemble!(A::ExtendableSparseMatrix, b::Vector, FES, f, μ = 1)
 	end
 	barrier(EG, L2G)
 	flush!(A)
+end
+
+function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
+	~, plt = main(; Plotter = Plotter, kwargs...)
+	scene = GridVisualize.reveal(plt)
+	GridVisualize.save(joinpath(dir, "example200.jpg"), scene; Plotter = Plotter)
 end
 
 end #module

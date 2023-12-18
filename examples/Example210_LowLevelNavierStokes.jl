@@ -1,4 +1,4 @@
-#= 
+#=
 
 # 210 : Navier-Stokes Problem
 ([source code](SOURCE_URL))
@@ -24,6 +24,9 @@ This example computes a planar lattice flow with inhomogeneous Dirichlet boundar
 (which requires some modification above).
 Newton's method with automatic differentation is used to handle the nonlinear convection term.
 
+The computed solution for the default parameters looks like this:
+
+![](example210.jpg)
 =#
 
 module Example210_LowLevelNavierStokes
@@ -94,9 +97,11 @@ function main(; nref = 5, teval = 0, order = 2, Plotter = nothing)
 	println("l2 error pressure = $(error_p)")
 
 	## plot
-	p = GridVisualizer(; Plotter = Plotter, layout = (1, 1), clear = true, resolution = (1200, 1200))
-	scalarplot!(p[1, 1], xgrid, nodevalues(sol[1]; abs = true)[1, :]; title = "|u| + quiver", Plotter = Plotter)
-	vectorplot!(p[1, 1], xgrid, eval_func(PointEvaluator([(1, Identity)], sol)), spacing = 0.05, clear = false)
+	plt = GridVisualizer(; Plotter = Plotter, layout = (1, 1), clear = true, resolution = (500, 500))
+	scalarplot!(plt[1, 1], xgrid, nodevalues(sol[1]; abs = true)[1, :]; title = "|u| + quiver", Plotter = Plotter)
+	vectorplot!(plt[1, 1], xgrid, eval_func_bary(PointEvaluator([(1, Identity)], sol)), clear = false)
+
+	return sol, plt
 end
 
 ## computes error and integrals
@@ -393,4 +398,9 @@ function prepare_assembly!(A, b, FESu, FESp, sol; teval = 0)
 	update_system!
 end
 
+function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
+	~, plt = main(; Plotter = Plotter, kwargs...)
+	scene = GridVisualize.reveal(plt)
+	GridVisualize.save(joinpath(dir, "example210.jpg"), scene; Plotter = Plotter)
+end
 end #module

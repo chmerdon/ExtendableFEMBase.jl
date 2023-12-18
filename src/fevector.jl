@@ -176,10 +176,12 @@ Custom `show` function for `FEVector` that prints some information on its blocks
 function Base.show(io::IO, FEF::FEVector)
 	println(io, "\nFEVector information")
 	println(io, "====================")
-	print(io, "   block  |  ndofs \t| FEType \t\t (name/tag)")
+	print(io, "   block  |  ndofs \t|     min  /  max    \t| FEType \t\t (name/tag)")
 	for j ∈ 1:length(FEF)
 		@printf(io, "\n [%5d]  | ", j)
 		@printf(io, " %6d\t|", FEF[j].FES.ndofs)
+		ext = extrema(view(FEF[j]))
+		@printf(io, " %.2e/%.2e  \t|", ext[1], ext[2])
 		if length(FEF.tags) >= j
 			@printf(io, " %s  \t (%s)", FEF[j].FES.name, FEF.tags[j])
 		else

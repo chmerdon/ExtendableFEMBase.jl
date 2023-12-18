@@ -1,4 +1,4 @@
-#= 
+#=
 
 # 290 : Interpolation Between Meshes
 ([source code](SOURCE_URL))
@@ -6,6 +6,9 @@
 This example demonstrates the interpolation between meshes feature. Here, we interpolate a function with the P2 element of a coarse triangulation and then interpolate
 this P2 function on two uniform refinements into some P1 function. Then, both finite element functions are plotted.
 
+The computed solution for the default parameters looks like this:
+
+![](example290.jpg)
 =#
 
 module Example290_InterpolationBetweenMeshes
@@ -49,9 +52,17 @@ function main(; ν = 1e-3, nrefs = 4, Plotter = nothing)
 	@time lazy_interpolate!(FEFunction2[1], FEFunction1; use_cellparents = true)
 
 	## plot
-	p = GridVisualizer(; Plotter = Plotter, layout = (1, 2), clear = true, resolution = (1000, 500))
+	p = GridVisualizer(; Plotter = Plotter, layout = (1, 2), clear = true, resolution = (800, 400))
 	scalarplot!(p[1, 1], xgrid1, view(nodevalues(FEFunction1[1]), 1, :), levels = 11, title = "u_h ($FEType1, coarse grid)")
 	scalarplot!(p[1, 2], xgrid2, view(nodevalues(FEFunction2[1]), 1, :), levels = 11, title = "u_h ($FEType2, fine grid)")
+
+	return p
+end
+
+function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
+	plt = main(; Plotter = Plotter, kwargs...)
+	scene = GridVisualize.reveal(plt)
+	GridVisualize.save(joinpath(dir, "example290.jpg"), scene; Plotter = Plotter)
 end
 
 end
