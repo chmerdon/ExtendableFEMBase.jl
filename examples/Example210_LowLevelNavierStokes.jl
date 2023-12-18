@@ -26,7 +26,7 @@ Newton's method with automatic differentation is used to handle the nonlinear co
 
 The computed solution for the default parameters looks like this:
 
-![](example210.jpg)
+![](example210.png)
 =#
 
 module Example210_LowLevelNavierStokes
@@ -400,6 +400,6 @@ end
 function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
 	~, plt = main(; Plotter = Plotter, kwargs...)
 	scene = GridVisualize.reveal(plt)
-	GridVisualize.save(joinpath(dir, "example210.jpg"), scene; Plotter = Plotter)
+	GridVisualize.save(joinpath(dir, "example210.png"), scene; Plotter = Plotter)
 end
 end #module
