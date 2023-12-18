@@ -37,7 +37,6 @@ using ExtendableSparse
 using GridVisualize
 using ForwardDiff
 using DiffResults
-using UnicodePlots
 
 ## data for Poisson problem
 const μ = 1e-2

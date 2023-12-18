@@ -27,7 +27,6 @@ using ExtendableFEMBase
 using ExtendableGrids
 using ExtendableSparse
 using GridVisualize
-using UnicodePlots
 
 ## data for Poisson problem
 const μ = 1.0
