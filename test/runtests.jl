@@ -1,6 +1,7 @@
 using Test
 using ExtendableGrids
 using ExtendableFEMBase
+using ExampleJuggler
 
 include("test_quadrature.jl")
 include("test_interpolators.jl")
@@ -8,6 +9,20 @@ include("test_operators.jl")
 include("test_febasis.jl")
 include("test_segmentintegrator.jl")
 include("test_pointevaluator.jl")
+
+function run_examples()
+	ExampleJuggler.verbose!(true)
+
+	example_dir = joinpath(@__DIR__, "..", "examples")
+
+	modules = [
+		"Example200_LowLevelPoisson.jl",
+	]
+
+	@testset "module examples" begin
+		@testmodules(example_dir, modules)
+	end
+end
 
 function testgrid(::Type{Edge1D})
     return uniform_refine(simplexgrid([0.0,1//4,2//3,1.0]),1)
@@ -105,6 +120,7 @@ end
 
 function run_all_tests()
     begin
+        run_examples()
         run_febasis_tests()
         run_operator_tests()
         run_quadrature_tests()

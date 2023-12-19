@@ -8,7 +8,7 @@ on a grid with two regions by region-wise nodal values and plotting.
 
 The computed solution for the default parameters looks like this:
 
-![](example281.png)
+![](example281.svg)
 =#
 
 module Example281_DiscontinuousPlot
@@ -71,6 +71,6 @@ end
 function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
 	plt = main(; Plotter = Plotter, kwargs...)
 	scene = GridVisualize.reveal(plt)
-	GridVisualize.save(joinpath(dir, "example281.png"), scene; Plotter = Plotter)
+	GridVisualize.save(joinpath(dir, "example281.svg"), scene; Plotter = Plotter)
 end
 end

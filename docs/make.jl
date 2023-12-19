@@ -10,6 +10,8 @@ function make_all(; with_examples::Bool = true)
     pluto_examples = []
 
     if with_examples
+        
+		DocMeta.setdocmeta!(ExampleJuggler, :DocTestSetup, :(using ExampleJuggler); recursive = true)
 
 		example_dir = joinpath(@__DIR__, "..", "examples")
 		pluto_example_dir = joinpath(@__DIR__, "..", "pluto-examples")

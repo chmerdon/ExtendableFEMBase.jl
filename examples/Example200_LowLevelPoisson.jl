@@ -17,7 +17,7 @@ for different refinement levels.
 
 The computed solution for the default parameters looks like this:
 
-![](example200.jpg)
+![](example200.svg)
 
 =#
 
@@ -28,6 +28,7 @@ using ExtendableGrids
 using ExtendableSparse
 using GridVisualize
 using UnicodePlots
+using Test #
 
 ## data for Poisson problem
 const μ = 1.0
@@ -46,6 +47,7 @@ function main(; maxnref = 8, order = 2, Plotter = nothing)
 
 	## loop over uniform refinements + timings
 	plt = GridVisualizer(; Plotter = Plotter, layout = (1, 1), clear = true, resolution = (500, 500))
+	loop_allocations = 0
 	for level ∈ 1:maxnref
 		X = LinRange(0, 1, 2^level + 1)
 		time_grid = @elapsed xgrid = simplexgrid(X, X)
@@ -62,7 +64,7 @@ function main(; maxnref = 8, order = 2, Plotter = nothing)
 		println(stdout, barplot(["Grid", "FaceNodes", "CellDofs", "Assembly", "Solve"], [time_grid, time_facenodes, time_dofmap, time_assembly, time_solve], title = "Runtimes"))
 
 		## plot
-		scalarplot!(plt[1,1], xgrid, view(sol.entries, 1:num_nodes(xgrid)), levels = 5)
+		scalarplot!(plt[1,1], xgrid, view(sol.entries, 1:num_nodes(xgrid)))
 	end
 
 	return sol, plt
@@ -76,7 +78,7 @@ function solve_poisson_lowlevel(FES, μ, f)
 	b = FEVector(FES)
 	println("Assembling...")
 	time_assembly = @elapsed @time begin
-		assemble!(A.entries, b.entries, FES, f, μ)
+		loop_allocations = assemble!(A.entries, b.entries, FES, f, μ)
 
 		## fix boundary dofs
 		begin
@@ -123,6 +125,7 @@ function assemble!(A::ExtendableSparseMatrix, b::Vector, FES, f, μ = 1)
 	CellDofs = FES[ExtendableFEMBase.CellDofs]
 
 	## ASSEMBLY LOOP
+	loop_allocations = 0
 	function barrier(EG, L2G::L2GTransformer)
 		## barrier function to avoid allocations by type dispatch
 
@@ -132,7 +135,7 @@ function assemble!(A::ExtendableSparseMatrix, b::Vector, FES, f, μ = 1)
 		dof_j::Int, dof_k::Int = 0, 0
 		x::Vector{Float64} = zeros(Float64, 2)
 
-		for cell ∈ 1:ncells
+		loop_allocations += @allocated for cell ∈ 1:ncells
 			## update FE basis evaluators
 			FEBasis_∇.citem[] = cell
 			update_basis!(FEBasis_∇)
@@ -182,12 +185,29 @@ function assemble!(A::ExtendableSparseMatrix, b::Vector, FES, f, μ = 1)
 	end
 	barrier(EG, L2G)
 	flush!(A)
+	return loop_allocations
 end
 
 function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
-	~, plt = main(; Plotter = Plotter, kwargs...)
+	~, plt, ~ = main(; Plotter = Plotter, kwargs...)
 	scene = GridVisualize.reveal(plt)
-	GridVisualize.save(joinpath(dir, "example200.jpg"), scene; Plotter = Plotter)
+	GridVisualize.save(joinpath(dir, "example200.svg"), scene; Plotter = Plotter)
 end
 
+function runtests(; order = 2, kwargs...) #hide
+	FEType = H1Pk{1, 2, order}
+	X = LinRange(0, 1, 64)
+	xgrid = simplexgrid(X, X)
+	FES = FESpace{FEType}(xgrid)
+	A = FEMatrix(FES, FES)
+	b = FEVector(FES)
+	@info "ndofs = $(FES.ndofs)"
+	## first assembly causes allocations when filling sparse matrix
+	loop_allocations = assemble!(A.entries, b.entries, FES, f, μ)
+	@info "allocations in 1st assembly: $loop_allocations"
+	## second assebly in same matrix should have allocation-free inner loop
+	loop_allocations = assemble!(A.entries, b.entries, FES, f, μ)
+	@info "allocations in 2nd assembly: $loop_allocations"
+	@test loop_allocations == 0
+end #hide
 end #module

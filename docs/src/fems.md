@@ -241,3 +241,11 @@ HCURLN0
 HCURLN1
 ```
 
+
+## Incomplete finite elements without approximation power
+
+```@docs
+H1BUBBLE
+```
+
+

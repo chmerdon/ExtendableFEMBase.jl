@@ -8,7 +8,7 @@ this P2 function on two uniform refinements into some P1 function. Then, both fi
 
 The computed solution for the default parameters looks like this:
 
-![](example290.png)
+![](example290.svg)
 =#
 
 module Example290_InterpolationBetweenMeshes
@@ -62,7 +62,7 @@ end
 function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
 	plt = main(; Plotter = Plotter, kwargs...)
 	scene = GridVisualize.reveal(plt)
-	GridVisualize.save(joinpath(dir, "example290.png"), scene; Plotter = Plotter)
+	GridVisualize.save(joinpath(dir, "example290.svg"), scene; Plotter = Plotter)
 end
 
 end
