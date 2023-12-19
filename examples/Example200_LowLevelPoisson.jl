@@ -189,7 +189,7 @@ function assemble!(A::ExtendableSparseMatrix, b::Vector, FES, f, μ = 1)
 end
 
 function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
-	~, plt, ~ = main(; Plotter = Plotter, kwargs...)
+	~, plt = main(; Plotter = Plotter, kwargs...)
 	scene = GridVisualize.reveal(plt)
 	GridVisualize.save(joinpath(dir, "example200.svg"), scene; Plotter = Plotter)
 end
