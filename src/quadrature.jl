@@ -6,7 +6,7 @@
 # there are some hard-coded ones for the lowest-order rules (that might be extended later)
 # and also generic functions that generate rules of arbitrary order
 #
-# integrate! allows to intgrate cell-wise (order face-wise etc. depending on the AssemblyType)
+# integrate! allows to integrate cell-wise (order face-wise etc. depending on the AssemblyType)
 # integrate does the same but only returns the full integral and is more memory-friendly
 
 """
