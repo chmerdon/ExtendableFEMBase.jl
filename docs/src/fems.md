@@ -27,12 +27,14 @@ AbstractFiniteElement
 │  ├─ H1Q1
 │  └─ H1Q2
 ├─ AbstractHcurlFiniteElement
-│  └─ HCURLN0
+│  ├─ HCURLN0
+│  └─ HCURLN1
 └─ AbstractHdivFiniteElement
    ├─ HDIVBDM1
    ├─ HDIVBDM2
    ├─ HDIVRT0
-   └─ HDIVRT1
+   ├─ HDIVRT1
+   └─ HDIVRTkENRICH
 ```
 
 
@@ -73,11 +75,13 @@ The following table lists all curently implemented finite elements and on which 
 | [`H1Q2`](@ref) | ✓ (N1F1, 12) | ✓ (N1F1I1, 18) | ✓ (N1E1, 30) |   |
 | AbstractHcurlFiniteElement |   |   |   |   |
 | [`HCURLN0`](@ref) | ✓ (f1, 3) | ✓ (f1, 4) | ✓ (e1, 6) |   |
+| [`HCURLN1`](@ref) | ✓ (f1, 6) |  |  |   |
 | AbstractHdivFiniteElement |   |   |   |   |
 | [`HDIVBDM1`](@ref) | ✓ (f2, 6) | ✓ (f2, 8) | ✓ (f3, 12) |   |
 | [`HDIVBDM2`](@ref) | ✓ (f3i3, 12) |   |   |   |
 | [`HDIVRT0`](@ref) | ✓ (f1, 3) | ✓ (f1, 4) | ✓ (f1, 4) | ✓ (f1, 6) |
 | [`HDIVRT1`](@ref) | ✓ (f2i2, 8) |   | ✓ (f3i3, 15) |   |
+| [`HDIVRTkENRICH`](@ref) | ✓ (order-dep) |  | ✓ (order-dep) | |
 
 
 Note: the dofmap pattern describes the connection of the local degrees of freedom to entities of the grid and also hints to the continuity. Here, "N" or "n" means nodes, "F" or "f" means faces, "E" or "e" means edges and "I" means interior (dofs without any continuity across elements). Capital letters cause that every component has its own degree of freedom, while small letters signalize that only one dof is associated to the entity. As an example "N1f1" (for the Bernardi-Raugel element) means that at each node sits one dof per component and at each face sits a single dof. Usually finite elements that involve small letters are only defined vector-valued (i.e. the number of components has to match the element dimension), while finite elements that only involve capital letters are available for any number of components.
@@ -228,6 +232,7 @@ HDIVRT0
 HDIVBDM1
 HDIVRT1
 HDIVBDM2
+HDIVRTkENRICH
 ```
 
 ## Hcurl-conforming finite elements
