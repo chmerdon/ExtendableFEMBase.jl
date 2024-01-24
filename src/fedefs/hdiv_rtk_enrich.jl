@@ -15,9 +15,6 @@ allowed ElementGeometries:
 - Triangle2D
 - Tetrahedron3D
 """
-
-## DEFINITION OF RTk BUBBLE SPACES
-## contain only that many non divergence-free RTk bubbles that seem to be needed to correct divergence moments for PkxPk-1
 abstract type HDIVRTkENRICH{edim, k, stack} <: AbstractHdivFiniteElement where {k <: Int, edim <: Int, stack <: Bool} end
 
 const _num_RTk_enrich_bubbles = [[2, 3, 4], [3, 9]]

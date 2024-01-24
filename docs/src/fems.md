@@ -34,6 +34,7 @@ AbstractFiniteElement
    ├─ HDIVBDM2
    ├─ HDIVRT0
    ├─ HDIVRT1
+   ├─ HDIVRTk
    └─ HDIVRTkENRICH
 ```
 
