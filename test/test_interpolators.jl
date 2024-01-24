@@ -15,9 +15,14 @@ function run_interpolator_tests()
         HCURLN0{2},
         HCURLN1{2},
         HDIVRT0{2},
+        HDIVRTk{2,0},
         HDIVBDM1{2},
         HDIVRT1{2},
+        HDIVRTk{2,1},
         HDIVBDM2{2},
+        HDIVRTk{2,2},
+        HDIVRTk{2,3},
+        HDIVRTk{2,4},
         L2P0{2},
         H1P1{2}, 
         H1Q1{2},
@@ -33,7 +38,7 @@ function run_interpolator_tests()
         H1Pk{2,2,4},
         H1Pk{2,2,5}
         ]
-    ExpectedOrders2D = [0,1,0,1,1,2,0,1,1,1,1,1,1,2,2,2,3,3,4,5]
+    ExpectedOrders2D = [0,1,0,0,1,1,1,2,2,3,4,0,1,1,1,1,1,1,2,2,2,3,3,4,5]
 
     TestCatalog3D = [
         HCURLN0{3},
@@ -100,7 +105,7 @@ function run_interpolator_tests()
 
         # interpolate
         Solution = FEVector(FES)
-        interpolate!(Solution[1], u)
+        interpolate!(Solution[1], u; bonus_quadorder = order)
 
         # compute error
         error = compute_error(Solution[1], u, order)

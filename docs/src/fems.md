@@ -81,6 +81,7 @@ The following table lists all curently implemented finite elements and on which 
 | [`HDIVBDM2`](@ref) | ✓ (f3i3, 12) |   |   |   |
 | [`HDIVRT0`](@ref) | ✓ (f1, 3) | ✓ (f1, 4) | ✓ (f1, 4) | ✓ (f1, 6) |
 | [`HDIVRT1`](@ref) | ✓ (f2i2, 8) |   | ✓ (f3i3, 15) |   |
+| [`HDIVRTk`](@ref) | ✓ (order-dep) |   |  |   |
 | [`HDIVRTkENRICH`](@ref) | ✓ (order-dep) |  | ✓ (order-dep) | |
 
 
@@ -232,6 +233,7 @@ HDIVRT0
 HDIVBDM1
 HDIVRT1
 HDIVBDM2
+HDIVRTk
 HDIVRTkENRICH
 ```
 

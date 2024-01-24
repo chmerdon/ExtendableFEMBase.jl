@@ -12,6 +12,8 @@ using DocStringExtensions
 using Printf
 using UnicodePlots
 using Term
+using SpecialPolynomials
+using Polynomials
 
 
 include("qpinfos.jl")
@@ -54,7 +56,7 @@ export AbstractH1FiniteElementWithCoefficients
 export H1BR, H1P1TEB
 
 export AbstractHdivFiniteElement
-export HDIVRT0, HDIVBDM1, HDIVRT1, HDIVBDM2
+export HDIVRT0, HDIVBDM1, HDIVRT1, HDIVBDM2, HDIVRTk
 export HDIVRTkENRICH
 
 export AbstractHcurlFiniteElement
