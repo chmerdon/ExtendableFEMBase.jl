@@ -41,7 +41,7 @@ interior_dofs_offset(::Type{<:ON_CELLS}, ::Type{<:HDIVRT1{3}}, ::Type{<:Tetrahed
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, data; items = [], kwargs...) where {T, Tv, Ti, FEType <: HDIVRT1, APT}
 	ncomponents = get_ncomponents(FEType)
-	xFaceNormals = FE.xgrid[FaceNormals]
+	xFaceNormals = FE.dofgrid[FaceNormals]
 	nfaces = num_sources(xFaceNormals)
 	if items == []
 		items = 1:nfaces
@@ -57,22 +57,22 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 			result[3] = result[1] * (qpinfo.xref[2] - 1 // ncomponents)
 		end
 	end
-	integrate!(Target, FE.xgrid, ON_FACES, normalflux_eval; quadorder = 2, items = items, offset = 0:nfaces:(ncomponents-1)*nfaces, kwargs...)
+	integrate!(Target, FE.dofgrid, ON_FACES, normalflux_eval; quadorder = 2, items = items, offset = 0:nfaces:(ncomponents-1)*nfaces, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, data; items = [], kwargs...) where {T, Tv, Ti, FEType <: HDIVRT1, APT}
 	# delegate cell faces to face interpolation
-	subitems = slice(FE.xgrid[CellFaces], items)
+	subitems = slice(FE.dofgrid[CellFaces], items)
 	interpolate!(Target, FE, ON_FACES, data; items = subitems, kwargs...)
 
 	# set values of interior RT1 functions by integrating over cell
 	# they are chosen such that integral mean of exact function is preserved on each cell
 	ncomponents = get_ncomponents(FEType)
-	ncells = num_sources(FE.xgrid[CellNodes])
-	xCellVolumes::Array{Tv, 1} = FE.xgrid[CellVolumes]
+	ncells = num_sources(FE.dofgrid[CellNodes])
+	xCellVolumes::Array{Tv, 1} = FE.dofgrid[CellVolumes]
 	xCellDofs::DofMapTypes{Ti} = FE[CellDofs]
 	means = zeros(T, ncomponents, ncells)
-	integrate!(means, FE.xgrid, ON_CELLS, data; quadorder = 3, kwargs...)
+	integrate!(means, FE.dofgrid, ON_CELLS, data; quadorder = 3, kwargs...)
 	EG = (ncomponents == 2) ? Triangle2D : Tetrahedron3D
 	qf = QuadratureRule{T, EG}(2)
 	FEB = FEEvaluator(FE, Identity, qf; T = T)
@@ -195,7 +195,7 @@ function get_basis(::Type{ON_CELLS}, ::Type{HDIVRT1{3}}, ::Type{<:Tetrahedron3D}
 end
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVRT1{2}, APT}, EG::Type{<:Triangle2D}) where {Tv, Ti, APT}
-	xCellFaceSigns = FE.xgrid[CellFaceSigns]
+	xCellFaceSigns = FE.dofgrid[CellFaceSigns]
 	nfaces = num_faces(EG)
 	function closure(coefficients, cell)
 		fill!(coefficients, 1.0)
@@ -208,7 +208,7 @@ function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVRT1{2}, AP
 end
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVRT1{3}, APT}, EG::Type{<:Tetrahedron3D}) where {Tv, Ti, APT}
-	xCellFaceSigns = FE.xgrid[CellFaceSigns]
+	xCellFaceSigns = FE.dofgrid[CellFaceSigns]
 	nfaces = num_faces(EG)
 	function closure(coefficients, cell)
 		fill!(coefficients, 1.0)
@@ -229,7 +229,7 @@ end
 # such that they reflect the two moments with respect to the second and third node
 # of the global face enumeration
 function get_basissubset(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVRT1{3}, APT}, EG::Type{<:Tetrahedron3D}) where {Tv, Ti, APT}
-	xCellFaceOrientations = FE.xgrid[CellFaceOrientations]
+	xCellFaceOrientations = FE.dofgrid[CellFaceOrientations]
 	nfaces::Int = num_faces(EG)
 	orientation = xCellFaceOrientations[1, 1]
 	shift4orientation1::Array{Int, 1} = [1, 0, 1, 2]

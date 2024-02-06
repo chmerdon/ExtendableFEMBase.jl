@@ -51,15 +51,15 @@ interior_dofs_offset(::Type{<:AssemblyType}, ::Type{H1Q2{ncomponents, edim}}, ::
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{AT_NODES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1Q2, APT}
 	edim = get_edim(FEType)
-	nnodes = size(FE.xgrid[Coordinates], 2)
+	nnodes = size(FE.dofgrid[Coordinates], 2)
 	nextra = 0
 	if edim == 1
-		nedges = num_sources(FE.xgrid[CellNodes])
+		nedges = num_sources(FE.dofgrid[CellNodes])
 	elseif edim == 2
-		nedges = num_sources(FE.xgrid[FaceNodes])
-		nextra = count(i -> (i <: Quadrilateral2D), FE.xgrid[CellGeometries])
+		nedges = num_sources(FE.dofgrid[FaceNodes])
+		nextra = count(i -> (i <: Quadrilateral2D), FE.dofgrid[CellGeometries])
 	elseif edim == 3
-		nedges = num_sources(FE.xgrid[EdgeNodes])
+		nedges = num_sources(FE.dofgrid[EdgeNodes])
 	end
 
 
@@ -70,7 +70,7 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, 
 	edim = get_edim(FEType)
 	if edim == 3
 		# delegate edge nodes to node interpolation
-		subitems = slice(FE.xgrid[EdgeNodes], items)
+		subitems = slice(FE.dofgrid[EdgeNodes], items)
 		interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
 		# perform edge mean interpolation
@@ -82,18 +82,18 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, 
 	edim = get_edim(FEType)
 	if edim == 2
 		# delegate face nodes to node interpolation
-		subitems = slice(FE.xgrid[FaceNodes], items)
+		subitems = slice(FE.dofgrid[FaceNodes], items)
 		interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
 		# perform face mean interpolation
 		ensure_moments!(Target, FE, ON_FACES, exact_function!; items = items, kwargs...)
 	elseif edim == 3
 		# delegate face edges to edge interpolation
-		subitems = slice(FE.xgrid[FaceEdges], items)
+		subitems = slice(FE.dofgrid[FaceEdges], items)
 		interpolate!(Target, FE, ON_EDGES, exact_function!; items = subitems, kwargs...)
 	elseif edim == 1
 		# delegate face nodes to node interpolation
-		subitems = slice(FE.xgrid[FaceNodes], items)
+		subitems = slice(FE.dofgrid[FaceNodes], items)
 		interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 	end
 end
@@ -103,27 +103,27 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, 
 	edim = get_edim(FEType)
 	if edim == 2
 		# delegate cell faces to face interpolation
-		subitems = slice(FE.xgrid[CellFaces], items)
+		subitems = slice(FE.dofgrid[CellFaces], items)
 		interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, kwargs...)
 
 		# preserve cell integral on quads
 		if items == []
-			items = 1:num_cells(FE.xgrid)
+			items = 1:num_cells(FE.dofgrid)
 		end
-		items_quads = findall(i -> (i <: Quadrilateral2D), view(FE.xgrid[CellGeometries], items))
+		items_quads = findall(i -> (i <: Quadrilateral2D), view(FE.dofgrid[CellGeometries], items))
 		if length(items_quads) > 0
 			ensure_moments!(Target, FE, ON_CELLS, exact_function!; items = view(items, items_quads), kwargs...)
 		end
 
 	elseif edim == 3
 		# delegate cell edges to edge interpolation
-		subitems = slice(FE.xgrid[CellEdges], items)
+		subitems = slice(FE.dofgrid[CellEdges], items)
 		interpolate!(Target, FE, ON_EDGES, exact_function!; items = subitems, kwargs...)
 
 		# todo: preserve face and cell integrals on quads
 	elseif edim == 1
 		# delegate cell nodes to node interpolation
-		subitems = slice(FE.xgrid[CellNodes], items)
+		subitems = slice(FE.dofgrid[CellNodes], items)
 		interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
 		# preserve cell integral

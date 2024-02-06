@@ -42,7 +42,7 @@ isdefined(FEType::Type{<:HDIVBDM1}, ::Type{<:Tetrahedron3D}) = true
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, data; items = [], kwargs...) where {T, Tv, Ti, FEType <: HDIVBDM1, APT}
 	ncomponents = get_ncomponents(FEType)
-	xFaceNormals = FE.xgrid[FaceNormals]
+	xFaceNormals = FE.dofgrid[FaceNormals]
 	nfaces = num_sources(xFaceNormals)
 	if items == []
 		items = 1:nfaces
@@ -58,12 +58,12 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 			result[3] = result[1] * (qpinfo.xref[2] - 1 // ncomponents)
 		end
 	end
-	integrate!(Target, FE.xgrid, ON_FACES, normalflux_eval; quadorder = 2, items = items, offset = 0:nfaces:(ncomponents-1)*nfaces, kwargs...)
+	integrate!(Target, FE.dofgrid, ON_FACES, normalflux_eval; quadorder = 2, items = items, offset = 0:nfaces:(ncomponents-1)*nfaces, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, data; items = [], kwargs...) where {Tv, Ti, FEType <: HDIVBDM1, APT}
 	# delegate cell faces to face interpolation
-	subitems = slice(FE.xgrid[CellFaces], items)
+	subitems = slice(FE.dofgrid[CellFaces], items)
 	interpolate!(Target, FE, ON_FACES, data; items = subitems, kwargs...)
 end
 
@@ -203,7 +203,7 @@ end
 
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVBDM1, APT}, EG::Type{<:AbstractElementGeometry2D}) where {Tv, Ti, APT}
-	xCellFaceSigns::Union{VariableTargetAdjacency{Int32}, Array{Int32, 2}} = FE.xgrid[CellFaceSigns]
+	xCellFaceSigns::Union{VariableTargetAdjacency{Int32}, Array{Int32, 2}} = FE.dofgrid[CellFaceSigns]
 	nfaces::Int = num_faces(EG)
 	dim::Int = dim_element(EG)
 	function closure(coefficients::Array{<:Real, 2}, cell::Int)
@@ -218,8 +218,8 @@ end
 
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVBDM1, APT}, EG::Type{<:AbstractElementGeometry3D}) where {Tv, Ti, APT}
-	xCellFaceSigns::Union{VariableTargetAdjacency{Int32}, Array{Int32, 2}} = FE.xgrid[CellFaceSigns]
-	xCellFaceOrientations::Union{VariableTargetAdjacency{Int32}, Array{Int32, 2}} = FE.xgrid[CellFaceOrientations]
+	xCellFaceSigns::Union{VariableTargetAdjacency{Int32}, Array{Int32, 2}} = FE.dofgrid[CellFaceSigns]
+	xCellFaceOrientations::Union{VariableTargetAdjacency{Int32}, Array{Int32, 2}} = FE.dofgrid[CellFaceOrientations]
 	nfaces::Int = num_faces(EG)
 	dim::Int = dim_element(EG)
 	function closure(coefficients::Array{<:Real, 2}, cell::Int)
@@ -238,7 +238,7 @@ end
 # such that they reflect the two moments with respect to the second and third node
 # of the global face enumeration
 function get_basissubset(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVBDM1, APT}, EG::Type{<:AbstractElementGeometry3D}) where {Tv, Ti, APT}
-	xCellFaceOrientations = FE.xgrid[CellFaceOrientations]
+	xCellFaceOrientations = FE.dofgrid[CellFaceOrientations]
 	nfaces::Int = num_faces(EG)
 	orientation = xCellFaceOrientations[1, 1]
 	shift4orientation1::Array{Int, 1} = [1, 0, 1, 2]

@@ -49,13 +49,13 @@ get_ref_cellmoments(::Type{<:H1P3}, ::Type{<:Triangle2D}) = [1 // 30, 1 // 30, 1
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{AT_NODES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1P3, APT}
 	edim = get_edim(FEType)
-	coffset = size(FE.xgrid[Coordinates], 2)
+	coffset = size(FE.dofgrid[Coordinates], 2)
 	if edim == 1
-		coffset += 2 * num_sources(FE.xgrid[CellNodes])
+		coffset += 2 * num_sources(FE.dofgrid[CellNodes])
 	elseif edim == 2
-		coffset += 2 * num_sources(FE.xgrid[FaceNodes]) + num_sources(FE.xgrid[CellNodes])
+		coffset += 2 * num_sources(FE.dofgrid[FaceNodes]) + num_sources(FE.dofgrid[CellNodes])
 	elseif edim == 3
-		coffset += 2 * num_sources(FE.xgrid[EdgeNodes]) + num_sources(FE.xgrid[FaceNodes])
+		coffset += 2 * num_sources(FE.dofgrid[EdgeNodes]) + num_sources(FE.dofgrid[FaceNodes])
 	end
 
 	point_evaluation!(Target, FE, AT_NODES, exact_function!; items = items, component_offset = coffset, kwargs...)
@@ -65,7 +65,7 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, 
 	edim = get_edim(FEType)
 	if edim == 3
 		# delegate edge nodes to node interpolation
-		subitems = slice(FE.xgrid[EdgeNodes], items)
+		subitems = slice(FE.dofgrid[EdgeNodes], items)
 		interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
 		# perform edge mean interpolation
@@ -77,21 +77,21 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, 
 	edim = get_edim(FEType)
 	if edim == 2
 		# delegate face nodes to node interpolation
-		subitems = slice(FE.xgrid[FaceNodes], items)
+		subitems = slice(FE.dofgrid[FaceNodes], items)
 		interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
 		# perform face mean interpolation
 		ensure_moments!(Target, FE, ON_FACES, exact_function!; items = items, order = 1, kwargs...)
 	elseif edim == 3
 		# delegate face edges to edge interpolation
-		subitems = slice(FE.xgrid[FaceEdges], items)
+		subitems = slice(FE.dofgrid[FaceEdges], items)
 		interpolate!(Target, FE, ON_EDGES, exact_function!; items = subitems, kwargs...)
 
 		# preserve face integral
 		ensure_moments!(Target, FE, ON_FACES, exact_function!; order = 0, items = items, kwargs...)
 	elseif edim == 1
 		# delegate face nodes to node interpolation
-		subitems = slice(FE.xgrid[FaceNodes], items)
+		subitems = slice(FE.dofgrid[FaceNodes], items)
 		interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 	end
 end
@@ -101,18 +101,18 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, 
 	edim = get_edim(FEType)
 	if edim == 2
 		# delegate cell faces to face interpolation
-		subitems = slice(FE.xgrid[CellFaces], items)
+		subitems = slice(FE.dofgrid[CellFaces], items)
 		interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, kwargs...)
 
 		# fix cell bubble value by preserving integral mean
 		ensure_moments!(Target, FE, ON_CELLS, exact_function!; items = items, kwargs...)
 	elseif edim == 3
 		# delegate cell faces to face interpolation
-		subitems = slice(FE.xgrid[CellFaces], items)
+		subitems = slice(FE.dofgrid[CellFaces], items)
 		interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, kwargs...)
 	elseif edim == 1
 		# delegate cell nodes to node interpolation
-		subitems = slice(FE.xgrid[CellNodes], items)
+		subitems = slice(FE.dofgrid[CellNodes], items)
 		interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
 		# preserve cell integral
@@ -198,7 +198,7 @@ end
 
 # we need to change the ordering of the face dofs on faces that have a negative orientation sign
 function get_basissubset(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1P3{ncomponents, edim}, APT}, EG::Type{<:Triangle2D}) where {ncomponents, edim, Tv, Ti, APT}
-	xCellFaceSigns = FE.xgrid[CellFaceSigns]
+	xCellFaceSigns = FE.dofgrid[CellFaceSigns]
 	nfaces::Int = num_faces(EG)
 	function closure(subset_ids::Array{Int, 1}, cell)
 		for j ∈ 1:nfaces
@@ -220,7 +220,7 @@ end
 
 # we need to change the ordering of the face dofs on faces that have a negative orientation sign
 function get_basissubset(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1P3{ncomponents, edim}, APT}, EG::Type{<:Tetrahedron3D}) where {ncomponents, edim, Tv, Ti, APT}
-	xCellEdgeSigns = FE.xgrid[CellEdgeSigns]
+	xCellEdgeSigns = FE.dofgrid[CellEdgeSigns]
 	nedges::Int = num_edges(EG)
 	function closure(subset_ids::Array{Int, 1}, cell)
 		for j ∈ 1:nedges
@@ -243,7 +243,7 @@ end
 
 # we need to change the ordering of the face dofs on faces that have a negative orientation sign
 function get_basissubset(::Type{ON_FACES}, FE::FESpace{Tv, Ti, H1P3{ncomponents, edim}, APT}, EG::Type{<:Triangle2D}) where {ncomponents, edim, Tv, Ti, APT}
-	xFaceEdgeSigns = FE.xgrid[FaceEdgeSigns]
+	xFaceEdgeSigns = FE.dofgrid[FaceEdgeSigns]
 	nedges::Int = num_edges(EG)
 	function closure(subset_ids::Array{Int, 1}, face)
 		for j ∈ 1:nedges
@@ -264,8 +264,8 @@ function get_basissubset(::Type{ON_FACES}, FE::FESpace{Tv, Ti, H1P3{ncomponents,
 end
 
 function get_basissubset(::Type{ON_BFACES}, FE::FESpace{Tv, Ti, H1P3{ncomponents, edim}, APT}, EG::Type{<:Triangle2D}) where {ncomponents, edim, Tv, Ti, APT}
-	xFaceEdgeSigns = FE.xgrid[FaceEdgeSigns]
-	xBFaceFaces = FE.xgrid[BFaceFaces]
+	xFaceEdgeSigns = FE.dofgrid[FaceEdgeSigns]
+	xBFaceFaces = FE.dofgrid[BFaceFaces]
 	nedges::Int = num_edges(EG)
 	function closure(subset_ids::Array{Int, 1}, bface)
 		for j ∈ 1:nedges

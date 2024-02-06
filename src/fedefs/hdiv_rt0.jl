@@ -35,7 +35,7 @@ isdefined(FEType::Type{<:HDIVRT0}, ::Type{<:Tetrahedron3D}) = true
 isdefined(FEType::Type{<:HDIVRT0}, ::Type{<:Hexahedron3D}) = true
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, data; items = [], kwargs...) where {T, Tv, Ti, FEType <: HDIVRT0, APT}
-	xFaceNormals = FE.xgrid[FaceNormals]
+	xFaceNormals = FE.dofgrid[FaceNormals]
 	if items == []
 		items = 1:size(xFaceNormals, 2)
 	end
@@ -46,12 +46,12 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 		data(data_eval, qpinfo)
 		result[1] = dot(data_eval, view(xFaceNormals, :, qpinfo.item))
 	end
-	integrate!(Target, FE.xgrid, ON_FACES, normalflux_eval; items = items, kwargs...)
+	integrate!(Target, FE.dofgrid, ON_FACES, normalflux_eval; items = items, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, data; items = [], kwargs...) where {Tv, Ti, FEType <: HDIVRT0, APT}
 	# delegate cell faces to face interpolation
-	subitems = slice(FE.xgrid[CellFaces], items)
+	subitems = slice(FE.dofgrid[CellFaces], items)
 	interpolate!(Target, FE, ON_FACES, data; items = subitems, kwargs...)
 end
 
@@ -117,7 +117,7 @@ function get_basis(::Type{ON_CELLS}, ::Type{HDIVRT0{3}}, ::Type{<:Hexahedron3D})
 end
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVRT0, APT}, EG::Type{<:AbstractElementGeometry}) where {Tv, Ti, APT}
-	xCellFaceSigns = FE.xgrid[CellFaceSigns]
+	xCellFaceSigns = FE.dofgrid[CellFaceSigns]
 	nfaces = num_faces(EG)
 	function closure(coefficients, cell)
 		# multiplication with normal vector signs

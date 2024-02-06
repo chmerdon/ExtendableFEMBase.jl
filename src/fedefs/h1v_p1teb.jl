@@ -43,35 +43,35 @@ isdefined(FEType::Type{<:H1P1TEB}, ::Type{<:Tetrahedron3D}) = true
 
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{AT_NODES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1P1TEB, APT}
-	nnodes = size(FE.xgrid[Coordinates], 2)
+	nnodes = size(FE.dofgrid[Coordinates], 2)
 	point_evaluation!(Target, FE, AT_NODES, exact_function!; items = items, component_offset = nnodes, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_EDGES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1P1TEB{2}, APT}
 	# delegate edge nodes to node interpolation
-	subitems = slice(FE.xgrid[EdgeNodes], items)
+	subitems = slice(FE.dofgrid[EdgeNodes], items)
 	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1P1TEB{3}, APT}
 	# delegate edges to edge interpolation
-	subitems = slice(FE.xgrid[FaceEdges], items)
+	subitems = slice(FE.dofgrid[FaceEdges], items)
 	interpolate!(Target, FE, ON_EDGES, exact_function!; items = subitems, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, exact_function!; items = [], bonus_quadorder = 0, kwargs...) where {T, Tv, Ti, FEType <: H1P1TEB{2}, APT}
 	# delegate face nodes to node interpolation
-	subitems = slice(FE.xgrid[FaceNodes], items)
+	subitems = slice(FE.dofgrid[FaceNodes], items)
 	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
 	# preserve face means in tangential direction
-	xItemVolumes = FE.xgrid[FaceVolumes]
-	xItemNodes = FE.xgrid[FaceNodes]
-	xItemGeometries = FE.xgrid[FaceGeometries]
-	xFaceNormals = FE.xgrid[FaceNormals]
+	xItemVolumes = FE.dofgrid[FaceVolumes]
+	xItemNodes = FE.dofgrid[FaceNodes]
+	xItemGeometries = FE.dofgrid[FaceGeometries]
+	xFaceNormals = FE.dofgrid[FaceNormals]
 	xItemDofs = FE[FaceDofs]
 	ncomponents = get_ncomponents(FEType)
-	nnodes = size(FE.xgrid[Coordinates], 2)
+	nnodes = size(FE.dofgrid[Coordinates], 2)
 	nitems = num_sources(xItemNodes)
 	offset = ncomponents * nnodes
 	if items == []
@@ -80,7 +80,7 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 
 	# compute exact face means
 	facemeans = zeros(T, ncomponents, nitems)
-	integrate!(facemeans, FE.xgrid, ON_FACES, exact_function!; quadorder = 2 + bonus_quadorder, items = items, kwargs...)
+	integrate!(facemeans, FE.dofgrid, ON_FACES, exact_function!; quadorder = 2 + bonus_quadorder, items = items, kwargs...)
 	P1flux::T = 0
 	value::T = 0
 	itemEG = Edge1D
@@ -109,16 +109,16 @@ end
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_EDGES}, exact_function!; items = [], bonus_quadorder = 0, kwargs...) where {T, Tv, Ti, FEType <: H1P1TEB{3}, APT}
 	# delegate face nodes to node interpolation
-	subitems = slice(FE.xgrid[EdgeNodes], items)
+	subitems = slice(FE.dofgrid[EdgeNodes], items)
 	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
 	# preserve edge means in tangential direction
-	xItemVolumes = FE.xgrid[EdgeVolumes]
-	xItemNodes = FE.xgrid[EdgeNodes]
-	xItemGeometries = FE.xgrid[EdgeGeometries]
-	xEdgeTangents = FE.xgrid[EdgeTangents]
+	xItemVolumes = FE.dofgrid[EdgeVolumes]
+	xItemNodes = FE.dofgrid[EdgeNodes]
+	xItemGeometries = FE.dofgrid[EdgeGeometries]
+	xEdgeTangents = FE.dofgrid[EdgeTangents]
 	xItemDofs = FE[EdgeDofs]
-	nnodes = size(FE.xgrid[Coordinates], 2)
+	nnodes = size(FE.dofgrid[Coordinates], 2)
 	nitems = num_sources(xItemNodes)
 	ncomponents = get_ncomponents(FEType)
 	offset = ncomponents * nnodes
@@ -128,7 +128,7 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 
 	# compute exact face means
 	edgemeans = zeros(T, ncomponents, nitems)
-	integrate!(edgemeans, FE.xgrid, ON_EDGES, exact_function!; quadorder = 2 + bonus_quadorder, items = items, kwargs...)
+	integrate!(edgemeans, FE.dofgrid, ON_EDGES, exact_function!; quadorder = 2 + bonus_quadorder, items = items, kwargs...)
 	P1flux::T = 0
 	value::T = 0
 	itemEG = Edge1D
@@ -152,7 +152,7 @@ end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1P1TEB, APT}
 	# delegate cell faces to face interpolation
-	subitems = slice(FE.xgrid[CellFaces], items)
+	subitems = slice(FE.dofgrid[CellFaces], items)
 	interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, kwargs...)
 end
 
@@ -188,8 +188,8 @@ function get_basis(AT::Type{ON_CELLS}, ::Type{H1P1TEB{2}}, EG::Type{<:Triangle2D
 end
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1P1TEB{2}, APT}, ::Type{<:Triangle2D}) where {Tv, Ti, APT}
-	xFaceNormals::Array{Tv, 2} = FE.xgrid[FaceNormals]
-	xCellFaces = FE.xgrid[CellFaces]
+	xFaceNormals::Array{Tv, 2} = FE.dofgrid[FaceNormals]
+	xCellFaces = FE.dofgrid[CellFaces]
 	function closure(coefficients::Array{<:Real, 2}, cell)
 		fill!(coefficients, 1.0)
 		coefficients[1, 7] = -xFaceNormals[2, xCellFaces[1, cell]]
@@ -202,7 +202,7 @@ function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1P1TEB{2}, APT}
 end
 
 function get_coefficients(::Type{<:ON_FACES}, FE::FESpace{Tv, Ti, H1P1TEB{2}, APT}, ::Type{<:Edge1D}) where {Tv, Ti, APT}
-	xFaceNormals::Array{Tv, 2} = FE.xgrid[FaceNormals]
+	xFaceNormals::Array{Tv, 2} = FE.dofgrid[FaceNormals]
 	function closure(coefficients::Array{<:Real, 2}, face)
 		# multiplication of face bubble with normal vector of face
 		fill!(coefficients, 1.0)
@@ -252,8 +252,8 @@ function get_basis(AT::Type{ON_CELLS}, ::Type{H1P1TEB{3}}, EG::Type{<:Tetrahedro
 end
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1P1TEB{3}, APT}, ::Type{<:Tetrahedron3D}) where {Tv, Ti, APT}
-	xEdgeTangents::Array{Tv, 2} = FE.xgrid[EdgeTangents]
-	xCellEdges = FE.xgrid[CellEdges]
+	xEdgeTangents::Array{Tv, 2} = FE.dofgrid[EdgeTangents]
+	xCellEdges = FE.dofgrid[CellEdges]
 	function closure(coefficients::Array{<:Real, 2}, cell)
 		fill!(coefficients, 1.0)
 		for e ∈ 1:6, k ∈ 1:2
@@ -264,8 +264,8 @@ function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1P1TEB{3}, APT}
 end
 
 function get_coefficients(::Type{<:ON_FACES}, FE::FESpace{Tv, Ti, H1P1TEB{3}, APT}, ::Type{<:Triangle2D}) where {Tv, Ti, APT}
-	xEdgeTangents::Array{Tv, 2} = FE.xgrid[EdgeTangents]
-	xFaceEdges = FE.xgrid[FaceEdges]
+	xEdgeTangents::Array{Tv, 2} = FE.dofgrid[EdgeTangents]
+	xFaceEdges = FE.dofgrid[FaceEdges]
 	function closure(coefficients::Array{<:Real, 2}, face)
 		fill!(coefficients, 1.0)
 		for e ∈ 1:3, k ∈ 1:2

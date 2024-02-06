@@ -42,26 +42,26 @@ get_ref_cellmoments(::Type{<:H1MINI}, ::Type{<:Quadrilateral2D}) = [1 // 4, 1 //
 interior_dofs_offset(::Type{ON_CELLS}, ::Type{H1MINI{ncomponents, edim}}, EG::Type{<:AbstractElementGeometry}) where {ncomponents, edim} = num_nodes(EG)
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{AT_NODES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1MINI, APT}
-	nnodes = size(FE.xgrid[Coordinates], 2)
-	ncells = num_sources(FE.xgrid[CellNodes])
+	nnodes = size(FE.dofgrid[Coordinates], 2)
+	ncells = num_sources(FE.dofgrid[CellNodes])
 	point_evaluation!(Target, FE, AT_NODES, exact_function!; items = items, component_offset = nnodes + ncells, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_EDGES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1MINI, APT}
 	# delegate edge nodes to node interpolation
-	subitems = slice(FE.xgrid[EdgeNodes], items)
+	subitems = slice(FE.dofgrid[EdgeNodes], items)
 	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1MINI, APT}
 	# delegate face nodes to node interpolation
-	subitems = slice(FE.xgrid[FaceNodes], items)
+	subitems = slice(FE.dofgrid[FaceNodes], items)
 	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1MINI, APT}
 	# delegate cell nodes to node interpolation
-	subitems = slice(FE.xgrid[CellNodes], items)
+	subitems = slice(FE.dofgrid[CellNodes], items)
 	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
 	# fix cell bubble value by preserving integral mean
@@ -69,8 +69,8 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, 
 end
 
 function nodevalues!(Target::AbstractArray{<:Real, 2}, Source::AbstractArray{<:Real, 1}, FE::FESpace{<:H1MINI})
-	nnodes = num_sources(FE.xgrid[Coordinates])
-	ncells = num_sources(FE.xgrid[CellNodes])
+	nnodes = num_sources(FE.dofgrid[Coordinates])
+	ncells = num_sources(FE.dofgrid[CellNodes])
 	FEType = eltype(FE)
 	ncomponents = get_ncomponents(FEType)
 	offset4component = 0:(nnodes+ncells):ncomponents*(nnodes+ncells)

@@ -31,7 +31,7 @@ interior_dofs_offset(::Type{<:ON_CELLS}, ::Type{<:HDIVBDM2{2}}, ::Type{<:Triangl
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, data; items = [], kwargs...) where {T, Tv, Ti, FEType <: HDIVBDM2, APT}
 	ncomponents = get_ncomponents(FEType)
-	xFaceNormals = FE.xgrid[FaceNormals]
+	xFaceNormals = FE.dofgrid[FaceNormals]
 	nfaces = num_sources(xFaceNormals)
 	if items == []
 		items = 1:nfaces
@@ -45,12 +45,12 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 		result[2] = result[1] * (qpinfo.xref[1] - 1 // ncomponents)
 		result[3] = result[1] * (qpinfo.xref[1]^2 - qpinfo.xref[1] + 1 // 6)
 	end
-	integrate!(Target, FE.xgrid, ON_FACES, normalflux_eval; quadorder = 4, items = items, offset = [0, nfaces, 2 * nfaces], kwargs...)
+	integrate!(Target, FE.dofgrid, ON_FACES, normalflux_eval; quadorder = 4, items = items, offset = [0, nfaces, 2 * nfaces], kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, data; items = [], time = 0, bonus_quadorder = 0, kwargs...) where {T, Tv, Ti, FEType <: HDIVBDM2, APT}
 	# delegate cell faces to face interpolation
-	subitems = slice(FE.xgrid[CellFaces], items)
+	subitems = slice(FE.dofgrid[CellFaces], items)
 	interpolate!(Target, FE, ON_FACES, data; items = subitems, kwargs...)
 
 	# set values of interior BDM2 functions as piecewise best-approximation
@@ -59,21 +59,21 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 	ndofs = get_ndofs(ON_CELLS, FEType, EG)
 	interior_offset::Int = 9
 	nidofs::Int = ndofs - interior_offset
-	ncells = num_sources(FE.xgrid[CellNodes])
-	xCellVolumes::Array{Tv, 1} = FE.xgrid[CellVolumes]
-	xCellRegions = FE.xgrid[CellRegions]
+	ncells = num_sources(FE.dofgrid[CellNodes])
+	xCellVolumes::Array{Tv, 1} = FE.dofgrid[CellVolumes]
+	xCellRegions = FE.dofgrid[CellRegions]
 	xCellDofs::DofMapTypes{Ti} = FE[CellDofs]
 	qf = QuadratureRule{T, EG}(max(4, 2 + bonus_quadorder))
 	FEB = FEEvaluator(FE, Identity, qf; T = T)
-	QP = QPInfos(FE.xgrid)
+	QP = QPInfos(FE.dofgrid)
 
 	# evaluation of gradient of P1 functions
 	FE3 = H1P1{1}
-	FES3 = FESpace{FE3, ON_CELLS}(FE.xgrid)
+	FES3 = FESpace{FE3, ON_CELLS}(FE.dofgrid)
 	FEBP1 = FEEvaluator(FES3, Gradient, qf; T = T)
 	# evaluation of curl of bubble functions
 	FE4 = H1BUBBLE{1}
-	FES4 = FESpace{FE4, ON_CELLS}(FE.xgrid)
+	FES4 = FESpace{FE4, ON_CELLS}(FE.dofgrid)
 	FEBB = FEEvaluator(FES4, CurlScalar, qf; T = T)
 
 	if items == []
@@ -203,7 +203,7 @@ end
 
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVBDM2, APT}, EG::Type{<:AbstractElementGeometry2D}) where {Tv, Ti, APT}
-	xCellFaceSigns::Union{VariableTargetAdjacency{Int32}, Array{Int32, 2}} = FE.xgrid[CellFaceSigns]
+	xCellFaceSigns::Union{VariableTargetAdjacency{Int32}, Array{Int32, 2}} = FE.dofgrid[CellFaceSigns]
 	nfaces::Int = num_faces(EG)
 	dim::Int = dim_element(EG)
 	function closure(coefficients::Array{<:Real, 2}, cell::Int)

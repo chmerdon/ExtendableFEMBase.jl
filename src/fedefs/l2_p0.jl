@@ -25,8 +25,8 @@ get_dofmap_pattern(FEType::Type{<:L2P0}, ::Union{Type{FaceDofs}, Type{BFaceDofs}
 isdefined(FEType::Type{<:L2P0}, ::Type{<:AbstractElementGeometry}) = true
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {T, Tv, Ti, FEType <: L2P0, APT}
-	xCellVolumes = FE.xgrid[CellVolumes]
-	ncells = num_sources(FE.xgrid[CellNodes])
+	xCellVolumes = FE.dofgrid[CellVolumes]
+	ncells = num_sources(FE.dofgrid[CellNodes])
 	if items == []
 		items = 1:ncells
 	else
@@ -34,7 +34,7 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 	end
 	ncomponents = get_ncomponents(FEType)
 	integrals4cell = zeros(T, ncomponents, ncells)
-	integrate!(integrals4cell, FE.xgrid, ON_CELLS, exact_function!; items = items, kwargs...)
+	integrate!(integrals4cell, FE.dofgrid, ON_CELLS, exact_function!; items = items, kwargs...)
 	for cell in items
 		if cell != 0
 			for c ∈ 1:ncomponents
@@ -46,13 +46,13 @@ end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: L2P0, APT}
 	# delegate to node cell interpolation
-	subitems = slice(FE.xgrid[FaceCells], items)
+	subitems = slice(FE.dofgrid[FaceCells], items)
 	interpolate!(Target, FE, ON_CELLS, exact_function!; items = subitems, kwargs...)
 end
 
 function nodevalues!(Target::AbstractArray{<:Real, 2}, Source::AbstractArray{<:Real, 1}, FE::FESpace{<:L2P0})
-	xCoords = FE.xgrid[Coordinates]
-	xCellNodes = FE.xgrid[CellNodes]
+	xCoords = FE.dofgrid[Coordinates]
+	xCellNodes = FE.dofgrid[CellNodes]
 	xNodeCells = atranspose(xCellNodes)
 	FEType = eltype(FE)
 	ncomponents = get_ncomponents(FEType)

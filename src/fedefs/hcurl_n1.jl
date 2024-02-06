@@ -36,7 +36,7 @@ end
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, data; items = [], kwargs...) where {T, Tv, Ti, FEType <: HCURLN1, APT}
 	edim = get_ncomponents(FEType)
 	if edim == 2
-		xFaceNormals = FE.xgrid[FaceNormals]
+		xFaceNormals = FE.dofgrid[FaceNormals]
         nfaces = num_sources(xFaceNormals)
 		if items == []
 			items = 1:size(xFaceNormals, 2)
@@ -49,10 +49,10 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 			result[1] += data_eval[2] * xFaceNormals[1, qpinfo.item]
             result[2] = result[1] * (qpinfo.xref[1] - 1 // 2)
         end
-        integrate!(Target, FE.xgrid, ON_FACES, tangentflux_eval2d; quadorder = 2, items = items, offset = [0,nfaces], kwargs...)
+        integrate!(Target, FE.dofgrid, ON_FACES, tangentflux_eval2d; quadorder = 2, items = items, offset = [0,nfaces], kwargs...)
 	elseif edim == 3
 		# delegate face edges to edge interpolation
-		subitems = slice(FE.xgrid[FaceEdges], items)
+		subitems = slice(FE.dofgrid[FaceEdges], items)
 		interpolate!(Target, FE, ON_EDGES, data; items = subitems, kwargs...)
 	end
 end
@@ -61,11 +61,11 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, 
 	edim = get_ncomponents(FEType)
 	if edim == 2
 		# delegate cell faces to face interpolation
-		subitems = slice(FE.xgrid[CellFaces], items)
+		subitems = slice(FE.dofgrid[CellFaces], items)
 		interpolate!(Target, FE, ON_FACES, data; items = subitems, kwargs...)
 	elseif edim == 3
 		# delegate cell edges to edge interpolation
-		subitems = slice(FE.xgrid[CellEdges], items)
+		subitems = slice(FE.dofgrid[CellEdges], items)
 		interpolate!(Target, FE, ON_EDGES, data; items = subitems, kwargs...)
 	end
 end
@@ -104,7 +104,7 @@ function get_basis(::Type{ON_CELLS}, ::Type{HCURLN1{2}}, ::Type{<:Triangle2D})
 end
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HCURLN1, APT}, EG::Type{<:AbstractElementGeometry2D}) where {Tv, Ti, APT}
-	xCellFaceSigns = FE.xgrid[CellFaceSigns]
+	xCellFaceSigns = FE.dofgrid[CellFaceSigns]
 	nfaces = num_faces(EG)
 	function closure(coefficients, cell)
 		# multiplication with normal vector signs (only RT0)

@@ -39,28 +39,28 @@ isdefined(FEType::Type{<:H1BR}, ::Type{<:Tetrahedron3D}) = true
 
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{AT_NODES}, exact_function!; kwargs...) where {Tv, Ti, FEType <: H1BR, APT}
-	nnodes = size(FE.xgrid[Coordinates], 2)
+	nnodes = size(FE.dofgrid[Coordinates], 2)
 	point_evaluation!(Target, FE, AT_NODES, exact_function!; component_offset = nnodes, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_EDGES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1BR, APT}
 	# delegate edge nodes to node interpolation
-	subitems = slice(FE.xgrid[EdgeNodes], items)
+	subitems = slice(FE.dofgrid[EdgeNodes], items)
 	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target::AbstractVector{T}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, exact_function!; items = [], bonus_quadorder = 0, kwargs...) where {T, Tv, Ti, FEType <: H1BR, APT}
 	# delegate face nodes to node interpolation
-	subitems = slice(FE.xgrid[FaceNodes], items)
+	subitems = slice(FE.dofgrid[FaceNodes], items)
 	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
 	# preserve face means in normal direction
-	xItemVolumes = FE.xgrid[FaceVolumes]
-	xItemNodes = FE.xgrid[FaceNodes]
-	xItemGeometries = FE.xgrid[FaceGeometries]
-	xFaceNormals = FE.xgrid[FaceNormals]
+	xItemVolumes = FE.dofgrid[FaceVolumes]
+	xItemNodes = FE.dofgrid[FaceNodes]
+	xItemGeometries = FE.dofgrid[FaceGeometries]
+	xFaceNormals = FE.dofgrid[FaceNormals]
 	xItemDofs = FE[FaceDofs]
-	nnodes = size(FE.xgrid[Coordinates], 2)
+	nnodes = size(FE.dofgrid[Coordinates], 2)
 	nitems = num_sources(xItemNodes)
 	ncomponents = get_ncomponents(FEType)
 	offset = ncomponents * nnodes
@@ -70,7 +70,7 @@ function ExtendableGrids.interpolate!(Target::AbstractVector{T}, FE::FESpace{Tv,
 
 	# compute exact face means
 	facemeans = zeros(T, ncomponents, nitems)
-	integrate!(facemeans, FE.xgrid, ON_FACES, exact_function!; quadorder = 2 + bonus_quadorder, items = items, kwargs...)
+	integrate!(facemeans, FE.dofgrid, ON_FACES, exact_function!; quadorder = 2 + bonus_quadorder, items = items, kwargs...)
 	P1flux::T = 0
 	value::T = 0
 	itemEG = Edge1D
@@ -94,7 +94,7 @@ end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1BR, APT}
 	# delegate cell faces to face interpolation
-	subitems = slice(FE.xgrid[CellFaces], items)
+	subitems = slice(FE.dofgrid[CellFaces], items)
 	interpolate!(Target, FE, ON_FACES, exact_function!; items = subitems, kwargs...)
 end
 
@@ -148,8 +148,8 @@ function get_basis(AT::Type{ON_CELLS}, FEType::Type{H1BR{2}}, EG::Type{<:Quadril
 end
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1BR{2}, APT}, ::Type{<:Triangle2D}) where {Tv, Ti, APT}
-	xFaceNormals::Array{Tv, 2} = FE.xgrid[FaceNormals]
-	xCellFaces = FE.xgrid[CellFaces]
+	xFaceNormals::Array{Tv, 2} = FE.dofgrid[FaceNormals]
+	xCellFaces = FE.dofgrid[CellFaces]
 	function closure(coefficients::Array{<:Real, 2}, cell)
 		fill!(coefficients, 1.0)
 		coefficients[1, 7] = xFaceNormals[1, xCellFaces[1, cell]]
@@ -162,8 +162,8 @@ function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1BR{2}, APT}, :
 end
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1BR{2}, APT}, ::Type{<:Quadrilateral2D}) where {Tv, Ti, APT}
-	xFaceNormals::Array{Tv, 2} = FE.xgrid[FaceNormals]
-	xCellFaces = FE.xgrid[CellFaces]
+	xFaceNormals::Array{Tv, 2} = FE.dofgrid[FaceNormals]
+	xCellFaces = FE.dofgrid[CellFaces]
 	function closure(coefficients::Array{<:Real, 2}, cell)
 		fill!(coefficients, 1.0)
 		coefficients[1, 9] = xFaceNormals[1, xCellFaces[1, cell]]
@@ -178,7 +178,7 @@ function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1BR{2}, APT}, :
 end
 
 function get_coefficients(::Type{<:ON_FACES}, FE::FESpace{Tv, Ti, H1BR{2}, APT}, ::Type{<:Edge1D}) where {Tv, Ti, APT}
-	xFaceNormals::Array{Tv, 2} = FE.xgrid[FaceNormals]
+	xFaceNormals::Array{Tv, 2} = FE.dofgrid[FaceNormals]
 	function closure(coefficients::Array{<:Real, 2}, face)
 		# multiplication of face bubble with normal vector of face
 		fill!(coefficients, 1.0)
@@ -251,8 +251,8 @@ end
 
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1BR{3}, APT}, ::Type{<:Tetrahedron3D}) where {Tv, Ti, APT}
-	xFaceNormals::Array{Tv, 2} = FE.xgrid[FaceNormals]
-	xCellFaces::Adjacency{Ti} = FE.xgrid[CellFaces]
+	xFaceNormals::Array{Tv, 2} = FE.dofgrid[FaceNormals]
+	xCellFaces::Adjacency{Ti} = FE.dofgrid[CellFaces]
 	function closure(coefficients::Array{<:Real, 2}, cell)
 		# multiplication with normal vectors
 		fill!(coefficients, 1.0)
@@ -274,7 +274,7 @@ end
 
 
 function get_coefficients(::Type{<:ON_FACES}, FE::FESpace{Tv, Ti, H1BR{3}, APT}, ::Type{<:Triangle2D}) where {Tv, Ti, APT}
-	xFaceNormals::Array{Tv, 2} = FE.xgrid[FaceNormals]
+	xFaceNormals::Array{Tv, 2} = FE.dofgrid[FaceNormals]
 	function closure(coefficients::Array{<:Real, 2}, face)
 		# multiplication of face bubble with normal vector of face
 		fill!(coefficients, 1.0)
@@ -285,8 +285,8 @@ function get_coefficients(::Type{<:ON_FACES}, FE::FESpace{Tv, Ti, H1BR{3}, APT},
 end
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, H1BR{3}, APT}, ::Type{<:Hexahedron3D}) where {Tv, Ti, APT}
-	xFaceNormals::Array{Tv, 2} = FE.xgrid[FaceNormals]
-	xCellFaces::Adjacency{Ti} = FE.xgrid[CellFaces]
+	xFaceNormals::Array{Tv, 2} = FE.dofgrid[FaceNormals]
+	xCellFaces::Adjacency{Ti} = FE.dofgrid[CellFaces]
 	function closure(coefficients::Array{<:Real, 2}, cell)
 		# multiplication with normal vectors
 		fill!(coefficients, 1.0)
@@ -314,7 +314,7 @@ end
 
 
 function get_coefficients(::Type{<:ON_FACES}, FE::FESpace{Tv, Ti, H1BR{3}, APT}, ::Type{<:Quadrilateral2D}) where {Tv, Ti, APT}
-	xFaceNormals::Array{Tv, 2} = FE.xgrid[FaceNormals]
+	xFaceNormals::Array{Tv, 2} = FE.dofgrid[FaceNormals]
 	function closure(coefficients::Array{<:Real, 2}, face)
 		# multiplication of face bubble with normal vector of face
 		fill!(coefficients, 1.0)

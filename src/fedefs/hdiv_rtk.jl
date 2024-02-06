@@ -31,7 +31,7 @@ interior_dofs_offset(::Type{<:ON_CELLS}, ::Type{<:HDIVRTk{2, order}}, ::Type{<:T
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, HDIVRTk{edim, order}, APT}, ::Type{ON_FACES}, data; items = [], bonus_quadorder = 0, kwargs...) where {T, Tv, Ti, edim, order, APT}
 	ncomponents = edim
-	xFaceNormals = FE.xgrid[FaceNormals]
+	xFaceNormals = FE.dofgrid[FaceNormals]
 	nfaces = num_sources(xFaceNormals)
 	if items == []
 		items = 1:nfaces
@@ -48,12 +48,12 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 		    result[j+1] = result[1] * moments_weights[j+1](qpinfo.xref[1])
         end
 	end
-	integrate!(Target, FE.xgrid, ON_FACES, normalflux_eval; quadorder = 2*order + bonus_quadorder, items = items, offset = offset, kwargs...)
+	integrate!(Target, FE.dofgrid, ON_FACES, normalflux_eval; quadorder = 2*order + bonus_quadorder, items = items, offset = offset, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, HDIVRTk{edim, order}, APT}, ::Type{ON_CELLS}, data; items = [], time = 0, bonus_quadorder = 0, kwargs...) where {T, Tv, Ti, edim, order, APT}
 	# delegate cell faces to face interpolation
-	subitems = slice(FE.xgrid[CellFaces], items)
+	subitems = slice(FE.dofgrid[CellFaces], items)
 	interpolate!(Target, FE, ON_FACES, data; items = subitems, bonus_quadorder = bonus_quadorder, kwargs...)
 
     if order == 0
@@ -67,17 +67,17 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 	ndofs = get_ndofs(ON_CELLS, FEType, EG)
 	interior_offset::Int = interior_dofs_offset(ON_CELLS, HDIVRTk{edim, order}, Triangle2D)
 	nidofs::Int = ndofs - interior_offset
-	ncells = num_sources(FE.xgrid[CellNodes])
-	xCellVolumes::Array{Tv, 1} = FE.xgrid[CellVolumes]
-	xCellRegions = FE.xgrid[CellRegions]
+	ncells = num_sources(FE.dofgrid[CellNodes])
+	xCellVolumes::Array{Tv, 1} = FE.dofgrid[CellVolumes]
+	xCellRegions = FE.dofgrid[CellRegions]
 	xCellDofs::DofMapTypes{Ti} = FE[CellDofs]
 	qf = QuadratureRule{T, EG}(max(2*order, order + 1 + bonus_quadorder))
 	FEB = FEEvaluator(FE, Identity, qf; T = T)
-	QP = QPInfos(FE.xgrid)
+	QP = QPInfos(FE.dofgrid)
 
 	# evaluation of gradient of P1 functions
 	FE3 = order == 1 ? L2P0{ncomponents} : H1Pk{ncomponents, 2, order - 1}
-	FES3 = FESpace{FE3, ON_CELLS}(FE.xgrid)
+	FES3 = FESpace{FE3, ON_CELLS}(FE.dofgrid)
 	FEBPk = FEEvaluator(FES3, Identity, qf; T = T)
 
 	if items == []
@@ -202,7 +202,7 @@ end
 
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVRTk{2, order}, APT}, EG::Type{<:Triangle2D}) where {Tv, Ti, APT, order}
-	xCellFaceSigns::Union{VariableTargetAdjacency{Int32}, Array{Int32, 2}} = FE.xgrid[CellFaceSigns]
+	xCellFaceSigns::Union{VariableTargetAdjacency{Int32}, Array{Int32, 2}} = FE.dofgrid[CellFaceSigns]
 	nfaces::Int = num_faces(EG)
 	dim::Int = dim_element(EG)
 	function closure(coefficients::Array{<:Real, 2}, cell::Int)
