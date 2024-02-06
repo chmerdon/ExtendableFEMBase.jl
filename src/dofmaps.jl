@@ -11,6 +11,11 @@ abstract type FaceDofs <: DofMap end
 abstract type EdgeDofs <: DofMap end
 abstract type BFaceDofs <: DofMap end
 abstract type BEdgeDofs <: DofMap end
+abstract type CellDofsParent <: DofMap end
+abstract type FaceDofsParent <: DofMap end
+abstract type EdgeDofsParent <: DofMap end
+abstract type BFaceDofsParent <: DofMap end
+abstract type BEdgeDofsParent <: DofMap end
 
 const DofMapTypes{Ti} = Union{VariableTargetAdjacency{Ti}, SerialVariableTargetAdjacency{Ti}, Array{Ti, 2}}
 
@@ -45,6 +50,12 @@ Dofmap4AssemblyType(::Type{<:ON_FACES}) = FaceDofs
 Dofmap4AssemblyType(::Type{ON_BFACES}) = BFaceDofs
 Dofmap4AssemblyType(::Type{<:ON_EDGES}) = EdgeDofs
 Dofmap4AssemblyType(::Type{ON_BEDGES}) = BEdgeDofs
+
+ParentDofmap4Dofmap(::Type{CellDofs}) = CellDofsParent
+ParentDofmap4Dofmap(::Type{FaceDofs}) = FaceDofsParent
+ParentDofmap4Dofmap(::Type{EdgeDofs}) = EdgeDofsParent
+ParentDofmap4Dofmap(::Type{BFaceDofs}) = BFaceDofsParent
+ParentDofmap4Dofmap(::Type{BEdgeDofs}) = BEdgeDofsParent
 
 EffAT4AssemblyType(::Type{ON_CELLS}, ::Type{ON_CELLS}) = ON_CELLS
 EffAT4AssemblyType(::Type{ON_CELLS}, ::Type{<:ON_FACES}) = ON_FACES
@@ -197,13 +208,12 @@ function Dofmap4AssemblyType(FES::FESpace, AT::Type{<:AssemblyType})
 	return FES[Dofmap4AssemblyType(EffAT4AssemblyType(assemblytype(FES), AT))]
 end
 
-
 function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<:DofMap}) where {Tv, Ti, FEType <: AbstractFiniteElement, APT}
 	## Beware: Automatic broken DofMap generation currently only reliable for CellDofs
 
 	@debug "Generating $DM for $(FES.name)"
 	## prepare dofmap patterns
-	xgrid = FES.xgrid
+	xgrid = FES.dofgrid
 	EG = xgrid[UCG4DofMap(DM)]
 	ncomponents::Int = get_ncomponents(FEType)
 	need_faces::Bool = false
@@ -368,15 +378,50 @@ function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<
 			end
 		end
 	end
-	# save dofmap
+
 	FES[DM] = xItemDofs
+
+	if FES.dofgrid !== FES.xgrid
+		## assume parent relation between xgrid and dofgrid
+		@assert FES.dofgrid[ParentGrid] == FES.xgrid "xgrid is not the parent grid of dofgrid !!!"
+		@assert FES.dofgrid[ParentGridRelation] == SubGrid "dofgrid is not a subgrid of xgrid !!!"
+		## lift subgrid dofmap to parent xgrid to allow assembly on common parent grid
+		## by constructing a variable target adjacency with empty dofs for parent items in xgrid
+		## that are not in the dofgrid --> this allows to use the dofmap in assembly over full xgrid
+		xItemDofsLifted = VariableTargetAdjacency(Ti)
+		if DM == CellDofs
+			parentitems = FES.dofgrid[CellParents]
+		elseif DM == FaceDofs
+			parentitems = FES.dofgrid[FaceParents]
+		elseif DM == EdgeDofs
+			parentitems = FES.dofgrid[EdgeParents]
+		elseif DM == BFaceDofs
+			parentitems = FES.dofgrid[BFaceParents]
+		elseif DM == BEdgeDofs
+			parentitems = FES.dofgrid[BEdgeParents]
+		end
+		DMP = ParentDofmap4Dofmap(DM)
+		subitem = 1
+		for i = 1 : num_sources(xItemDofs)
+			t = parentitems[i]
+			for j = subitem : t-1
+				append!(xItemDofsLifted, [])
+				subitem += 1
+			end
+			append!(xItemDofsLifted, view(xItemDofs, :, i))
+			subitem += 1
+		end
+
+		FES[DMP] = xItemDofsLifted
+	end
+	return FES[DM]
 end
 
 
 function init_broken_dofmap!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Union{Type{BFaceDofs}, Type{FaceDofs}}) where {Tv, Ti, FEType <: AbstractFiniteElement, APT}
 
 	## prepare dofmap patterns
-	xgrid = FES.xgrid
+	xgrid = FES.dofgrid
 	cellEG = xgrid[UniqueCellGeometries]
 	EG = xgrid[UCG4DofMap(DM)]
 	ncomponents::Int = get_ncomponents(FEType)
@@ -405,15 +450,15 @@ function init_broken_dofmap!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Union{Type{B
 		end
 	end
 
-	xFaceCells = FES.xgrid[FaceCells]
-	xCellNodes = FES.xgrid[CellNodes]
+	xFaceCells = xgrid[FaceCells]
+	xCellNodes = xgrid[CellNodes]
 	xCellDofs = FES[CellDofs]
-	xFaceNodes = FES.xgrid[SuperItemNodes4DofMap(DM)]
+	xFaceNodes = xgrid[SuperItemNodes4DofMap(DM)]
 	xCellGeometries = xgrid[CellGeometries]
 	xFaceGeometries = xgrid[ItemGeometries4DofMap(DM)]
 	xFaceDofs = VariableTargetAdjacency(Ti)
 	if DM == BFaceDofs
-		xRealFace = FES.xgrid[BFaceFaces]
+		xRealFace = xgrid[BFaceFaces]
 		nfaces = length(xRealFace)
 	elseif DM == FaceDofs
 		nfaces = num_sources(xFaceNodes)

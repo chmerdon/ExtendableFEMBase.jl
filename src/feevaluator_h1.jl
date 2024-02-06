@@ -265,7 +265,7 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Lapl
 end
 
 
-# CURLSCALAR H1
+# CURLSCALAR H1 : R1 -> R2
 function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:CurlScalar, <:AbstractH1FiniteElement})
 	L2GAinv = _update_trafo!(FEBE)
 	subset = _update_subset!(FEBE)
@@ -285,7 +285,7 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Curl
 	return nothing
 end
 
-# CURL2D H1
+# CURL2D H1 : R2 -> R1
 function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Curl2D, <:AbstractH1FiniteElement})
 	L2GAinv = _update_trafo!(FEBE)
 	subset = _update_subset!(FEBE)

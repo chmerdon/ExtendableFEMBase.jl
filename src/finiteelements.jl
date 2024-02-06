@@ -44,8 +44,13 @@ struct FESpace{Tv, Ti, FEType <: AbstractFiniteElement, AT <: AssemblyType}
 	broken::Bool                          # if true, broken dofmaps are generated
 	ndofs::Int64                          # total number of dofs
 	coffset::Int                          # offset for component dofs
-	xgrid::ExtendableGrid{Tv, Ti}          # link to xgrid 
+	xgrid::ExtendableGrid{Tv, Ti}         # link to (master/parent) grid 
+	dofgrid::ExtendableGrid{Tv,Ti}	      # link to (sub) grid used for dof numbering (expected to be equal to or child grid of xgrid)
 	dofmaps::Dict{Type{<:AbstractGridComponent}, Any} # backpack with dofmaps
+end
+
+function Base.copy(FES::FESpace{Tv, Ti, FEType, AT}) where {Tv, Ti, FEType, AT}
+	return FESpace{Tv, Ti, FEType, AT}(deepcopy(FES.name), FES.broken, FES.ndofs, FES.coffset, FES.xgrid, FES.dofgrid, FES.dofmaps)
 end
 
 get_AT(::FESpace{Tv, Ti, FEType, AT}) where {Tv, Ti, FEType, AT} = AT
@@ -75,6 +80,7 @@ If no AT is provided, the space is generated ON_CELLS.
 function FESpace{FEType, AT}(
 	xgrid::ExtendableGrid{Tv, Ti};
 	name = "",
+	regions = nothing,
 	broken::Bool = false) where {Tv, Ti, FEType <: AbstractFiniteElement, AT <: AssemblyType}
 
 	# piecewise constants are always broken
@@ -102,12 +108,22 @@ function FESpace{FEType, AT}(
 		xgrid[BFaceVolumes] = zeros(Tv, 0)
 	end
 
+	if isnothing(regions)
+		regions = unique(xgrid[CellRegions])
+	end
+
+	if regions != unique(xgrid[CellRegions])
+		dofgrid = subgrid(xgrid, regions)
+	else
+		dofgrid = xgrid
+	end
+
 	# first generate some empty FESpace
 	if name == ""
 		name = broken ? "$FEType (broken)" : "$FEType"
 	end
-	ndofs, coffset = count_ndofs(xgrid, FEType, broken)
-	FES = FESpace{Tv, Ti, FEType, AT}(name, broken, ndofs, coffset, xgrid, Dict{Type{<:AbstractGridComponent}, Any}())
+	ndofs, coffset = count_ndofs(dofgrid, FEType, broken)
+	FES = FESpace{Tv, Ti, FEType, AT}(name, broken, ndofs, coffset, xgrid, dofgrid, Dict{Type{<:AbstractGridComponent}, Any}())
 
 	@debug "Generated FESpace $name ($AT, ndofs=$ndofs)"
 
@@ -116,9 +132,8 @@ end
 
 function FESpace{FEType}(
 	xgrid::ExtendableGrid{Tv, Ti};
-	name = "",
-	broken::Bool = false) where {Tv, Ti, FEType <: AbstractFiniteElement}
-	return FESpace{FEType, ON_CELLS}(xgrid; name = name, broken = broken)
+	kwargs...) where {Tv, Ti, FEType <: AbstractFiniteElement}
+	return FESpace{FEType, ON_CELLS}(xgrid; kwargs...)
 end
 
 """

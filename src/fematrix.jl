@@ -22,6 +22,9 @@ struct FEMatrixBlock{TvM, TiM, TvG, TiG, FETypeX, FETypeY, APTX, APTY} <: Abstra
 	entries::AbstractSparseMatrix{TvM, TiM} # shares with parent object
 end
 
+function Base.copy(FEMB::FEMatrixBlock{TvM, TiM, TvG, TiG, FETypeX, FETypeY, APTX, APTY}, entries) where {TvM, TiM, TvG, TiG, FETypeX, FETypeY, APTX, APTY}
+    return FEMatrixBlock{TvM, TiM, TvG, TiG, FETypeX, FETypeY, APTX, APTY}(deepcopy(FEMB.name), copy(FEMB.FES), copy(FEMB.FESY), FEMB.offset, FEMB.offsetY, FEMB.last_index, FEMB.last_indexY, entries)
+end
 
 function Base.show(io::IO, FEB::FEMatrixBlock; tol = 1e-14)
 	@printf(io, "\n")
@@ -48,6 +51,11 @@ an AbstractMatrix (e.g. an ExtendableSparseMatrix) with an additional layer of s
 struct FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal} <: AbstractSparseMatrix{TvM, TiM}
 	FEMatrixBlocks::Array{FEMatrixBlock{TvM, TiM, TvG, TiG}, 1}
 	entries::AbstractSparseMatrix{TvM, TiM}
+end
+
+function Base.copy(FEV::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}) where {TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}
+    entries = deepcopy(FEV.entries)
+    return FEVector{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}([copy(B, entries) for B in FEV.FEMatrixBlocks], entries)
 end
 
 #Add value to matrix if it is nonzero

@@ -42,8 +42,9 @@ export OperatorPair, OperatorTriple
 include("finiteelements.jl")
 export DofMap
 export CellDofs, FaceDofs, EdgeDofs, BFaceDofs, BEdgeDofs
+export CellDofsParent, FaceDofsParent, EdgeDofsParent, BFaceDofsParent, BEdgeDofsParent
 export DofMapTypes
-export Dofmap4AssemblyType, ItemGeometries4DofMap, EffAT4AssemblyType
+export Dofmap4AssemblyType, ItemGeometries4DofMap, EffAT4AssemblyType, ParentDofmap4Dofmap
 export AbstractFiniteElement
 export FESpace, FESpaces, get_AT, get_FEType
 

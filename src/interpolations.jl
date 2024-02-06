@@ -38,7 +38,7 @@ end
 # for lowest order degrees of freedom
 # used e.g. for interpolation into P1, P2, P2B, MINI finite elements
 function point_evaluation!(target::AbstractArray{T, 1}, FES::FESpace{Tv, Ti, FEType, APT}, ::Type{AT_NODES}, exact_function; items = [], component_offset::Int = 0, time = 0, kwargs...) where {T, Tv, Ti, FEType <: AbstractH1FiniteElement, APT}
-	xCoordinates = FES.xgrid[Coordinates]
+	xCoordinates = FES.dofgrid[Coordinates]
 	nnodes = size(xCoordinates, 2)
 	ncomponents = get_ncomponents(FEType)
 	if items == []
@@ -46,11 +46,11 @@ function point_evaluation!(target::AbstractArray{T, 1}, FES::FESpace{Tv, Ti, FET
 	end
 	offset4component = 0:component_offset:ncomponents*component_offset
 	# interpolate at nodes
-	xNodeCells = atranspose(FES.xgrid[CellNodes])
-	xCellRegions = FES.xgrid[CellRegions]
+	xNodeCells = atranspose(FES.dofgrid[CellNodes])
+	xCellRegions = FES.dofgrid[CellRegions]
 	cell::Ti = 0
 	result = zeros(T, ncomponents)
-	QP = QPInfos(FES.xgrid; time = time, kwargs...)
+	QP = QPInfos(FES.dofgrid; time = time, kwargs...)
 	for j in items
 		cell = xNodeCells[1, j]
 		QP.item = cell
@@ -66,10 +66,10 @@ end
 
 
 function point_evaluation_broken!(target::AbstractArray{T, 1}, FES::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, exact_function; items = [], time = 0, kwargs...) where {T, Tv, Ti, FEType <: AbstractH1FiniteElement, APT}
-	xCoordinates = FES.xgrid[Coordinates]
-	xCellNodes = FES.xgrid[CellNodes]
+	xCoordinates = FES.dofgrid[Coordinates]
+	xCellNodes = FES.dofgrid[CellNodes]
 	xCellDofs = FES[CellDofs]
-	xCellRegions = FES.xgrid[CellRegions]
+	xCellRegions = FES.dofgrid[CellRegions]
 
 	ncomponents = get_ncomponents(FEType)
 	if items == []
@@ -77,7 +77,7 @@ function point_evaluation_broken!(target::AbstractArray{T, 1}, FES::FESpace{Tv, 
 	end
 	nnodes_on_cell::Int = 0
 	# interpolate at nodes
-	QP = QPInfos(FES.xgrid; time = time)
+	QP = QPInfos(FES.dofgrid; time = time)
 	result = zeros(T, ncomponents)
 	for cell in items
 		nnodes_on_cell = num_targets(xCellNodes, cell)
@@ -102,10 +102,11 @@ end
 # e.g. H1P2 ON_EDGES, H1MINI ON_CELLS, H1P2B ON_EDGES, ON_FACES, ON_CELLS
 function ensure_moments!(target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, AT::Type{<:AssemblyType}, exact_function; FEType_ref = "auto", order = 0, items = [], kwargs...) where {T, Tv, Ti, FEType <: AbstractH1FiniteElement, APT}
 
-	xItemVolumes::Array{Tv, 1} = FE.xgrid[GridComponentVolumes4AssemblyType(AT)]
-	xItemNodes::Adjacency{Ti} = FE.xgrid[GridComponentNodes4AssemblyType(AT)]
+	xgrid = FE.dofgrid
+	xItemVolumes::Array{Tv, 1} = xgrid[GridComponentVolumes4AssemblyType(AT)]
+	xItemNodes::Adjacency{Ti} = xgrid[GridComponentNodes4AssemblyType(AT)]
 	xItemDofs::DofMapTypes{Ti} = Dofmap4AssemblyType(FE, AT)
-	EGs = FE.xgrid[GridComponentUniqueGeometries4AssemblyType(AT)]
+	EGs = xgrid[GridComponentUniqueGeometries4AssemblyType(AT)]
 
 	bestapprox::Bool = false # if true interior dofs are set acoording to a constrained bestapproximation, otherwise to preserve the moments up to order, might become a kwarg later
 
@@ -246,7 +247,7 @@ function ensure_moments!(target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType
 
 	# integrate moments of exact_function over edges
 	edgemoments::Array{T, 2} = zeros(T, nmoments, nitems)
-	integrate!(edgemoments, FE.xgrid, AT, f_times_moments; quadorder = 2 * order_FE, items = items, kwargs...)
+	integrate!(edgemoments, xgrid, AT, f_times_moments; quadorder = 2 * order_FE, items = items, kwargs...)
 
 	localdof::Int = 0
 	for item::Int in items
@@ -272,9 +273,9 @@ end
 # remap boundary face interpolation to faces by using BFaceFaces (if there is no special function by the finite element defined)
 function ExtendableGrids.interpolate!(target::FEVectorBlock, FES::FESpace, ::Type{ON_BFACES}, source; items = items, kwargs...)
 	if length(items) == 0
-		items = FES.xgrid[BFaceFaces]
+		items = FES.dofgrid[BFaceFaces]
 	else
-		items = FES.xgrid[BFaceFaces][items]
+		items = FES.dofgrid[BFaceFaces][items]
 	end
 	interpolate!(target, FES, ON_FACES, source; items = items, kwargs...)
 end
@@ -311,7 +312,7 @@ function ExtendableGrids.interpolate!(
 
 	FEType = eltype(target.FES)
 	if target.FES.broken == true
-		FESc = FESpace{FEType}(target.FES.xgrid)
+		FESc = FESpace{FEType}(target.FES.dofgrid)
 		Targetc = FEVector{T}(FESc)
 		interpolate!(Targetc[1], FESc, AT, source; items = items, kwargs...)
 		xCellDofs = target.FES[CellDofs]
@@ -394,12 +395,13 @@ function nodevalues_subset!(target::AbstractArray{T, 2},
 	zero_target::Bool = true,
 	continuous::Bool = false) where {T, Tv, Ti, FEType, AT}
 
-	xItemGeometries = FE.xgrid[CellGeometries]
-	xItemRegions::GridRegionTypes{Ti} = FE.xgrid[CellRegions]
+	xgrid = FE.dofgrid
+	xItemGeometries = xgrid[CellGeometries]
+	xItemRegions::GridRegionTypes{Ti} = xgrid[CellRegions]
 	xItemDofs::DofMapTypes{Ti} = FE[CellDofs]
-	xItemNodes::Adjacency{Ti} = FE.xgrid[CellNodes]
+	xItemNodes::Adjacency{Ti} = xgrid[CellNodes]
 
-	EG = FE.xgrid[UniqueCellGeometries]
+	EG = xgrid[UniqueCellGeometries]
 	ndofs4EG::Array{Int, 1} = Array{Int, 1}(undef, length(EG))
 	qf = Array{QuadratureRule, 1}(undef, length(EG))
 	basisevaler::Array{FEEvaluator{T, Tv, Ti}, 1} = Array{FEEvaluator{T, Tv, Ti}, 1}(undef, length(EG))
@@ -413,7 +415,7 @@ function nodevalues_subset!(target::AbstractArray{T, 2},
 	@assert size(target, 1) >= target_resultdim "too small target dimension"
 
 	# setup basisevaler for each unique cell geometries
-	EG = FE.xgrid[UniqueCellGeometries]
+	EG = xgrid[UniqueCellGeometries]
 
 	if zero_target
 		fill!(target, 0)
@@ -428,7 +430,7 @@ function nodevalues_subset!(target::AbstractArray{T, 2},
 	end
 	nregions = length(regions)
 
-	nnodes::Int = num_sources(FE.xgrid[Coordinates])
+	nnodes::Int = num_sources(xgrid[Coordinates])
 	nneighbours::Int = 0
 
 	nnodes = length(nodes)
@@ -537,10 +539,11 @@ function nodevalues!(target::AbstractArray{T, 2},
 	zero_target::Bool = true,
 	continuous::Bool = false) where {T, Tv, Ti, FEType, AT}
 
-	xItemGeometries = FE.xgrid[CellGeometries]
-	xItemRegions::GridRegionTypes{Ti} = FE.xgrid[CellRegions]
+	xgrid = FE.dofgrid
+	xItemGeometries = xgrid[CellGeometries]
+	xItemRegions::GridRegionTypes{Ti} = xgrid[CellRegions]
 	xItemDofs::DofMapTypes{Ti} = FE[CellDofs]
-	xItemNodes::Adjacency{Ti} = FE.xgrid[CellNodes]
+	xItemNodes::Adjacency{Ti} = xgrid[CellNodes]
 	nitems = num_sources(xItemNodes)
 	target_resultdim::Int = 0
 
@@ -554,13 +557,13 @@ function nodevalues!(target::AbstractArray{T, 2},
 	nregions = length(regions)
 
 	# setup basisevaler for each unique cell geometries
-	EG = FE.xgrid[UniqueCellGeometries]
+	EG = xgrid[UniqueCellGeometries]
 
 	if zero_target
 		fill!(target, 0)
 	end
 
-	nnodes::Int = num_sources(FE.xgrid[Coordinates])
+	nnodes::Int = num_sources(xgrid[Coordinates])
 	nneighbours::Array{Int, 1} = zeros(Int, nnodes)
 	flag4node::Array{Bool, 1} = zeros(Bool, nnodes)
 
@@ -653,10 +656,11 @@ function piecewise_nodevalues!(target::AbstractArray{T, 2},
 	zero_target::Bool = true,
 	continuous::Bool = false) where {T, Tv, Ti, FEType, AT}
 
-	xItemGeometries = FE.xgrid[CellGeometries]
-	xItemRegions::GridRegionTypes{Ti} = FE.xgrid[CellRegions]
+	xgrid = FE.dofgrid
+	xItemGeometries = xgrid[CellGeometries]
+	xItemRegions::GridRegionTypes{Ti} = xgrid[CellRegions]
 	xItemDofs::DofMapTypes{Ti} = FE[CellDofs]
-	xItemNodes::Adjacency{Ti} = FE.xgrid[CellNodes]
+	xItemNodes::Adjacency{Ti} = xgrid[CellNodes]
 	nitems = num_sources(xItemNodes)
 	target_resultdim::Int = 0
 
@@ -670,13 +674,13 @@ function piecewise_nodevalues!(target::AbstractArray{T, 2},
 	nregions = length(regions)
 
 	# setup basisevaler for each unique cell geometries
-	EG = FE.xgrid[UniqueCellGeometries]
+	EG = xgrid[UniqueCellGeometries]
 
 	if zero_target
 		fill!(target, 0)
 	end
 
-	nnodes::Int = num_sources(FE.xgrid[Coordinates])
+	nnodes::Int = num_sources(xgrid[Coordinates])
 	nneighbours::Array{Int, 1} = zeros(Int, nnodes)
 	flag4node::Array{Bool, 1} = zeros(Bool, nnodes)
 
@@ -810,16 +814,16 @@ function nodevalues(source::FEVectorBlock{T, Tv, Ti, FEType, APT}, operator::Typ
 	if abs
 		nvals = 1
 	else
-		xdim = size(source.FES.xgrid[Coordinates], 2)
+		xdim = size(source.FES.dofgrid[Coordinates], 2)
 		ncomponents = get_ncomponents(eltype(source.FES))
 		nvals = Length4Operator(operator, xdim, ncomponents)
 	end
 	if nodes == []
 		if cellwise
-			target = zeros(T, nvals * max_num_targets_per_source(source.FES.xgrid[CellNodes]), num_cells(source.FES.xgrid))
+			target = zeros(T, nvals * max_num_targets_per_source(source.FES.dofgrid[CellNodes]), num_cells(source.FES.dofgrid))
 			piecewise_nodevalues!(target, source.entries, source.FES, operator; continuous = continuous, source_offset = source.offset, abs = abs, kwargs...)
 		else
-			target = zeros(T, nvals, num_nodes(source.FES.xgrid))
+			target = zeros(T, nvals, num_nodes(source.FES.dofgrid))
 			nodevalues!(target, source.entries, source.FES, operator; continuous = continuous, source_offset = source.offset, abs = abs, kwargs...)
 		end
 	else
@@ -848,7 +852,7 @@ function nodevalues_view(source::FEVectorBlock{T, Tv, Ti, FEType, APT}, operator
 		offset::Int = source.offset
 		coffset::Int = source.FES.coffset
 		if nodes == [0]
-			nodes = 1:num_nodes(source.FES.xgrid)
+			nodes = 1:num_nodes(source.FES.dofgrid)
 		end
 		for k ∈ 1:ncomponents
 			push!(array_of_views, view(source.entries, offset .+ nodes))
@@ -902,7 +906,7 @@ function continuify(
 	regions::Array{Int, 1} = [0]) where {T, Tv, Ti, FEType, APT}
 
 	FE = source.FES
-	xgrid = FE.xgrid
+	xgrid = FE.dofgrid
 	xItemGeometries = xgrid[CellGeometries]
 	xItemRegions::GridRegionTypes{Ti} = xgrid[CellRegions]
 	xItemDofs::DofMapTypes{Ti} = FE[CellDofs]
@@ -919,7 +923,7 @@ function continuify(
 	end
 
 	# setup basisevaler for each unique cell geometries
-	EG = FE.xgrid[UniqueCellGeometries]
+	EG = xgrid[UniqueCellGeometries]
 	if order == "auto"
 		order = max(get_polynomialorder(FEType, EG[1]) + QuadratureOrderShift4Operator(operator), 1)
 	end

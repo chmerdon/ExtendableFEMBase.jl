@@ -18,6 +18,10 @@ struct FEVectorBlock{T, Tv, Ti, FEType, APT} <: AbstractArray{T, 1}
 	entries::Array{T, 1} # shares with parent object
 end
 
+function Base.copy(FEB::FEVectorBlock{T,Tv,Ti,FEType,APT}, entries) where {T,Tv,Ti,FEType,APT}
+    return FEVectorBlock{T,Tv,Ti,FEType,APT}(deepcopy(FEB.name), copy(FEB.FES), FEB.offset, FEB.last_index, entries)
+end
+
 get_ncomponents(FB::FEVectorBlock) = get_ncomponents(get_FEType(FB.FES))
 
 function Base.show(io::IO, FEB::FEVectorBlock; tol = 1e-14)
@@ -45,6 +49,11 @@ struct FEVector{T, Tv, Ti} #<: AbstractVector{T}
 	FEVectorBlocks::Array{FEVectorBlock{T, Tv, Ti}, 1}
 	entries::Array{T, 1}
 	tags::Vector{Any}
+end
+
+function Base.copy(FEV::FEVector{T,Tv,Ti}) where {T,Tv,Ti}
+    entries = deepcopy(FEV.entries)
+    return FEVector{T,Tv,Ti}([copy(B, entries) for B in FEV.FEVectorBlocks], entries, [t for t in FEV.tags])
 end
 
 # overload stuff for AbstractArray{T,1} behaviour
