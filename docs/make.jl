@@ -18,6 +18,7 @@ function make_all(; with_examples::Bool = true)
 
 		modules = [
 			"Example200_LowLevelPoisson.jl",
+			"Example205_LowLevelSpaceTimePoisson.jl",
 			"Example210_LowLevelNavierStokes.jl",
 			"Example280_BasisPlotter.jl",
 			"Example281_DiscontinuousPlot.jl",
