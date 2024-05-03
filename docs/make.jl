@@ -1,6 +1,7 @@
 using Documenter
 using ExtendableFEMBase
 using ExampleJuggler
+using PlutoStaticHTML
 using CairoMakie
 
 
