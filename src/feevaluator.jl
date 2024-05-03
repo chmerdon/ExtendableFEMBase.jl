@@ -179,7 +179,7 @@ _prepare_additional_coefficients(::Type{<:NormalFlux}, xgrid, AT, edim) = AT == 
 _prepare_additional_coefficients(::Type{<:TangentialGradient}, xgrid, AT, edim) = xgrid[FaceNormals]
 function _prepare_additional_coefficients(::Type{<:TangentFlux}, xgrid, AT, edim)
 	if edim == 2
-		return _prepare_additional_coefficients(NormalFlux, AT, edim)
+		return _prepare_additional_coefficients(NormalFlux, xgrid, AT, edim)
 	else
 		return AT == ON_BEDGES ? view(xgrid[EdgeTangents], :, xgrid[BEdgeEdges]) : xgrid[EdgeTangents]
 	end

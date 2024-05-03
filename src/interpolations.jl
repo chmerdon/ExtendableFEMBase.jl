@@ -1042,22 +1042,19 @@ function displace_mesh!(xgrid::ExtendableGrid, source::FEVectorBlock; magnify = 
 	xgrid[Coordinates] .+= magnify * nodevals
 
 	# remove all keys from grid components that might have changed and need a reinstantiation
-	delete!(xgrid.components, CellVolumes)
-	delete!(xgrid.components, FaceVolumes)
-	delete!(xgrid.components, EdgeVolumes)
-	delete!(xgrid.components, FaceNormals)
-	delete!(xgrid.components, EdgeTangents)
-	delete!(xgrid.components, BFaceVolumes)
-	delete!(xgrid.components, BEdgeVolumes)
+	ExtendableGrids.update!(xgrid, CellVolumes)
+	ExtendableGrids.update!(xgrid, FaceVolumes)
+	ExtendableGrids.update!(xgrid, EdgeVolumes)
+	ExtendableGrids.update!(xgrid, FaceNormals)
+	ExtendableGrids.update!(xgrid, EdgeTangents)
+	ExtendableGrids.update!(xgrid, BFaceVolumes)
+	ExtendableGrids.update!(xgrid, BEdgeVolumes)
 end
 
 
-function displace_mesh(xgrid::ExtendableGrid, source::FEVectorBlock; magnify = 1)
+function displace_mesh(xgrid::ExtendableGrid, source::FEVectorBlock; kwargs...)
 	xgrid_displaced = deepcopy(xgrid)
-	nnodes = size(xgrid[Coordinates], 2)
-	nodevals = zeros(eltype(xgrid[Coordinates]), get_ncomponents(Base.eltype(source.FES)), nnodes)
-	nodevalues!(nodevals, source, Identity)
-	xgrid_displaced[Coordinates] .+= magnify * nodevals
+	displace_mesh!(xgrid_displaced, source; kwargs...)
 	return xgrid_displaced
 end
 

@@ -168,7 +168,7 @@ Length4Operator(::Type{CurlScalar}, xdim::Int, ncomponents::Int) = ((xdim == 2) 
 Length4Operator(::Type{Curl2D}, xdim::Int, ncomponents::Int) = 1
 Length4Operator(::Type{Curl3D}, xdim::Int, ncomponents::Int) = 3
 Length4Operator(::Type{<:Gradient}, xdim::Int, ncomponents::Int) = xdim * ncomponents
-Length4Operator(::Type{TangentialGradient}, xdim::Int, ncomponents::Int) = 1
+Length4Operator(::Type{TangentialGradient}, xdim::Int, ncomponents::Int) = ncomponents
 Length4Operator(::Type{<:SymmetricGradient}, xdim::Int, ncomponents::Int) = ((xdim == 2) ? 3 : 6) * Int(ceil(ncomponents / xdim))
 Length4Operator(::Type{<:Hessian}, xdim::Int, ncomponents::Int) = xdim * xdim * ncomponents
 Length4Operator(::Type{<:SymmetricHessian}, xdim::Int, ncomponents::Int) = ((xdim == 2) ? 3 : 6) * ncomponents

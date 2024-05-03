@@ -95,11 +95,14 @@ function FESpace{FEType, AT}(
 		xgrid[BFaceGeometries] = VectorOfConstants{ElementGeometries, Int}(Edge1D, 0)
 		xgrid[BFaceVolumes] = zeros(Tv, 0)
 	elseif AT == ON_BFACES
-		xgrid = subgrid(xgrid, unique(xgrid[BFaceRegions]); boundary = true, project = false)
-		xgrid[BFaceNodes] = zeros(Ti, 2, 0)
-		xgrid[BFaceRegions] = zeros(Ti, 0)
-		xgrid[BFaceGeometries] = VectorOfConstants{ElementGeometries, Int}(Edge1D, 0)
-		xgrid[BFaceVolumes] = zeros(Tv, 0)
+		if isnothing(regions)
+			regions = unique(xgrid[BFaceRegions])
+		end
+		dofgrid = subgrid(xgrid, regions; boundary = true, project = false)
+		dofgrid[BFaceNodes] = zeros(Ti, 2, 0)
+		dofgrid[BFaceRegions] = zeros(Ti, 0)
+		dofgrid[BFaceGeometries] = VectorOfConstants{ElementGeometries, Int}(Edge1D, 0)
+		dofgrid[BFaceVolumes] = zeros(Tv, 0)
 	elseif AT == ON_EDGES
 		xgrid = get_edgegrid(xgrid)
 		xgrid[BFaceNodes] = zeros(Ti, 2, 0)
@@ -112,10 +115,12 @@ function FESpace{FEType, AT}(
 		regions = unique(xgrid[CellRegions])
 	end
 
-	if regions != unique(xgrid[CellRegions])
-		dofgrid = subgrid(xgrid, regions)
-	else
-		dofgrid = xgrid
+	if AT !== ON_BFACES
+		if regions != unique(xgrid[CellRegions])
+			dofgrid = subgrid(xgrid, regions)
+		else
+			dofgrid = xgrid
+		end
 	end
 
 	# first generate some empty FESpace

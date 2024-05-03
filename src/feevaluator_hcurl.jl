@@ -22,6 +22,7 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Tang
 	subset = _update_subset!(FEBE)
 	refbasisvals = FEBE.refbasisvals
 	xItemVolumes = FEBE.L2G.ItemVolumes
+	item = FEBE.citem[]
 	cvals = FEBE.cvals
 	for i ∈ 1:size(cvals, 3), dof_i ∈ 1:size(cvals, 2), k ∈ 1:size(cvals, 1)
 		cvals[k, dof_i, i] = refbasisvals[i][subset[dof_i], k] / xItemVolumes[item]
