@@ -32,7 +32,7 @@ function make_all(; with_examples::Bool = true)
 		cleanexamples()
 
 		module_examples = @docmodules(example_dir, modules, Plotter = CairoMakie)
-        pluto_examples = @docplutonotebooks(pluto_example_dir, notebooks, iframe=true)
+        pluto_examples = @docplutonotebooks(pluto_example_dir, notebooks, iframe=false)
         pushfirst!(module_examples, "Introduction" => "examples_intro.md")
 
     end
