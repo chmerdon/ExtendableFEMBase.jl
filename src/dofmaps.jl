@@ -384,7 +384,7 @@ function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<
 	if FES.dofgrid !== FES.xgrid
 		## assume parent relation between xgrid and dofgrid
 		@assert FES.dofgrid[ParentGrid] == FES.xgrid "xgrid is not the parent grid of dofgrid !!!"
-		@assert FES.dofgrid[ParentGridRelation] == SubGrid "dofgrid is not a subgrid of xgrid !!!"
+		@assert FES.dofgrid[ParentGridRelation] in [SubGrid, BoundarySubGrid] "dofgrid is not a subgrid or boundary-subgrid of xgrid !!!"
 		## lift subgrid dofmap to parent xgrid to allow assembly on common parent grid
 		## by constructing a variable target adjacency with empty dofs for parent items in xgrid
 		## that are not in the dofgrid --> this allows to use the dofmap in assembly over full xgrid
