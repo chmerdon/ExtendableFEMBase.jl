@@ -151,7 +151,7 @@ function unicode_scalarplot(
 		end
 		for c ∈ 1:length(components)
 			if c == 1
-				plt = lineplot(X, view(I[c][1]), ylim = ylim, xlabel = "x", name = title * "[$(components[c])]", height = resolution[2], width = resolution[1])
+				plt = lineplot(X, view(I[c][1]), ylim = ylim, xlabel = "x", name = title * (length(components) == 1 ? "" : "[$(components[c])]"), height = resolution[2], width = resolution[1])
 			else
 				lineplot!(plt, X, view(I[c][1]), name = title * "[$(components[c])]")
 			end
@@ -167,7 +167,7 @@ function unicode_scalarplot(
 				yfact = (ey[2] - ey[1]) / (resolution[2] - 1),
 				xoffset = ex[1],
 				yoffset = ey[1],
-				title = title * "[$(components[c])]",
+				title = title * (length(components) == 1 ? "" : "[$(components[c])]"),
 				colormap = colormap,
 			) for c ∈ 1:length(components)
 		]

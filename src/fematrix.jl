@@ -261,7 +261,7 @@ end
 function add!(AM::ExtendableSparseMatrix{Tv, Ti}, BM::ExtendableSparseMatrix{Tv, Ti}; kwargs...) where {Tv, Ti}
 	add!(AM, BM.cscmatrix; kwargs...)
 end
-function add!(AM::ExtendableSparseMatrix{Tv, Ti}, cscmat::SparseMatrixCSC{Tv, Ti}; factor = 1, transpose::Bool = false) where {Tv, Ti}
+function add!(AM::ExtendableSparseMatrix{Tv, Ti}, cscmat::SparseMatrixCSC{Tv, Ti}; factor = 1, rowoffset = 0, coloffset = 0, transpose::Bool = false) where {Tv, Ti}
 	rows::Array{Ti, 1} = rowvals(cscmat)
 	valsB::Array{Tv, 1} = cscmat.nzval
 	ncols::Int = size(cscmat, 2)
@@ -270,14 +270,14 @@ function add!(AM::ExtendableSparseMatrix{Tv, Ti}, cscmat::SparseMatrixCSC{Tv, Ti
 		for col ∈ 1:ncols
 			for r in nzrange(cscmat, col)
 				arow = rows[r]
-				_addnz(AM, col, arow, valsB[r], factor)
+				_addnz(AM, col + coloffset, arow + rowoffset, valsB[r], factor)
 			end
 		end
 	else
 		for col ∈ 1:ncols
 			for r in nzrange(cscmat, col)
 				arow = rows[r]
-				_addnz(AM, arow, col, valsB[r], factor)
+				_addnz(AM, arow + rowoffset, col + coloffset, valsB[r], factor)
 			end
 		end
 	end
@@ -547,7 +547,7 @@ function lrmatmul(a::AbstractVector{Tv}, B::ExtendableSparseMatrix{Tv, Ti}, b::A
 	rows::Array{Ti, 1} = rowvals(cscmat)
 	result = 0.0
 	for col ∈ 1:size(B, 2)
-		for r in nzrange(B.cscmatrix, col)
+		for r in nzrange(cscmat, col)
 			result += valsB[r] * b[col] * factor * a[rows[r]]
 		end
 	end
@@ -566,9 +566,31 @@ function ldrdmatmul(a1::AbstractVector{Tv}, a2::AbstractVector{Tv}, B::Extendabl
 	rows::Array{Ti, 1} = rowvals(cscmat)
 	result = 0.0
 	for col ∈ 1:size(B, 2)
-		for r in nzrange(B.cscmatrix, col)
+		for r in nzrange(cscmat, col)
 			result += valsB[r] * (b1[col] - b2[col]) * factor * (a1[rows[r]] - a2[rows[r]])
 		end
 	end
 	return result
+end
+
+
+function submatrix(A::ExtendableSparseMatrix{Tv,Ti}, srows, scols) where {Tv,Ti}
+	cscmat::SparseMatrixCSC{Tv, Ti} = A.cscmatrix
+	valsA::Array{Tv, 1} = cscmat.nzval
+	rows::Array{Ti, 1} = rowvals(cscmat)
+	result = 0.0
+	S = ExtendableSparseMatrix{Tv,Ti}(length(srows), length(scols))
+	@assert maximum(srows) <= size(A, 1) "rows exceeds rowcount of A"
+	@assert maximum(scols) <= size(A, 2) "cols exceeds colcount of A"
+	for col = 1 : length(scols)
+		scol = scols[col]
+		for r in nzrange(cscmat, scol)
+			j = findfirst(==(rows[r]), srows)
+			if j !== nothing
+				S[j, col] = A[rows[r], scol]
+			end
+		end
+	end
+	flush!(S)
+	return S
 end

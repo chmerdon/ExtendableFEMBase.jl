@@ -80,6 +80,7 @@ export FEVectorBlock, FEVector
 export dot, norm, norms
 export FEMatrixBlock, FEMatrix, _addnz
 export fill!, addblock!, addblock_matmul!, lrmatmul, mul!, add!, apply_penalties!
+export submatrix
 export show_entries
 
 export displace_mesh, displace_mesh!
