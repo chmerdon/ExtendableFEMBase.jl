@@ -2,6 +2,7 @@ using Test
 using ExtendableGrids
 using ExtendableFEMBase
 using ExampleJuggler
+using SparseArrays
 
 include("test_quadrature.jl")
 include("test_interpolators.jl")
@@ -9,6 +10,7 @@ include("test_operators.jl")
 include("test_febasis.jl")
 include("test_segmentintegrator.jl")
 include("test_pointevaluator.jl")
+include("test_fematrix_and_vector.jl")
 
 function run_examples()
 	ExampleJuggler.verbose!(true)
@@ -120,6 +122,7 @@ end
 
 function run_all_tests()
     begin
+        run_fematrix_tests()
         run_examples()
         run_febasis_tests()
         run_operator_tests()

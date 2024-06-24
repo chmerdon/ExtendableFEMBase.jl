@@ -39,7 +39,7 @@ export NeededDerivative4Operator, Length4Operator, QuadratureOrderShift4Operator
 export OperatorPair, OperatorTriple
 
 
-include("finiteelements.jl")
+include("finiteelements.jl") # also includes dofmaps.jl and feevaluator*.jl
 export DofMap
 export CellDofs, FaceDofs, EdgeDofs, BFaceDofs, BEdgeDofs
 export CellDofsParent, FaceDofsParent, EdgeDofsParent, BFaceDofsParent, BEdgeDofsParent
@@ -47,6 +47,7 @@ export DofMapTypes
 export Dofmap4AssemblyType, ItemGeometries4DofMap, EffAT4AssemblyType, ParentDofmap4Dofmap
 export AbstractFiniteElement
 export FESpace, FESpaces, get_AT, get_FEType
+export boundarydofs, ndofs, broken
 
 export AbstractH1FiniteElement
 export H1BUBBLE, L2P0, H1P1, H1P2, H1P2B, H1MINI, H1CR, H1P3, H1Pk

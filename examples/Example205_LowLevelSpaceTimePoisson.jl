@@ -17,7 +17,7 @@ on the unit square domain ``\Omega`` on a given grid
 with space-time finite element methods based on
 tensorized ansatz functions.
 
-![](example205.svg)
+![](example205.png)
 
 =#
 
@@ -99,23 +99,19 @@ function solve_poisson_lowlevel(FES_time, FES_space, μ, f)
 		loop_allocations = assemble!(A, b, FES_time, FES_space, f, μ)
 
 		## fix homogeneous boundary dofs
-		bfacedofs::Adjacency{Int32} = FES_space[ExtendableFEMBase.BFaceDofs]
-		nbfaces::Int = num_sources(bfacedofs)
-		dof::Int = 0
-		for bface ∈ 1:nbfaces
+		bdofs = boundarydofs(FES_space)
+		for sdof in bdofs
 			for dof_t = 1 : ndofs_time
-				for j ∈ 1:num_targets(bfacedofs, 1)
-					dof = (dof_t-1)*ndofs_space + bfacedofs[j, bface]
-					A[dof, dof] = 1e60
-					b[dof] = 0
-				end
+				dof = (dof_t-1)*ndofs_space + sdof
+				A[dof, dof] = 1e60
+				b[dof] = 0
 			end
 		end
 
         ## fix initial value by zero
 		for j=1:ndofs_space
 			A[j,j] = 1e60
-			b[dof] = 0
+			b[j] = 0
 		end
 		ExtendableSparse.flush!(A)
 	end
@@ -311,7 +307,7 @@ end
 function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
 	~, plt = main(; Plotter = Plotter, kwargs...)
 	scene = GridVisualize.reveal(plt)
-	GridVisualize.save(joinpath(dir, "example205.svg"), scene; Plotter = Plotter)
+	GridVisualize.save(joinpath(dir, "example205.png"), scene; Plotter = Plotter)
 end
 
 end #module

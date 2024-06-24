@@ -26,7 +26,7 @@ Newton's method with automatic differentation is used to handle the nonlinear co
 
 The computed solution for the default parameters looks like this:
 
-![](example210.svg)
+![](example210.png)
 =#
 
 module Example210_LowLevelNavierStokes
@@ -162,18 +162,7 @@ function solve_stokes_lowlevel(FES; teval = 0)
 	@time begin
 		u_init = FEVector(FES)
 		interpolate!(u_init[1], u!; time = teval)
-
-		fixed_dofs = [size(A.entries, 1)] # fix one pressure dof = last dof
-		BFaceDofs::Adjacency{Int32} = FES[1][ExtendableFEMBase.BFaceDofs]
-		nbfaces::Int = num_sources(BFaceDofs)
-		AM::ExtendableSparseMatrix{Float64, Int64} = A.entries
-		dof_j::Int = 0
-		for bface ∈ 1:nbfaces
-			for j ∈ 1:num_targets(BFaceDofs, 1)
-				dof_j = BFaceDofs[j, bface]
-				push!(fixed_dofs, dof_j)
-			end
-		end
+		fixed_dofs = boundarydofs(FES[1])
 		push!(fixed_dofs, FES[1].ndofs + 1) ## fix one pressure dof
 	end
 
@@ -200,7 +189,7 @@ function solve_stokes_lowlevel(FES; teval = 0)
 
 		## fix boundary dofs
 		for dof in fixed_dofs
-			AM[dof, dof] = 1e60
+			A.entries[dof, dof] = 1e60
 			b.entries[dof] = 1e60 * u_init.entries[dof]
 		end
 		ExtendableSparse.flush!(A.entries)
@@ -400,6 +389,6 @@ end
 function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
 	~, plt = main(; Plotter = Plotter, kwargs...)
 	scene = GridVisualize.reveal(plt)
-	GridVisualize.save(joinpath(dir, "example210.svg"), scene; Plotter = Plotter)
+	GridVisualize.save(joinpath(dir, "example210.png"), scene; Plotter = Plotter)
 end
 end #module

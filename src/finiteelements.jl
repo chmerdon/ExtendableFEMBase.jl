@@ -53,6 +53,8 @@ function Base.copy(FES::FESpace{Tv, Ti, FEType, AT}) where {Tv, Ti, FEType, AT}
 	return FESpace{Tv, Ti, FEType, AT}(deepcopy(FES.name), FES.broken, FES.ndofs, FES.coffset, FES.xgrid, FES.dofgrid, FES.dofmaps)
 end
 
+ndofs(FES::FESpace) = FES.ndofs
+broken(FES::FESpace) = FES.broken
 get_AT(::FESpace{Tv, Ti, FEType, AT}) where {Tv, Ti, FEType, AT} = AT
 get_FEType(::FESpace{Tv, Ti, FEType, AT}) where {Tv, Ti, FEType, AT} = FEType
 
@@ -89,33 +91,24 @@ function FESpace{FEType, AT}(
 	end
 
 	if AT == ON_FACES
-		xgrid = get_facegrid(xgrid)
-		xgrid[BFaceNodes] = zeros(Ti, 2, 0)
-		xgrid[BFaceRegions] = zeros(Ti, 0)
-		xgrid[BFaceGeometries] = VectorOfConstants{ElementGeometries, Int}(Edge1D, 0)
-		xgrid[BFaceVolumes] = zeros(Tv, 0)
+		if isnothing(regions)
+			regions = unique(xgrid[FaceRegions])
+		end
+		dofgrid = subgrid(xgrid, regions; support = ON_FACES, project = false)
 	elseif AT == ON_BFACES
 		if isnothing(regions)
 			regions = unique(xgrid[BFaceRegions])
 		end
-		dofgrid = subgrid(xgrid, regions; boundary = true, project = false)
-		dofgrid[BFaceNodes] = zeros(Ti, 2, 0)
-		dofgrid[BFaceRegions] = zeros(Ti, 0)
-		dofgrid[BFaceGeometries] = VectorOfConstants{ElementGeometries, Int}(Edge1D, 0)
-		dofgrid[BFaceVolumes] = zeros(Tv, 0)
+		dofgrid = subgrid(xgrid, regions; support = ON_BFACES, project = false)
 	elseif AT == ON_EDGES
-		xgrid = get_edgegrid(xgrid)
-		xgrid[BFaceNodes] = zeros(Ti, 2, 0)
-		xgrid[BFaceRegions] = zeros(Ti, 0)
-		xgrid[BFaceGeometries] = VectorOfConstants{ElementGeometries, Int}(Edge1D, 0)
-		xgrid[BFaceVolumes] = zeros(Tv, 0)
+		@assert false "not possible currently"
 	end
 
 	if isnothing(regions)
 		regions = unique(xgrid[CellRegions])
 	end
 
-	if AT !== ON_BFACES
+	if AT !== ON_BFACES && AT !== ON_FACES
 		if regions != unique(xgrid[CellRegions])
 			dofgrid = subgrid(xgrid, regions)
 		else

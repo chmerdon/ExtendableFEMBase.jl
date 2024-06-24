@@ -177,6 +177,9 @@ Optionally a name for the matrix can be given.
 function FEMatrix(FESX::FESpace, FESY::FESpace; name = "auto")
 	return FEMatrix{Float64, Int64}(FESX, FESY; name = name)
 end
+function FEMatrix(FESX::Vector{<:FESpace}, FESY::Vector{<:FESpace}; name = "auto")
+	return FEMatrix{Float64, Int64}(FESX, FESY; name = name)
+end
 function FEMatrix{TvM}(FESX::FESpace, FESY::FESpace; name = "auto") where {TvM}
 	return FEMatrix{TvM, Int64}(FESX, FESY; name = name)
 end

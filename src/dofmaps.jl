@@ -6,15 +6,77 @@ information with respect to different AssemblyTypes. They are generated automati
 associated to each subtype can be accessed via FESpace[DofMap].
 """
 abstract type DofMap <: AbstractGridAdjacency end
+
+
+"""
+    $(TYPEDEF)
+
+Key type describing the dofs for each cell of the dofgrid
+"""
 abstract type CellDofs <: DofMap end
+
+"""
+    $(TYPEDEF)
+
+Key type describing the dofs for each face of the dofgrid
+"""
 abstract type FaceDofs <: DofMap end
+
+"""
+    $(TYPEDEF)
+
+Key type describing the dofs for each edge of the dofgrid
+"""
 abstract type EdgeDofs <: DofMap end
+
+"""
+    $(TYPEDEF)
+
+Key type describing the dofs for each boundary face of the dofgrid
+"""
 abstract type BFaceDofs <: DofMap end
+
+"""
+    $(TYPEDEF)
+
+Key type describing the dofs for each boundary edge of the dofgrid
+"""
 abstract type BEdgeDofs <: DofMap end
+
+
+"""
+    $(TYPEDEF)
+
+Key type describing the dofs for each cell of the parentgrid
+"""
 abstract type CellDofsParent <: DofMap end
+
+"""
+    $(TYPEDEF)
+
+Key type describing the dofs for each face of the parentgrid
+"""
 abstract type FaceDofsParent <: DofMap end
+
+"""
+    $(TYPEDEF)
+
+Key type describing the dofs for each edge of the parentgrid
+"""
 abstract type EdgeDofsParent <: DofMap end
+
+"""
+    $(TYPEDEF)
+
+Key type describing the dofs for each boundary face of the parentgrid
+"""
 abstract type BFaceDofsParent <: DofMap end
+
+"""
+    $(TYPEDEF)
+
+Key type describing the dofs for each boundary edge of the parentgrid
+"""
 abstract type BEdgeDofsParent <: DofMap end
 
 const DofMapTypes{Ti} = Union{VariableTargetAdjacency{Ti}, SerialVariableTargetAdjacency{Ti}, Array{Ti, 2}}
@@ -384,7 +446,8 @@ function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<
 	if FES.dofgrid !== FES.xgrid
 		## assume parent relation between xgrid and dofgrid
 		@assert FES.dofgrid[ParentGrid] == FES.xgrid "xgrid is not the parent grid of dofgrid !!!"
-		@assert FES.dofgrid[ParentGridRelation] in [SubGrid, BoundarySubGrid] "dofgrid is not a subgrid or boundary-subgrid of xgrid !!!"
+		@assert FES.dofgrid[ParentGridRelation] <: SubGrid "dofgrid needs to be a subgrid of xgrid"
+		SubGridAssemblyType = FES.dofgrid[ParentGridRelation].parameters[1]
 		## lift subgrid dofmap to parent xgrid to allow assembly on common parent grid
 		## by constructing a variable target adjacency with empty dofs for parent items in xgrid
 		## that are not in the dofgrid --> this allows to use the dofmap in assembly over full xgrid
@@ -640,6 +703,39 @@ function init_dofmap!(FES::FESpace, DM::Type{<:DofMap})
 		init_broken_dofmap!(FES, DM)
 	else
 		init_dofmap_from_pattern!(FES, DM)
+	end
+end
+
+
+
+function boundarydofs(FES; dofmap = BFaceDofs, regions = :all)
+
+	bitemdofs = FES[dofmap]
+	if regions === :all
+		if typeof(bfacedofs) <: VariableTargetAdjacency
+			return bfacedofs.colentries
+		elseif typeof(bfacedofs) <: SerialVariableTargetAdjacency
+			return 1:bfacedofs.colstart[end]-1
+		else 
+			@error "dofmap has unexpected type"
+		end
+	else
+		if dofmap == BFaceDofs
+			bitemregions = FES[BFaceRegions]
+		elseif dofmap == BFaceEdges
+			bitemregions = FES[BEdgeRegions]
+			@error "do not know where to look for regions"
+		end
+		bdofs = []
+		nbitems::Int = num_sources(bitemdofs)
+		for bface ∈ 1:nbitems
+			for j ∈ 1:num_targets(bitemdofs, 1)
+				if bitemregions[bface] in regions
+					push!(bdofs, bitemdofs[j, bface])
+				end
+			end
+		end
+		return unique(bdofs)
 	end
 end
 

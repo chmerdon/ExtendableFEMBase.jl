@@ -4,7 +4,9 @@
 ([source code](SOURCE_URL))
 
 This example plots all the basis functions of a H1 finite element on Edge1D or Triangle2D
-as unicode plots
+as unicode plots. This is the result with the default parameters (dim = 1, order = 3):
+
+![](https://github.com/chmerdon/ExtendableFEMBase.jl/blob/master/docs/src/assets/example280.png?raw=true")
 
 =#
 
@@ -14,7 +16,7 @@ using ExtendableFEMBase
 using ExtendableGrids
 
 ## everything is wrapped in a main function
-function main(; dim = 1, order = 2)
+function main(; dim = 1, order = 3)
 
 	## generate two grids
 	@assert dim in [1, 2] "dim must be 1 or 2"
