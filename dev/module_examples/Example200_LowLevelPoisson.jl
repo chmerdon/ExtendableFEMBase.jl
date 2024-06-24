@@ -17,7 +17,7 @@ for different refinement levels.
 
 The computed solution for the default parameters looks like this:
 
-![](example200.svg)
+![](example200.png)
 
 =#
 
@@ -61,10 +61,10 @@ function main(; maxnref = 8, order = 2, Plotter = nothing)
 		sol, time_assembly, time_solve = solve_poisson_lowlevel(FES, μ, f)
 
 		## plot statistics
-		println(stdout, barplot(["Grid", "FaceNodes", "CellDofs", "Assembly", "Solve"], [time_grid, time_facenodes, time_dofmap, time_assembly, time_solve], title = "Runtimes"))
+		println(stdout, barplot(["Grid", "FaceNodes", "celldofs", "Assembly", "Solve"], [time_grid, time_facenodes, time_dofmap, time_assembly, time_solve], title = "Runtimes"))
 
 		## plot
-		scalarplot!(plt[1,1], xgrid, view(sol.entries, 1:num_nodes(xgrid)))
+		scalarplot!(plt[1,1], xgrid, view(sol.entries, 1:num_nodes(xgrid)), limits = (-0.0125,0.0125))
 	end
 
 	return sol, plt
@@ -82,16 +82,10 @@ function solve_poisson_lowlevel(FES, μ, f)
 
 		## fix boundary dofs
 		begin
-			BFaceDofs::Adjacency{Int32} = FES[ExtendableFEMBase.BFaceDofs]
-			nbfaces::Int = num_sources(BFaceDofs)
-			AM::ExtendableSparseMatrix{Float64, Int64} = A.entries
-			dof_j::Int = 0
-			for bface ∈ 1:nbfaces
-				for j ∈ 1:num_targets(BFaceDofs, 1)
-					dof_j = BFaceDofs[j, bface]
-					AM[dof_j, dof_j] = 1e60
-					b.entries[dof_j] = 0
-				end
+			bdofs = boundarydofs(FES)
+			for dof in bdofs
+				A.entries[dof, dof] = 1e60
+				b.entries[dof] = 0
 			end
 		end
 		ExtendableSparse.flush!(A.entries)
@@ -122,13 +116,12 @@ function assemble!(A::ExtendableSparseMatrix, b::Vector, FES, f, μ = 1)
 	∇vals = FEBasis_∇.cvals
 	FEBasis_id = FEEvaluator(FES, Identity, qf)
 	idvals = FEBasis_id.cvals
-	CellDofs = FES[ExtendableFEMBase.CellDofs]
+	celldofs = FES[CellDofs]
 
 	## ASSEMBLY LOOP
 	loop_allocations = 0
 	function barrier(EG, L2G::L2GTransformer)
 		## barrier function to avoid allocations by type dispatch
-
 		ndofs4cell::Int = get_ndofs(ON_CELLS, FEType, EG)
 		Aloc = zeros(Float64, ndofs4cell, ndofs4cell)
 		ncells::Int = num_cells(xgrid)
@@ -152,9 +145,9 @@ function assemble!(A::ExtendableSparseMatrix, b::Vector, FES, f, μ = 1)
 
 			## add local matrix to global matrix
 			for j ∈ 1:ndofs4cell
-				dof_j = CellDofs[j, cell]
+				dof_j = celldofs[j, cell]
 				for k ∈ j:ndofs4cell
-					dof_k = CellDofs[k, cell]
+					dof_k = celldofs[k, cell]
 					if abs(Aloc[j, k]) > 1e-15
 						## write into sparse matrix, only lines with allocations
 						rawupdateindex!(A, +, Aloc[j, k], dof_j, dof_k)
@@ -178,7 +171,7 @@ function assemble!(A::ExtendableSparseMatrix, b::Vector, FES, f, μ = 1)
 					temp += weights[qp] * idvals[1, j, qp] * f(x)
 				end
 				## write into global vector
-				dof_j = CellDofs[j, cell]
+				dof_j = celldofs[j, cell]
 				b[dof_j] += temp * cellvolumes[cell]
 			end
 		end
@@ -191,7 +184,7 @@ end
 function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
 	~, plt = main(; Plotter = Plotter, kwargs...)
 	scene = GridVisualize.reveal(plt)
-	GridVisualize.save(joinpath(dir, "example200.svg"), scene; Plotter = Plotter)
+	GridVisualize.save(joinpath(dir, "example200.png"), scene; Plotter = Plotter)
 end
 
 function runtests(; order = 2, kwargs...) #hide

@@ -7,7 +7,7 @@
 	&amp; \text{for all } v \in V\\
 	(q, \mathrm{div}(u)) &amp; = 0
 	&amp; \text{for all } q \in Q\\
-\end{aligned}\]</p><p>This example computes a planar lattice flow with inhomogeneous Dirichlet boundary conditions (which requires some modification above). Newton&#39;s method with automatic differentation is used to handle the nonlinear convection term.</p><p>The computed solution for the default parameters looks like this:</p><p><img src="../example210.svg" alt/></p><pre><code class="language-julia hljs">module Example210_LowLevelNavierStokes
+\end{aligned}\]</p><p>This example computes a planar lattice flow with inhomogeneous Dirichlet boundary conditions (which requires some modification above). Newton&#39;s method with automatic differentation is used to handle the nonlinear convection term.</p><p>The computed solution for the default parameters looks like this:</p><p><img src="../example210.png" alt/></p><pre><code class="language-julia hljs">module Example210_LowLevelNavierStokes
 
 using ExtendableFEMBase
 using ExtendableGrids
@@ -140,18 +140,7 @@ function solve_stokes_lowlevel(FES; teval = 0)
 	@time begin
 		u_init = FEVector(FES)
 		interpolate!(u_init[1], u!; time = teval)
-
-		fixed_dofs = [size(A.entries, 1)] # fix one pressure dof = last dof
-		BFaceDofs::Adjacency{Int32} = FES[1][ExtendableFEMBase.BFaceDofs]
-		nbfaces::Int = num_sources(BFaceDofs)
-		AM::ExtendableSparseMatrix{Float64, Int64} = A.entries
-		dof_j::Int = 0
-		for bface ∈ 1:nbfaces
-			for j ∈ 1:num_targets(BFaceDofs, 1)
-				dof_j = BFaceDofs[j, bface]
-				push!(fixed_dofs, dof_j)
-			end
-		end
+		fixed_dofs = boundarydofs(FES[1])
 		push!(fixed_dofs, FES[1].ndofs + 1) ## fix one pressure dof
 	end
 
@@ -178,7 +167,7 @@ function solve_stokes_lowlevel(FES; teval = 0)
 
 		# fix boundary dofs
 		for dof in fixed_dofs
-			AM[dof, dof] = 1e60
+			A.entries[dof, dof] = 1e60
 			b.entries[dof] = 1e60 * u_init.entries[dof]
 		end
 		ExtendableSparse.flush!(A.entries)
@@ -378,6 +367,6 @@ end
 function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
 	~, plt = main(; Plotter = Plotter, kwargs...)
 	scene = GridVisualize.reveal(plt)
-	GridVisualize.save(joinpath(dir, &quot;example210.svg&quot;), scene; Plotter = Plotter)
+	GridVisualize.save(joinpath(dir, &quot;example210.png&quot;), scene; Plotter = Plotter)
 end
-end #module</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Example205_LowLevelSpaceTimePoisson/">« Example205_LowLevelSpaceTimePoisson</a><a class="docs-footer-nextpage" href="../Example280_BasisPlotter/">Example280_BasisPlotter »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Thursday 6 June 2024 15:01">Thursday 6 June 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+end #module</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Example205_LowLevelSpaceTimePoisson/">« Example205_LowLevelSpaceTimePoisson</a><a class="docs-footer-nextpage" href="../Example280_BasisPlotter/">Example280_BasisPlotter »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Monday 24 June 2024 14:30">Monday 24 June 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

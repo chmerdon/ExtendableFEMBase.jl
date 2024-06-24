@@ -39,9 +39,9 @@ end</code></pre>
 <pre class="code-output documenter-example-output" id="var-PlutoVista">PlutoVista</pre>
 
 
-<div class="markdown"><h1>Tutorial notebook: Poisson problem</h1><p>This notebook demonstrates how to implement the Poisson problem with the low level structures provided by ExtendableFEMBase. The Poisson problem with homogeneous Dirichlet boundary data seeks <span class="tex">$u$</span> such that</p><p class="tex">$$\begin{aligned}
+<div class="markdown"><h1>Tutorial notebook: Poisson problem</h1><p>This notebook demonstrates how to implement the Poisson problem with the low level structures provided by ExtendableFEMBase. The Poisson problem with homogeneous Dirichlet boundary data seeks <span class="tex">\(u\)</span> such that</p><p class="tex">$$\begin{aligned}
 	- \mu \Delta u = f.
-\end{aligned}$$</p><p>The weak formulation seeks <span class="tex">$u \in V := H^1_0(\Omega)$</span> such that</p><p class="tex">$$\begin{aligned}
+\end{aligned}$$</p><p>The weak formulation seeks <span class="tex">\(u \in V := H^1_0(\Omega)\)</span> such that</p><p class="tex">$$\begin{aligned}
 	\mu (\nabla u, \nabla v) = (f, v)
 	\quad \text{for all } v \in V
 \end{aligned}$$</p></div>
@@ -58,7 +58,7 @@ end</code></pre>
 <pre class="code-output documenter-example-output" id="var-f">1</pre>
 
 <pre class='language-julia'><code class='language-julia'>tricontour(xgrid[Coordinates],xgrid[CellNodes],sol.entries[1:num_nodes(xgrid)]; levels = 5, resolution = (500,500))</code></pre>
-<div style="white-space:nowrap;"><div id="a30b23c2-2415-11ef-3fea-118c29c9a0ec" style="width: 440.0px; height: 440.0px; display: inline-block; "></div><canvas height="475.0" id="a30b23c2-2415-11ef-3fea-118c29c9a0eccbar" style="display: inline-block; " width="60,"></canvas></div>
+<div style="white-space:nowrap;"><div id="302706bc-3236-11ef-1e2d-b1ddbf3ad95d" style="width: 440.0px; height: 440.0px; display: inline-block; "></div><canvas height="475.0" id="302706bc-3236-11ef-1e2d-b1ddbf3ad95dcbar" style="display: inline-block; " width="60,"></canvas></div>
 <script>
    // overwrite handleKeyPress and others
 // kind of modeled after https://kitware.github.io/vtk-js/api/Rendering_Core_Follower.html 
@@ -723,9 +723,9 @@ function canvascolorbar(uuid,w,h,cbdict)
     }
 }
 
-   const jsdict = /* See the documentation for AbstractPlutoDingetjes.Display.published_to_js */ getPublishedObject("6c445822-2415-11ef-39ae-552178b51af6/773c5c536522bc7")
-   plutovtkplot("a30b23c2-2415-11ef-3fea-118c29c9a0ec",jsdict,invalidation)
-   canvascolorbar("a30b23c2-2415-11ef-3fea-118c29c9a0eccbar",20,500.0,jsdict)        
+   const jsdict = /* See the documentation for AbstractPlutoDingetjes.Display.published_to_js */ getPublishedObject("f640f8ca-3235-11ef-2ebd-abcd0e51104c/8618a79f4112121c")
+   plutovtkplot("302706bc-3236-11ef-1e2d-b1ddbf3ad95d",jsdict,invalidation)
+   canvascolorbar("302706bc-3236-11ef-1e2d-b1ddbf3ad95dcbar",20,500.0,jsdict)        
    </script>
 
 <pre class='language-julia'><code class='language-julia'>begin
@@ -806,7 +806,6 @@ DofMaps
 end</code></pre>
 <pre class="code-output documenter-example-output" id="var-xgrid">ExtendableGrids.ExtendableGrid{Float64, Int32};
 dim: 2 nodes: 263169 cells: 524288 bfaces: 2048
-
 </pre>
 
 <pre class='language-julia'><code class='language-julia'>function assemble!(A::ExtendableSparseMatrix, b::Vector, FES, f, μ = 1)
@@ -898,11 +897,11 @@ end</code></pre>
 <pre class="code-output documenter-example-output" id="var-assemble!">assemble! (generic function with 2 methods)</pre>
 <div class='manifest-versions'>
 <p>Built with Julia 1.10.4 and</p>
-ExtendableFEMBase 0.3.3<br>
-ExtendableGrids 1.6.0<br>
-ExtendableSparse 1.4.0<br>
-GridVisualize 1.6.0<br>
+ExtendableFEMBase 0.4.0<br>
+ExtendableGrids 1.8.0<br>
+ExtendableSparse 1.4.1<br>
+GridVisualize 1.7.0<br>
 PlutoVista 1.0.1
 </div>
 
-<!-- PlutoStaticHTML.End --></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../plots/">« Plots</a><a class="docs-footer-nextpage" href="../LowLevelNavierStokes/">Low level Navier-Stokes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Thursday 6 June 2024 15:01">Thursday 6 June 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+<!-- PlutoStaticHTML.End --></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../plots/">« Plots</a><a class="docs-footer-nextpage" href="../LowLevelNavierStokes/">Low level Navier-Stokes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Monday 24 June 2024 14:30">Monday 24 June 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

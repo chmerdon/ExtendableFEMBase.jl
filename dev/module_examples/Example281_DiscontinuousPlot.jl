@@ -8,7 +8,7 @@ on a grid with two regions by region-wise nodal values and plotting.
 
 The computed solution for the default parameters looks like this:
 
-![](example281.svg)
+![](example281.png)
 =#
 
 module Example281_DiscontinuousPlot
@@ -35,7 +35,7 @@ function main(; broken = false, nrefs = 3, abs = false, Plotter = nothing)
 	## generate two grids
 	xgrid = grid_unitsquare(Triangle2D)
 
-    ## mark a second region
+    ## mark first two triangles to be in second region
     xgrid[CellRegions][1:2] .= 2
 
     ## refine
@@ -53,8 +53,8 @@ function main(; broken = false, nrefs = 3, abs = false, Plotter = nothing)
     subgrid2 = subgrid(xgrid, [2])
 
     ## get parent nodes for each subgrid
-    subnodes1 = subgrid1[ExtendableGrids.NodeInParent]
-    subnodes2 = subgrid2[ExtendableGrids.NodeInParent]
+    subnodes1 = subgrid1[NodeParents]
+    subnodes2 = subgrid2[NodeParents]
 
     ## compute nodevalues for nodes of each subgrid
     nodevals4nodes1 = nodevalues(FEFunction[1], Identity; abs = abs, regions = [1], nodes = subnodes1)
@@ -71,6 +71,6 @@ end
 function generateplots(dir = pwd(); Plotter = nothing, kwargs...)
 	plt = main(; Plotter = Plotter, kwargs...)
 	scene = GridVisualize.reveal(plt)
-	GridVisualize.save(joinpath(dir, "example281.svg"), scene; Plotter = Plotter)
+	GridVisualize.save(joinpath(dir, "example281.png"), scene; Plotter = Plotter)
 end
 end
