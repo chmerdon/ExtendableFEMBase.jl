@@ -712,10 +712,10 @@ function boundarydofs(FES; dofmap = BFaceDofs, regions = :all)
 
 	bitemdofs = FES[dofmap]
 	if regions === :all
-		if typeof(bfacedofs) <: VariableTargetAdjacency
-			return bfacedofs.colentries
-		elseif typeof(bfacedofs) <: SerialVariableTargetAdjacency
-			return 1:bfacedofs.colstart[end]-1
+		if typeof(bitemdofs) <: VariableTargetAdjacency
+			return bitemdofs.colentries
+		elseif typeof(bitemdofs) <: SerialVariableTargetAdjacency
+			return 1:bitemdofs.colstart[end]-1
 		else 
 			@error "dofmap has unexpected type"
 		end

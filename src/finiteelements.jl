@@ -53,9 +53,32 @@ function Base.copy(FES::FESpace{Tv, Ti, FEType, AT}) where {Tv, Ti, FEType, AT}
 	return FESpace{Tv, Ti, FEType, AT}(deepcopy(FES.name), FES.broken, FES.ndofs, FES.coffset, FES.xgrid, FES.dofgrid, FES.dofmaps)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+returns the total number of degrees of freedom of the finite element space.
+"""
 ndofs(FES::FESpace) = FES.ndofs
+
+"""
+$(TYPEDSIGNATURES)
+
+returns true if the finite element space is broken, false if not
+"""
 broken(FES::FESpace) = FES.broken
+
+"""
+$(TYPEDSIGNATURES)
+
+returns the support of the finite element space
+"""
 get_AT(::FESpace{Tv, Ti, FEType, AT}) where {Tv, Ti, FEType, AT} = AT
+
+"""
+$(TYPEDSIGNATURES)
+
+returns the finite element type of the finite element space
+"""
 get_FEType(::FESpace{Tv, Ti, FEType, AT}) where {Tv, Ti, FEType, AT} = FEType
 
 include("dofmaps.jl")
