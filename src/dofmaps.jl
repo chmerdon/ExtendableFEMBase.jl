@@ -698,7 +698,9 @@ end
 function init_dofmap!(FES::FESpace, DM::Type{<:DofMap})
 	@debug "Generating dofmap $DM for FESpace $(FES.name)"
 
-	if (FES.broken == true) && (DM != CellDofs)
+	if (FES.broken == true) && DM == CellDofsParent
+		init_dofmap_from_pattern!(FES, CellDofs)
+	elseif (FES.broken == true) && (DM != CellDofs)
 		## dofmap needs to include all (e.g. face) dofs from neighbouring cells
 		init_broken_dofmap!(FES, DM)
 	else

@@ -33,6 +33,7 @@ struct FESpace{Tv, Ti, FEType<:AbstractFiniteElement,AT<:AssemblyType}
 	ndofs::Int                            # total number of dofs
 	coffset::Int                          # offset for component dofs
 	xgrid::ExtendableGrid[Tv,Ti}          # link to xgrid 
+	dofgrid::ExtendableGrid{Tv,Ti}	      # link to (sub) grid used for dof numbering (expected to be equal to or child grid of xgrid)
 	dofmaps::Dict{Type{<:AbstractGridComponent},Any} # backpack with dofmaps
 end
 ````

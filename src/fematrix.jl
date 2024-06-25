@@ -51,6 +51,7 @@ an AbstractMatrix (e.g. an ExtendableSparseMatrix) with an additional layer of s
 struct FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal} <: AbstractSparseMatrix{TvM, TiM}
 	FEMatrixBlocks::Array{FEMatrixBlock{TvM, TiM, TvG, TiG}, 1}
 	entries::AbstractSparseMatrix{TvM, TiM}
+	tags::Matrix{Any}
 end
 
 function Base.copy(FEV::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}) where {TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}
@@ -84,7 +85,8 @@ function apply_nonzero_pattern!(B::FEMatrixBlock, AT::Type{<:AssemblyType})
 end
 
 Base.getindex(FEF::FEMatrix, i) = FEF.FEMatrixBlocks[i]
-Base.getindex(FEF::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}, i, j) where {TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal} = FEF.FEMatrixBlocks[(i-1)*nbcol+j]
+Base.getindex(FEF::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}, tagX, tagY) where {TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal} = (index = findfirst(==((tagX,tagY)), FEF.tags); return FEF.FEMatrixBlocks[(index[1]-1)*nbcol+index[2]] )
+Base.getindex(FEF::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}, i::Int, j::Int) where {TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal} = FEF.FEMatrixBlocks[(i-1)*nbcol+j]
 Base.getindex(FEB::FEMatrixBlock, i::Int, j::Int) = FEB.entries[FEB.offset+i, FEB.offsetY+j]
 Base.getindex(FEB::FEMatrixBlock, i::Any, j::Any) = FEB.entries[FEB.offset.+i, FEB.offsetY.+j]
 Base.setindex!(FEB::FEMatrixBlock, v, i::Int, j::Int) = setindex!(FEB.entries, v, FEB.offset + i, FEB.offsetY + j)
@@ -174,26 +176,26 @@ Creates FEMatrix with one rectangular block (FESX,FESY) if FESX and FESY are sin
 a rectangular block matrix with blocks corresponding to the entries of the FESpace vectors FESX and FESY.
 Optionally a name for the matrix can be given.
 """
-function FEMatrix(FESX::FESpace, FESY::FESpace; name = "auto")
-	return FEMatrix{Float64, Int64}(FESX, FESY; name = name)
+function FEMatrix(FESX::FESpace, FESY::FESpace; kwargs...)
+	return FEMatrix{Float64, Int64}(FESX, FESY; kwargs...)
 end
-function FEMatrix(FESX::Vector{<:FESpace}, FESY::Vector{<:FESpace}; name = "auto")
-	return FEMatrix{Float64, Int64}(FESX, FESY; name = name)
+function FEMatrix(FESX::Vector{<:FESpace}, FESY::Vector{<:FESpace}; kwargs...)
+	return FEMatrix{Float64, Int64}(FESX, FESY; kwargs...)
 end
-function FEMatrix{TvM}(FESX::FESpace, FESY::FESpace; name = "auto") where {TvM}
-	return FEMatrix{TvM, Int64}(FESX, FESY; name = name)
+function FEMatrix{TvM}(FESX::FESpace, FESY::FESpace; kwargs...) where {TvM}
+	return FEMatrix{TvM, Int64}(FESX, FESY; kwargs...)
 end
-function FEMatrix{TvM, TiM}(FESX::FESpace, FESY::FESpace; name = "auto") where {TvM, TiM}
-	return FEMatrix{TvM, TiM}([FESX], [FESY]; name = name)
+function FEMatrix{TvM, TiM}(FESX::FESpace, FESY::FESpace; kwargs...) where {TvM, TiM}
+	return FEMatrix{TvM, TiM}([FESX], [FESY]; kwargs...)
 end
-function FEMatrix(FES::Array{<:FESpace{TvG, TiG}, 1}; name = "auto") where {TvG, TiG}
-	return FEMatrix{Float64, Int64}(FES; name = name)
+function FEMatrix(FES::Array{<:FESpace{TvG, TiG}, 1}; kwargs...) where {TvG, TiG}
+	return FEMatrix{Float64, Int64}(FES; kwargs...)
 end
-function FEMatrix{TvM}(FES::Array{<:FESpace{TvG, TiG}, 1}; name = "auto") where {TvM, TvG, TiG}
-	return FEMatrix{TvM, Int64}(FES, FES; name = name)
+function FEMatrix{TvM}(FES::Array{<:FESpace{TvG, TiG}, 1}; kwargs...) where {TvM, TvG, TiG}
+	return FEMatrix{TvM, Int64}(FES, FES; kwargs...)
 end
-function FEMatrix{TvM, TiM}(FES::Array{<:FESpace{TvG, TiG}, 1}; name = "auto") where {TvM, TiM, TvG, TiG}
-	return FEMatrix{TvM, TiM}(FES, FES; name = name)
+function FEMatrix{TvM, TiM}(FES::Array{<:FESpace{TvG, TiG}, 1}; kwargs...) where {TvM, TiM, TvG, TiG}
+	return FEMatrix{TvM, TiM}(FES, FES; kwargs...)
 end
 
 """
@@ -203,7 +205,7 @@ FEMatrix{TvM,TiM}(FESX, FESY; name = "auto")
 
 Creates an FEMatrix with blocks coressponding to the ndofs of FESX (rows) and FESY (columns).
 """
-function FEMatrix{TvM, TiM}(FESX::Array{<:FESpace{TvG, TiG}, 1}, FESY::Array{<:FESpace{TvG, TiG}, 1}; name = "auto") where {TvM, TiM, TvG, TiG}
+function FEMatrix{TvM, TiM}(FESX::Array{<:FESpace{TvG, TiG}, 1}, FESY::Array{<:FESpace{TvG, TiG}, 1}; entries = nothing, name = nothing, tags = nothing, tagsX = tags, tagsY = tagsX, kwargs...) where {TvM, TiM, TvG, TiG}
 	ndofsX, ndofsY = 0, 0
 	for j ∈ 1:length(FESX)
 		ndofsX += FESX[j].ndofs
@@ -211,10 +213,21 @@ function FEMatrix{TvM, TiM}(FESX::Array{<:FESpace{TvG, TiG}, 1}, FESY::Array{<:F
 	for j ∈ 1:length(FESY)
 		ndofsY += FESY[j].ndofs
 	end
-	entries = ExtendableSparseMatrix{TvM, TiM}(ndofsX, ndofsY)
+	if entries === nothing
+		entries = ExtendableSparseMatrix{TvM, TiM}(ndofsX, ndofsY)
+	else
+		@assert size(entries) == (ndofsX, ndofsY) "size of given entries not matching number of dofs in given FE space(s)"
+	end
 
-	if name == "auto"
+	if name === nothing
 		name = ""
+	end
+
+	if tagsX !== nothing
+		@assert length(tagsX) == length(FESX)
+	end
+	if tagsY !== nothing
+		@assert length(tagsY) == length(FESY)
 	end
 
 	Blocks = Array{FEMatrixBlock{TvM, TiM, TvG, TiG}, 1}(undef, length(FESX) * length(FESY))
@@ -223,14 +236,24 @@ function FEMatrix{TvM, TiM}(FESX::Array{<:FESpace{TvG, TiG}, 1}, FESY::Array{<:F
 	for j ∈ 1:length(FESX)
 		offsetY = 0
 		for k ∈ 1:length(FESY)
+			if (tagsX !== nothing) && (tagsY !== nothing)
+				blockname = name * " [$(tagsX[j]),$(tagsY[k])"
+			else
+				blockname = name * " [$j,$k]"
+			end
 			Blocks[(j-1)*length(FESY)+k] =
-				FEMatrixBlock{TvM, TiM, TvG, TiG, eltype(FESX[j]), eltype(FESY[k]), assemblytype(FESX[j]), assemblytype(FESY[k])}(name * " [$j,$k]", FESX[j], FESY[k], offset, offsetY, offset + FESX[j].ndofs, offsetY + FESY[k].ndofs, entries)
+				FEMatrixBlock{TvM, TiM, TvG, TiG, eltype(FESX[j]), eltype(FESY[k]), assemblytype(FESX[j]), assemblytype(FESY[k])}(blockname, FESX[j], FESY[k], offset, offsetY, offset + FESX[j].ndofs, offsetY + FESY[k].ndofs, entries)
 			offsetY += FESY[k].ndofs
 		end
 		offset += FESX[j].ndofs
 	end
 
-	return FEMatrix{TvM, TiM, TvG, TiG, length(FESX), length(FESY), length(FESX) * length(FESY)}(Blocks, entries)
+	if (tagsX !== nothing) && (tagsY !== nothing)
+		tagmatrix = [(j, k) for j in tagsX, k in tagsY]
+	else
+		tagmatrix = zeros(Int,0,0)
+	end
+	return FEMatrix{TvM, TiM, TvG, TiG, length(FESX), length(FESY), length(FESX) * length(FESY)}(Blocks, entries, tagmatrix)
 end
 
 """

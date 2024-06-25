@@ -166,6 +166,8 @@ function FEVector{T}(FES::Array{<:FESpace{Tv, Ti}, 1}; entries = nothing, name =
 	end
 	if entries === nothing
 		entries = zeros(T, ndofs)
+	else
+		@assert length(entries) == ndofs "length of given entries does not match number of dofs in given FESpace(s)"
 	end
 	Blocks = Array{FEVectorBlock{T, Tv, Ti}, 1}(undef, length(FES))
 	offset = 0
