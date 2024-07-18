@@ -1,7 +1,7 @@
 name = "ExtendableFEMBase"
 uuid = "12fb9182-3d4c-4424-8fd1-727a0899810c"
 authors = ["Christian Merdon <merdon@wias-berlin.de>"]
-version = "0.6"
+version = "0.6.1"
 
 [deps]
 DiffResults = "163ba53b-c6d8-5494-b064-1a9d43ac40c5"
@@ -23,8 +23,11 @@ DocStringExtensions = "0.8,0.9"
 ExtendableGrids = "1.8"
 ExtendableSparse = "^1.4"
 ForwardDiff = "^0.10.35"
+LinearAlgebra = "1.9"
 Term = "2"
 UnicodePlots = "^3.6"
 Polynomials = "2.0.21, 3, 4"
+Printf = "1.9"
+SparseArrays = "1.9"
 SpecialPolynomials = "0.4.9, 0.5"
 julia = "^1.9"

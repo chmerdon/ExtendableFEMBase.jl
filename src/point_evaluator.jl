@@ -32,7 +32,7 @@ function Pointevaluator(
 Generates a PointEvaluator that can evaluate the specified operator evaluations
 at arbitrary points. If no kernel function is given, the arguments
 are given directly. If a kernel is provided, the arguments are postprocessed
-accordingly and the kernel has be conform to the interface
+accordingly and the kernel has to be conform to the interface
 
 	kernel!(result, eval_args, qpinfo)
 
@@ -58,17 +58,16 @@ function PointEvaluator(kernel, u_args, ops_args, sol = nothing; Tv = Float64, k
 	return PE
 end
 
-function PointEvaluator(kernel, oa_args::Array{<:Tuple{<:Any, DataType}, 1}, sol = nothing; kwargs...)
+function PointEvaluator(kernel::Function, oa_args::Array{<:Tuple{<:Any, DataType}, 1}, sol = nothing; kwargs...)
 	u_args = [oa[1] for oa in oa_args]
 	ops_args = [oa[2] for oa in oa_args]
 	return PointEvaluator(kernel, u_args, ops_args, sol; kwargs...)
 end
 
 function PointEvaluator(oa_args::Array{<:Tuple{<:Any, DataType}, 1}, sol = nothing; kwargs...)
-	u_args = [oa[1] for oa in oa_args]
-	ops_args = [oa[2] for oa in oa_args]
-	return PointEvaluator(standard_kernel, u_args, ops_args, sol; kwargs...)
+	return PointEvaluator(standard_kernel, oa_args, sol; kwargs...)
 end
+
 
 """
 ````

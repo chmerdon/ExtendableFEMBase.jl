@@ -28,10 +28,10 @@ include("functionoperators.jl")
 export AbstractFunctionOperator
 export StandardFunctionOperator
 export Identity, IdentityComponent
-export NormalFlux, NormalFluxDisc, TangentFlux
+export NormalFlux, TangentFlux
 export Gradient
 export SymmetricGradient, TangentialGradient
-export Divergence, ReconstructionDivergence
+export Divergence
 export CurlScalar, Curl2D, Curl3D
 export Laplacian, Hessian, SymmetricHessian
 export Trace, Deviator
@@ -64,11 +64,10 @@ export HDIVRTkENRICH
 export AbstractHcurlFiniteElement
 export HCURLN0, HCURLN1
 
-export get_assemblytype
+export get_AT
 export get_polynomialorder, get_ndofs, get_ndofs_all
 export get_ncomponents, get_edim
 export get_basis, get_coefficients, get_basissubset
-export reconstruct!
 
 export interpolate! # must be defined separately by each FEdefinition
 export nodevalues, continuify
@@ -82,9 +81,9 @@ export dot, norm, norms
 export FEMatrixBlock, FEMatrix, _addnz
 export fill!, addblock!, addblock_matmul!, lrmatmul, mul!, add!, apply_penalties!
 export submatrix
-export show_entries
 
 export displace_mesh, displace_mesh!
+
 
 include("plots.jl")
 export unicode_gridplot, unicode_scalarplot

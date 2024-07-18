@@ -3,6 +3,16 @@ using ExtendableGrids
 using ExtendableFEMBase
 using ExampleJuggler
 using SparseArrays
+using Aqua
+
+
+@testset "Aqua.jl" begin
+    Aqua.test_all(
+      ExtendableFEMBase;
+      ambiguities=false
+    )
+    Aqua.test_ambiguities(ExtendableFEMBase)
+end
 
 include("test_quadrature.jl")
 include("test_interpolators.jl")

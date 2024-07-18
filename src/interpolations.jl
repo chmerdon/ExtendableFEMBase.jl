@@ -312,23 +312,28 @@ function ExtendableGrids.interpolate!(
 
 	FEType = eltype(target.FES)
 	if target.FES.broken == true
+		## interpolate continously
 		FESc = FESpace{FEType}(target.FES.dofgrid)
 		Targetc = FEVector{T}(FESc)
 		interpolate!(Targetc[1], FESc, AT, source; items = items, kwargs...)
-		xCellDofs = target.FES[CellDofs]
-		xCellDofsc = FESc[CellDofs]
-		dof::Int = 0
-		dofc::Int = 0
+		celldofs = target.FES[CellDofs]
 		if items == []
-			items = 1:num_sources(xCellDofs)
+			items = 1:num_sources(celldofs)
 		end
-		for cell in items
-			for k ∈ 1:num_targets(xCellDofs, cell)
-				dof = xCellDofs[k, cell]
-				dofc = xCellDofsc[k, cell]
-				target[dof] = Targetc.entries[dofc]
+
+		## copy continuous dofs to broken dofs
+		function barrier(xCellDofs, xCellDofsc, items)
+			for cell in items
+				for k ∈ 1:num_targets(xCellDofs, cell)
+					dof = xCellDofs[k, cell]
+					dofc = xCellDofsc[k, cell]
+					target[dof] = Targetc.entries[dofc]
+				end
 			end
 		end
+
+		barrier(celldofs, FESc[CellDofs], items)
+
 	else
 		interpolate!(target, target.FES, AT, source; items = items, kwargs...)
 	end

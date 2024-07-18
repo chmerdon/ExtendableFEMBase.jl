@@ -6,4 +6,8 @@ ExampleJuggler = "3bbe58f8-ed81-4c4e-a134-03e85fcf4a1a"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 GridVisualize = "5eed8a63-0fb0-45eb-886d-8d5a387d12b8"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
+
+[compat]
+Aqua = "0.8"

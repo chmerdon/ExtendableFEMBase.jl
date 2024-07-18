@@ -19,8 +19,9 @@ end
 
 get_ncomponents(FEType::Type{<:H1MINI}) = FEType.parameters[1]
 get_edim(FEType::Type{<:H1MINI}) = FEType.parameters[2]
-get_ndofs(::Type{<:AssemblyType}, FEType::Type{<:H1MINI}, EG::Type{<:AbstractElementGeometry0D}) = FEType.parameters[1]
+get_ndofs(::Union{Type{<:ON_FACES}, Type{<:ON_FACES}, Type{<:ON_BFACES}}, FEType::Type{<:H1MINI}, EG::Type{<:AbstractElementGeometry0D}) = FEType.parameters[1]
 get_ndofs(::Union{Type{<:ON_FACES}, Type{<:ON_BFACES}}, FEType::Type{<:H1MINI}, EG::Type{<:AbstractElementGeometry}) = num_nodes(EG) * FEType.parameters[1]
+get_ndofs(::Type{<:ON_CELLS}, FEType::Type{<:H1MINI}, EG::Type{<:AbstractElementGeometry0D}) = FEType.parameters[1]
 get_ndofs(::Type{<:ON_CELLS}, FEType::Type{<:H1MINI}, EG::Type{<:AbstractElementGeometry}) = (1 + num_nodes(EG)) * FEType.parameters[1]
 
 get_polynomialorder(FEType::Type{<:H1MINI}, ::Type{<:Edge1D}) = FEType.parameters[2] == 1 ? 2 : 1
