@@ -67,7 +67,6 @@ export OperatorPair, OperatorTriple
 
 include("qpinfos.jl")
 #include("feview.jl")
-export FEView
 export QPInfos
 
 include("quadrature.jl")
