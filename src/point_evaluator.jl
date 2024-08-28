@@ -93,7 +93,7 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
 	Ti = eltype(xgrid[CellNodes])
 	EGs = xgrid[UniqueCellGeometries]
 	AT = ON_CELLS
-	gridAT = ExtendableFEMBase.EffAT4AssemblyType(get_AT(FES_args[1]), AT)
+	gridAT = EffAT4AssemblyType(get_AT(FES_args[1]), AT)
 	xgrid = FES_args[1].xgrid
 	itemregions = xgrid[CellRegions]
 	itemgeometries = xgrid[CellGeometries]
@@ -120,7 +120,7 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
 	append!(op_offsets_args, cumsum(op_lengths_args))
 	input_args = zeros(T, op_offsets_args[end])
 
-	FEATs_args = [ExtendableFEMBase.EffAT4AssemblyType(get_AT(FES_args[j]), AT) for j ∈ 1:nargs]
+	FEATs_args = [EffAT4AssemblyType(get_AT(FES_args[j]), AT) for j ∈ 1:nargs]
 	itemdofs_args::Array{Union{Adjacency{Ti}, SerialVariableTargetAdjacency{Ti}}, 1} = [FES_args[j][Dofmap4AssemblyType(FEATs_args[j])] for j ∈ 1:nargs]
 	kernel = O.kernel
 
@@ -138,7 +138,7 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
 
 		for id ∈ 1:nargs
 			# update basis evaluations at xref
-			ExtendableFEMBase.relocate_xref!(BE_args[id], xref)
+			relocate_xref!(BE_args[id], xref)
 
 			# update operator eveluation on item
 			update_basis!(BE_args[id], item)

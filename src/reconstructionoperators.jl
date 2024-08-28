@@ -16,9 +16,9 @@ abstract type Reconstruct{FETypeR, O} <: ReconstructionOperator where {FETypeR <
 StandardFunctionOperator(::Type{Reconstruct{FETypeR, O}}) where {FETypeR, O} = O
 ReconstructionSpace(::Type{Reconstruct{FETypeR, O}}) where {FETypeR, O} = FETypeR
 
-ExtendableFEMBase.NeededDerivative4Operator(::Type{Reconstruct{FETypeR, O}}) where {FETypeR, O} = NeededDerivative4Operator(O)
-ExtendableFEMBase.Length4Operator(::Type{Reconstruct{FETypeR, O}}, xdim, nc) where {FETypeR, O} = Length4Operator(O, xdim, nc)
-ExtendableFEMBase.DefaultName4Operator(::Type{Reconstruct{FETypeR, O}}) where {FETypeR, O} = "R(" * DefaultName4Operator(O) * ")"
+NeededDerivative4Operator(::Type{Reconstruct{FETypeR, O}}) where {FETypeR, O} = NeededDerivative4Operator(O)
+Length4Operator(::Type{Reconstruct{FETypeR, O}}, xdim, nc) where {FETypeR, O} = Length4Operator(O, xdim, nc)
+DefaultName4Operator(::Type{Reconstruct{FETypeR, O}}) where {FETypeR, O} = "R(" * DefaultName4Operator(O) * ")"
 
 struct FEReconstEvaluator{T, TvG, TiG, FEType, FEType2, stdop, O <: ReconstructionOperator} <: FEEvaluator{T, TvG, TiG}
 	citem::Base.RefValue{Int}                       # current item

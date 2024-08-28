@@ -19,17 +19,17 @@ abstract type HDIVRTkENRICH{edim, k, stack} <: AbstractHdivFiniteElement where {
 
 const _num_RTk_enrich_bubbles = [[2, 3, 4], [3, 9]]
 const _num_RTk_enrich_bubbles_stacked = [[2, 5, 9], [3, 9]]
-ExtendableFEMBase.get_ncomponents(::Type{<:HDIVRTkENRICH{edim, order}}) where {order, edim} = edim
-ExtendableFEMBase.get_ndofs(::Type{ON_CELLS}, FEType::Type{<:HDIVRTkENRICH{edim, order, false}}, EG::Type{<:AbstractElementGeometry}) where {edim, order} = _num_RTk_enrich_bubbles[edim-1][order]
-ExtendableFEMBase.get_ndofs(::Type{ON_CELLS}, FEType::Type{<:HDIVRTkENRICH{edim, order, true}}, EG::Type{<:AbstractElementGeometry}) where {edim, order} = _num_RTk_enrich_bubbles_stacked[edim-1][order]
-ExtendableFEMBase.get_polynomialorder(::Type{<:HDIVRTkENRICH{edim, order}}, ::Type{<:AbstractElementGeometry}) where {edim, order} = order + 1
-ExtendableFEMBase.get_dofmap_pattern(FEType::Type{<:HDIVRTkENRICH}, ::Type{CellDofs}, EG::Type{<:AbstractElementGeometry}) = "i$(get_ndofs(ON_CELLS, FEType, EG))"
+get_ncomponents(::Type{<:HDIVRTkENRICH{edim, order}}) where {order, edim} = edim
+get_ndofs(::Type{ON_CELLS}, FEType::Type{<:HDIVRTkENRICH{edim, order, false}}, EG::Type{<:AbstractElementGeometry}) where {edim, order} = _num_RTk_enrich_bubbles[edim-1][order]
+get_ndofs(::Type{ON_CELLS}, FEType::Type{<:HDIVRTkENRICH{edim, order, true}}, EG::Type{<:AbstractElementGeometry}) where {edim, order} = _num_RTk_enrich_bubbles_stacked[edim-1][order]
+get_polynomialorder(::Type{<:HDIVRTkENRICH{edim, order}}, ::Type{<:AbstractElementGeometry}) where {edim, order} = order + 1
+get_dofmap_pattern(FEType::Type{<:HDIVRTkENRICH}, ::Type{CellDofs}, EG::Type{<:AbstractElementGeometry}) = "i$(get_ndofs(ON_CELLS, FEType, EG))"
 
 isdefined(FEType::Type{<:HDIVRTkENRICH}, ::Type{<:Triangle2D}) = true
 isdefined(FEType::Type{<:HDIVRTkENRICH}, ::Type{<:Tetrahedron3D}) = true
 
 ## basis on reference triangle
-function ExtendableFEMBase.get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{2, order, false}}, EG::Type{<:Triangle2D}) where {order}
+function get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{2, order, false}}, EG::Type{<:Triangle2D}) where {order}
 	@assert order in 1:3
 	#@show chosen_bubbles
 	function closure(refbasis, xref)
@@ -81,7 +81,7 @@ end
 
 
 ## basis on reference tetrahedron
-function ExtendableFEMBase.get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{3, order, false}}, EG::Type{<:Tetrahedron3D}) where {order}
+function get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{3, order, false}}, EG::Type{<:Tetrahedron3D}) where {order}
 	@assert order in 1:2
 	#@show chosen_bubbles
 	function closure(refbasis, xref)
@@ -111,7 +111,7 @@ function ExtendableFEMBase.get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{3, o
 	end
 end
 
-function ExtendableFEMBase.get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{2, order, true}}, EG::Type{<:Triangle2D}) where {order}
+function get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{2, order, true}}, EG::Type{<:Triangle2D}) where {order}
 	@assert order in 1:3
 	refbasisRT0 = zeros(Real, 3, 2)
 	refbasisRT1 = zeros(Real, 2, 2) # only bubbles
@@ -159,7 +159,7 @@ function ExtendableFEMBase.get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{2, o
 	end
 end
 
-function ExtendableFEMBase.get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{3, order, true}}, EG::Type{<:Tetrahedron3D}) where {order}
+function get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{3, order, true}}, EG::Type{<:Tetrahedron3D}) where {order}
 	@assert order in 1:3
 	refbasisRT0 = zeros(Real, 4, 3)
 	refbasisRT1 = zeros(Real, 3, 3) # only bubbles

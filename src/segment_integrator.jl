@@ -101,7 +101,7 @@ function initialize!(O::SegmentIntegrator{T, UT}, sol; time = 0, kwargs...) wher
 	FETypes_args = [eltype(F) for F in FES_args]
 
 	AT = ON_CELLS
-	gridAT = ExtendableFEMBase.EffAT4AssemblyType(get_AT(FES_args[1]), AT)
+	gridAT = EffAT4AssemblyType(get_AT(FES_args[1]), AT)
 	xgrid = FES_args[1].xgrid
 	itemregions = xgrid[CellRegions]
 
@@ -113,7 +113,7 @@ function initialize!(O::SegmentIntegrator{T, UT}, sol; time = 0, kwargs...) wher
 	bonus_quadorder = O.parameters[:bonus_quadorder]
 	if O.parameters[:quadorder] == "auto"
 		polyorder = maximum([get_polynomialorder(FE, EG) for FE in FETypes_args])
-		minderiv = minimum([ExtendableFEMBase.NeededDerivative4Operator(op) for op in O.ops_args])
+		minderiv = minimum([NeededDerivative4Operator(op) for op in O.ops_args])
 		quadorder = polyorder - minderiv + bonus_quadorder
 	else
 		quadorder = O.parameters[:quadorder] + bonus_quadorder
@@ -142,7 +142,7 @@ function initialize!(O::SegmentIntegrator{T, UT}, sol; time = 0, kwargs...) wher
 	## parameter structure
 	QPinfo = QPInfos(xgrid; time = time, params = O.parameters[:params])
 
-	FEATs_args = [ExtendableFEMBase.EffAT4AssemblyType(get_AT(FES_args[j]), AT) for j ∈ 1:nargs]
+	FEATs_args = [EffAT4AssemblyType(get_AT(FES_args[j]), AT) for j ∈ 1:nargs]
 	itemdofs_args::Array{Union{Adjacency{Int32}, SerialVariableTargetAdjacency{Int32}}, 1} = [FES_args[j][Dofmap4AssemblyType(FEATs_args[j])] for j ∈ 1:nargs]
 
 	## prepare operator infos
@@ -193,7 +193,7 @@ function initialize!(O::SegmentIntegrator{T, UT}, sol; time = 0, kwargs...) wher
 
 			# update basis evaluations on new quadrature points
 			for id ∈ 1:nargs
-				ExtendableFEMBase.relocate_xref!(BE_args[id], xref)
+				relocate_xref!(BE_args[id], xref)
 				update_basis!(BE_args[id], item)
 			end
 
@@ -271,7 +271,7 @@ function initialize!(O::SegmentIntegrator{T, UT}, sol; time = 0, kwargs...) wher
 
 			# update basis evaluations on new quadrature points
 			for id ∈ 1:nargs
-				ExtendableFEMBase.relocate_xref!(BE_args[id], xref)
+				relocate_xref!(BE_args[id], xref)
 				update_basis!(BE_args[id], item)
 			end
 

@@ -1,5 +1,5 @@
 
-import UnicodePlots: lines!, points!, pixel!
+import UnicodePlots: lines!
 
 """
 ````

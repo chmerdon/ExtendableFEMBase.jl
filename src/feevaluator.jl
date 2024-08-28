@@ -58,7 +58,7 @@ function FEEvaluator(
 
 	# get effective assembly type for basis
 	# depending on the AT and the AT of the FESpace
-	FEAT = ExtendableFEMBase.EffAT4AssemblyType(FEAPT, AT)
+	FEAT = EffAT4AssemblyType(FEAPT, AT)
 
 	@debug "Creating FEEvaluator for $FEType, EG = $EG, operator = $operator, FEAT = $FEAT, AT = $AT"
 
@@ -294,7 +294,7 @@ end
 ## general call to update subset
 function _update_subset!(FEBE::FEEvaluator)
 	subset = FEBE.current_subset
-	if FEBE.subset_handler != ExtendableFEMBase.NothingFunction
+	if FEBE.subset_handler != NothingFunction
 		FEBE.subset_handler(subset, FEBE.citem[])
 	end
 	return subset

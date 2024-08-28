@@ -1,28 +1,55 @@
 module ExtendableFEMBase
 
-using ExtendableGrids # + some reexports from there
-export Edge1D, Triangle2D, Parallelogram2D, Tetrahedron3D, Parallelepiped3D
-export ON_CELLS, ON_FACES, ON_IFACES, ON_BFACES, ON_EDGES, ON_BEDGES
-using ExtendableSparse
-using SparseArrays
-using DiffResults
-using LinearAlgebra
-using ForwardDiff
-using DocStringExtensions
-using Printf
-using UnicodePlots
-using Term
-using SpecialPolynomials
-using Polynomials
-
-
-include("qpinfos.jl")
-export QPInfos
-
-include("quadrature.jl")
-export QuadratureRule
-export VertexRule
-export integrate!, integrate, ref_integrate!
+using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDSIGNATURES
+using ExtendableGrids: ExtendableGrids, AT_NODES, AbstractElementGeometry,
+						AbstractElementGeometry0D, AbstractElementGeometry1D,
+						AbstractElementGeometry2D, AbstractElementGeometry3D,
+						AbstractGridAdjacency, AbstractGridComponent,
+						AbstractGridFloatArray2D, AbstractGridIntegerArray2D,
+						Adjacency, AssemblyType, BEdgeEdges, BEdgeGeometries,
+						BEdgeRegions, BEdgeVolumes, BFaceEdges, BFaceFaces,
+						BFaceGeometries, BFaceNodes, BFaceParents, BFaceRegions,
+						BFaceVolumes, CellEdgeSigns, CellEdges,
+						CellFaceOrientations, CellFaceSigns, CellFaces,
+						CellFinder, CellGeometries, CellNodes, CellParents,
+						CellRegions, CellVolumes, Coordinates, Edge1D,
+						EdgeCells, EdgeGeometries, EdgeNodes, EdgeTangents,
+						EdgeVolumes, ElementGeometries, ExtendableGrid,
+						FaceCells, FaceEdgeSigns, FaceEdges, FaceGeometries,
+						FaceNodes, FaceNormals, FaceParents, FaceRegions,
+						FaceVolumes, GridComponentGeometries4AssemblyType,
+						GridComponentNodes4AssemblyType,
+						GridComponentRegions4AssemblyType,
+						GridComponentUniqueGeometries4AssemblyType,
+						GridComponentVolumes4AssemblyType, GridEGTypes,
+						GridRegionTypes, Hexahedron3D, L2GTransformer,
+						ON_BEDGES, ON_BFACES, ON_CELLS, ON_EDGES, ON_FACES,
+						ON_IFACES, Parallelepiped3D, Parallelogram2D,
+						ParentGrid, ParentGridRelation, Quadrilateral2D,
+						SerialVariableTargetAdjacency, SubGrid, Tetrahedron3D,
+						Triangle2D, UniqueBEdgeGeometries,
+						UniqueBFaceGeometries, UniqueCellGeometries,
+						UniqueEdgeGeometries, UniqueFaceGeometries,
+						VariableTargetAdjacency, Vertex0D, append!, atranspose,
+						dim_element, eval_trafo!, gFindLocal!, interpolate!,
+						local_celledgenodes, local_cellfacenodes, mapderiv!,
+						max_num_targets_per_source, num_cells, num_edges,
+						num_faces, num_nodes, num_sources, num_targets,
+						reference_domain, simplexgrid, subgrid, unique,
+						update_trafo!
+using ExtendableSparse: ExtendableSparse, ExtendableSparseMatrix, flush!,
+						rawupdateindex!
+using ForwardDiff: ForwardDiff, DiffResults
+using LinearAlgebra: LinearAlgebra, convert, det, diagm, dot, eigen, ldiv!, lu,
+					mul!, norm, transpose
+using Polynomials: Polynomials, Polynomial, coeffs
+using Printf: Printf, @printf
+using SparseArrays: SparseArrays, AbstractSparseArray, AbstractSparseMatrix,
+					SparseMatrixCSC, nzrange, rowvals, sparse
+using SpecialPolynomials: SpecialPolynomials, ShiftedLegendre, basis
+using Term: Term, grid
+using UnicodePlots: UnicodePlots, BrailleCanvas, Plot, heatmap, lineplot,
+					lineplot!
 
 include("functionoperators.jl")
 export AbstractFunctionOperator
@@ -37,6 +64,17 @@ export Laplacian, Hessian, SymmetricHessian
 export Trace, Deviator
 export NeededDerivative4Operator, Length4Operator, QuadratureOrderShift4Operator, DefaultName4Operator
 export OperatorPair, OperatorTriple
+
+include("qpinfos.jl")
+#include("feview.jl")
+export FEView
+export QPInfos
+
+include("quadrature.jl")
+export QuadratureRule
+export VertexRule
+export integrate!, integrate, ref_integrate!
+
 
 
 include("finiteelements.jl") # also includes dofmaps.jl and feevaluator*.jl
