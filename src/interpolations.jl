@@ -384,8 +384,8 @@ function nodevalues_subset!(
 Evaluates the finite element function with the coefficient vector source (interpreted as a coefficient vector for the FESpace FE)
 and the specified FunctionOperator at the specified list of nodes of the grid and writes the values in that order into target.
 Node values for nodes that are not part of the specified regions (default = all regions) are set to zero.
-Discontinuous (continuous = false) quantities are evaluated in all neighbouring cells of each node and then averaged. Continuous
-(continuous = true) quantities are only evaluated once at each node.
+Discontinuous (continuous = false) quantities are evaluated in all neighbouring cells (in the specified regions)
+of each node and then averaged. Continuous (continuous = true) quantities are only evaluated once at each node.
 """
 function nodevalues_subset!(target::AbstractArray{T, 2},
 	source::AbstractArray{T, 1},
@@ -1057,6 +1057,13 @@ function displace_mesh!(xgrid::ExtendableGrid, source::FEVectorBlock; magnify = 
 end
 
 
+"""
+````
+function displace_mesh(xgrid::ExtendableGrid, source::FEVectorBlock; magnify = 1)
+````
+Returns a new grid by adding the displacement field in source (expects a vector-valued finite element)
+to the coordinates of the provided xgrid times a magnify value.
+"""
 function displace_mesh(xgrid::ExtendableGrid, source::FEVectorBlock; kwargs...)
 	xgrid_displaced = deepcopy(xgrid)
 	displace_mesh!(xgrid_displaced, source; kwargs...)

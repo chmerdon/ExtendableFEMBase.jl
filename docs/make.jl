@@ -43,11 +43,11 @@ function make_all(; with_examples::Bool = true)
         modules=[ExtendableFEMBase],
         sitename="ExtendableFEMBase.jl",
         authors="Christian Merdon",
-        repo = "github.com/chmerdon/ExtendableFEMBase.jl",
-        clean = false,
-        format = Documenter.HTML(size_threshold = 250000),
+        repo = "https://github.com/chmerdon/ExtendableFEMBase.jl",
+        clean = true,
+        format = Documenter.HTML(size_threshold = 250000, mathengine = MathJax3()),
         checkdocs = :all,
-        warnonly = true,
+        warnonly = false,
         doctest = true,
         pages = [
             "Home" => "index.md",
@@ -76,7 +76,7 @@ function make_all(; with_examples::Bool = true)
     
 end
 
-make_all(; with_examples = true)
+make_all(; with_examples = false)
 
 deploydocs(
     repo = "github.com/chmerdon/ExtendableFEMBase.jl",

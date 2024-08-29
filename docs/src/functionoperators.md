@@ -36,6 +36,13 @@ used to dispatch different evaluations of finite element basis functions.
     can be build from the ones available (e.g. the deviator).
 
 
+```@autodocs
+Modules = [ExtendableFEMBase]
+Pages = ["functionoperators.jl"]
+Order   = [:type, :function]
+```
+
+
 ## ReconstructionOperators
 
 There are special operators that allow to evaluate a primitive operator of some discrete
@@ -60,8 +67,3 @@ as well as for the P2-bubble (H1P2B) finite element type in two dimensions.
 ## Operator Pairs (experimental)
 
 Two function operators can be put into an OperatorPair so that one can provide effectively two operators in each argument of an assembly pattern. However, the user should make sure that both operators can be evaluated together reasonably (meaning both should be well-defined on the element geometries and the finite element space where the argument will be evaluated, and the action of the operator has to operate with coressponding input and result fields). This feature is still experimental and might have issues in some cases. OperatorTriple for a combination of three operators is also available.
-
-```@docs
-OperatorPair
-OperatorTriple
-```

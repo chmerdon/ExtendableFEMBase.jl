@@ -13,3 +13,12 @@ Modules = [ExtendableFEMBase]
 Pages = ["quadrature.jl"]
 Order   = [:type, :function]
 ```
+
+
+#### Accumulating Vector (not relevant for users, but for completeness)
+
+Internally a global integration uses an accumulating vector and calls the cell-wise integration.
+
+```@docs
+AccumulatingVector
+```

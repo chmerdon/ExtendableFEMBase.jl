@@ -39,6 +39,7 @@ Usually, Plotters need nodal values, so there is a gengeric function that evalua
 nodevalues!
 nodevalues
 nodevalues_view
+nodevalues_subset!
 ```
 
 ## Lazy Interpolation
@@ -48,4 +49,14 @@ works in all cases (but is not very efficient as it involves a PointeEvaluator a
 
 ```@docs
 lazy_interpolate!
+```
+
+
+## Displace Mesh
+
+Nodal values (e.g. of a FEVector that discretizes a displacement) can be used to displace the mesh.
+
+```@docs
+displace_mesh!
+displace_mesh
 ```

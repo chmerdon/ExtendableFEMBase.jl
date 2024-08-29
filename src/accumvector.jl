@@ -1,21 +1,21 @@
 ###########################
 ### ACCUMULATING VECTOR ###
 ###########################
-#
-# used to store coefficients for FESpaces and can have several blocks of different FESpaces
-# acts like an AbstractArray{T,1}
 
 """
 $(TYPEDEF)
 
-block of an FEVector that carries coefficients for an associated FESpace and can be assigned as an AbstractArray (getindex, setindex, size, length)
+vector that is acting as an AbstractArray{T, 2} and 
+automatically accumulates all values from the second dimension
+
+AV[k,j] += s for any j results in AV.entries[k] += s
 """
 struct AccumulatingVector{T} <: AbstractArray{T, 2}
 	entries::Array{T, 1}
 	size2::Int
 end
 
-# AV[k,j] += s for any j results in entries[k] += s
+# 
 
 # overload stuff for AbstractArray{T,2} behaviour
 Base.getindex(AV::AccumulatingVector, i::Int, j) = AV.entries[i]
