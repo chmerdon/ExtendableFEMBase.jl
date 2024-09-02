@@ -60,16 +60,16 @@ function Base.copy(FEV::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}) whe
 end
 
 #Add value to matrix if it is nonzero
-@inline function _addnz(ESM::ExtendableSparseMatrix, i, j, v::Tv, fac) where Tv
+@inline function _addnz(ESM::AbstractExtendableSparseMatrixCSC, i, j, v::Tv, fac, part = 1) where Tv
 	if v != zero(Tv)
-		rawupdateindex!(ESM, +, v * fac, i, j)
+		rawupdateindex!(ESM, +, v * fac, i, j, part)
 	end
 end
 
 #Add value to matrix if it is nonzero
-@inline function _addnz(FEB::FEMatrixBlock, i, j, v::Tv, fac) where Tv
+@inline function _addnz(FEB::FEMatrixBlock, i, j, v::Tv, fac, part = 1) where Tv
 	if v != zero(Tv)
-		rawupdateindex!(FEB.entries, +, v * fac, FEB.offset + i, FEB.offsetY + j)
+		rawupdateindex!(FEB.entries, +, v * fac, FEB.offset + i, FEB.offsetY + j, part)
 	end
 end
 
@@ -205,7 +205,7 @@ FEMatrix{TvM,TiM}(FESX, FESY; name = "auto")
 
 Creates an FEMatrix with blocks coressponding to the ndofs of FESX (rows) and FESY (columns).
 """
-function FEMatrix{TvM, TiM}(FESX::Array{<:FESpace{TvG, TiG}, 1}, FESY::Array{<:FESpace{TvG, TiG}, 1}; entries = nothing, name = nothing, tags = nothing, tagsX = tags, tagsY = tagsX, kwargs...) where {TvM, TiM, TvG, TiG}
+function FEMatrix{TvM, TiM}(FESX::Array{<:FESpace{TvG, TiG}, 1}, FESY::Array{<:FESpace{TvG, TiG}, 1}; entries = nothing, name = nothing, tags = nothing, tagsX = tags, tagsY = tagsX, npartitions = 1, kwargs...) where {TvM, TiM, TvG, TiG}
 	ndofsX, ndofsY = 0, 0
 	for j ∈ 1:length(FESX)
 		ndofsX += FESX[j].ndofs
@@ -214,7 +214,11 @@ function FEMatrix{TvM, TiM}(FESX::Array{<:FESpace{TvG, TiG}, 1}, FESY::Array{<:F
 		ndofsY += FESY[j].ndofs
 	end
 	if entries === nothing
-		entries = ExtendableSparseMatrix{TvM, TiM}(ndofsX, ndofsY)
+		if npartitions == 1
+			entries = ExtendableSparseMatrixCSC{TvM, TiM}(ndofsX, ndofsY)
+		elseif npartitions > 1
+			entries = MTExtendableSparseMatrixCSC{TvM, TiM}(ndofsX, ndofsY, npartitions)
+		end
 	else
 		@assert size(entries) == (ndofsX, ndofsY) "size of given entries not matching number of dofs in given FE space(s)"
 	end
@@ -284,10 +288,10 @@ Adds FEMatrix/ExtendableSparseMatrix/CSCMatrix B to FEMatrix A.
 function add!(A::FEMatrix{Tv, Ti}, B::FEMatrix{Tv, Ti}; kwargs...) where {Tv, Ti}
 	add!(A.entries, B.entries; kwargs...)
 end
-function add!(AM::ExtendableSparseMatrix{Tv, Ti}, BM::ExtendableSparseMatrix{Tv, Ti}; kwargs...) where {Tv, Ti}
+function add!(AM::AbstractExtendableSparseMatrixCSC{Tv, Ti}, BM::AbstractExtendableSparseMatrixCSC{Tv, Ti}; kwargs...) where {Tv, Ti}
 	add!(AM, BM.cscmatrix; kwargs...)
 end
-function add!(AM::ExtendableSparseMatrix{Tv, Ti}, cscmat::SparseMatrixCSC{Tv, Ti}; factor = 1, rowoffset = 0, coloffset = 0, transpose::Bool = false) where {Tv, Ti}
+function add!(AM::AbstractExtendableSparseMatrixCSC{Tv, Ti}, cscmat::SparseMatrixCSC{Tv, Ti}; factor = 1, rowoffset = 0, coloffset = 0, transpose::Bool = false) where {Tv, Ti}
 	rows::Array{Ti, 1} = rowvals(cscmat)
 	valsB::Array{Tv, 1} = cscmat.nzval
 	ncols::Int = size(cscmat, 2)
@@ -318,8 +322,8 @@ $(TYPEDSIGNATURES)
 Adds FEMatrixBlock B to FEMatrixBlock A.
 """
 function addblock!(A::FEMatrixBlock{Tv, Ti}, B::FEMatrixBlock{Tv, Ti}; factor = 1, transpose::Bool = false) where {Tv, Ti}
-	AM::ExtendableSparseMatrix{Tv, Ti} = A.entries
-	BM::ExtendableSparseMatrix{Tv, Ti} = B.entries
+	AM::AbstractExtendableSparseMatrixCSC{Tv, Ti} = A.entries
+	BM::AbstractExtendableSparseMatrixCSC{Tv, Ti} = B.entries
 	cscmat::SparseMatrixCSC{Tv, Ti} = BM.cscmatrix
 	rows::Array{Ti, 1} = rowvals(cscmat)
 	valsB::Array{Tv, 1} = cscmat.nzval
@@ -357,7 +361,7 @@ $(TYPEDSIGNATURES)
 
 Adds ExtendableSparseMatrix B to FEMatrixBlock A.
 """
-function addblock!(A::FEMatrixBlock{Tv}, B::ExtendableSparseMatrix{Tv, Ti}; factor = 1, transpose::Bool = false) where {Tv, Ti <: Integer}
+function addblock!(A::FEMatrixBlock{Tv}, B::AbstractExtendableSparseMatrixCSC{Tv, Ti}; factor = 1, transpose::Bool = false) where {Tv, Ti <: Integer}
 	addblock!(A, B.cscmatrix; factor = factor, transpose = transpose)
 end
 
@@ -368,7 +372,7 @@ $(TYPEDSIGNATURES)
 Adds SparseMatrixCSC B to FEMatrixBlock A.
 """
 function addblock!(A::FEMatrixBlock{Tv}, cscmat::SparseArrays.SparseMatrixCSC{Tv, Ti}; factor = 1, transpose::Bool = false) where {Tv, Ti <: Integer}
-	AM::ExtendableSparseMatrix{Tv, Int64} = A.entries
+	AM::AbstractExtendableSparseMatrixCSC{Tv, Int64} = A.entries
 	rows::Array{Int, 1} = rowvals(cscmat)
 	valsB::Array{Tv, 1} = cscmat.nzval
 	arow::Int = 0
@@ -396,7 +400,7 @@ function addblock!(A::FEMatrixBlock{Tv}, cscmat::SparseArrays.SparseMatrixCSC{Tv
 	return nothing
 end
 
-function apply_penalties!(A::ExtendableSparseMatrix, fixed_dofs, penalty)
+function apply_penalties!(A::AbstractExtendableSparseMatrixCSC, fixed_dofs, penalty)
 	for dof in fixed_dofs
 		A[dof, dof] = penalty
 	end
@@ -410,7 +414,7 @@ $(TYPEDSIGNATURES)
 Adds matrix-matrix product B times C to FEMatrixBlock A.
 """
 function addblock_matmul!(A::FEMatrixBlock{Tv}, cscmatB::SparseMatrixCSC{Tv, Ti}, cscmatC::SparseMatrixCSC{Tv, Ti}; factor = 1, transposed::Bool = false) where {Tv, Ti}
-	AM::ExtendableSparseMatrix{Tv, Int64} = A.entries
+	AM::AbstractExtendableSparseMatrixCSC{Tv, Int64} = A.entries
 	rowsB::Array{Ti, 1} = rowvals(cscmatB)
 	rowsC::Array{Ti, 1} = rowvals(cscmatC)
 	valsB::Array{Tv, 1} = cscmatB.nzval
@@ -529,7 +533,7 @@ $(TYPEDSIGNATURES)
 
 Adds matrix-vector product B times b to FEVectorBlock a.
 """
-function addblock_matmul!(a::FEVectorBlock{Tv}, B::ExtendableSparseMatrix{Tv, Ti}, b::FEVectorBlock{Tv}; factor = 1) where {Tv, Ti <: Integer}
+function addblock_matmul!(a::FEVectorBlock{Tv}, B::AbstractExtendableSparseMatrixCSC{Tv, Ti}, b::FEVectorBlock{Tv}; factor = 1) where {Tv, Ti <: Integer}
 	cscmat::SparseMatrixCSC{Tv, Ti} = B.cscmatrix
 	rows::Array{Ti, 1} = rowvals(cscmat)
 	valsB::Array{Tv, 1} = cscmat.nzval
@@ -567,7 +571,7 @@ $(TYPEDSIGNATURES)
 
 Computes vector'-matrix-vector product a'*B*b.
 """
-function lrmatmul(a::AbstractVector{Tv}, B::ExtendableSparseMatrix{Tv, Ti}, b::AbstractVector{Tv}; factor = 1) where {Tv, Ti <: Integer}
+function lrmatmul(a::AbstractVector{Tv}, B::AbstractExtendableSparseMatrixCSC{Tv, Ti}, b::AbstractVector{Tv}; factor = 1) where {Tv, Ti <: Integer}
 	cscmat::SparseMatrixCSC{Tv, Ti} = B.cscmatrix
 	valsB::Array{Tv, 1} = cscmat.nzval
 	rows::Array{Ti, 1} = rowvals(cscmat)
@@ -586,7 +590,7 @@ $(TYPEDSIGNATURES)
 
 Computes vector'-matrix-vector product (a1-a2)'*B*(b1-b2).
 """
-function ldrdmatmul(a1::AbstractVector{Tv}, a2::AbstractVector{Tv}, B::ExtendableSparseMatrix{Tv, Ti}, b1::AbstractVector{Tv}, b2::AbstractVector{Tv}; factor = 1) where {Tv, Ti <: Integer}
+function ldrdmatmul(a1::AbstractVector{Tv}, a2::AbstractVector{Tv}, B::AbstractExtendableSparseMatrixCSC{Tv, Ti}, b1::AbstractVector{Tv}, b2::AbstractVector{Tv}; factor = 1) where {Tv, Ti <: Integer}
 	cscmat::SparseMatrixCSC{Tv, Ti} = B.cscmatrix
 	valsB::Array{Tv, 1} = cscmat.nzval
 	rows::Array{Ti, 1} = rowvals(cscmat)
@@ -600,7 +604,7 @@ function ldrdmatmul(a1::AbstractVector{Tv}, a2::AbstractVector{Tv}, B::Extendabl
 end
 
 
-function submatrix(A::ExtendableSparseMatrix{Tv,Ti}, srows, scols) where {Tv,Ti}
+function submatrix(A::AbstractExtendableSparseMatrixCSC{Tv,Ti}, srows, scols) where {Tv,Ti}
 	cscmat::SparseMatrixCSC{Tv, Ti} = A.cscmatrix
 	valsA::Array{Tv, 1} = cscmat.nzval
 	rows::Array{Ti, 1} = rowvals(cscmat)

@@ -38,6 +38,7 @@ using ExtendableGrids: ExtendableGrids, AT_NODES, AbstractElementGeometry,
 						reference_domain, simplexgrid, subgrid, unique,
 						update_trafo!
 using ExtendableSparse: ExtendableSparse, ExtendableSparseMatrix, flush!,
+						AbstractExtendableSparseMatrixCSC, ExtendableSparseMatrixCSC, MTExtendableSparseMatrixCSC,
 						rawupdateindex!
 using ForwardDiff: ForwardDiff, DiffResults
 using LinearAlgebra: LinearAlgebra, convert, det, diagm, dot, eigen, ldiv!, lu,
