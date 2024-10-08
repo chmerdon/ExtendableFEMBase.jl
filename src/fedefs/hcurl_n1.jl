@@ -9,6 +9,7 @@ allowed ElementGeometries:
 - Triangle2D
 """
 abstract type HCURLN1{edim} <: AbstractHcurlFiniteElement where {edim <: Int} end
+HCURLN1(edim::Int) = HCURLN1{edim}
 
 function Base.show(io::Core.IO, ::Type{<:HCURLN1{edim}}) where {edim}
 	print(io, "HCURLN1{$edim}")

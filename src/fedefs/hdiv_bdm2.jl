@@ -9,6 +9,7 @@ allowed ElementGeometries:
 - Triangle2D
 """
 abstract type HDIVBDM2{edim} <: AbstractHdivFiniteElement where {edim <: Int} end
+HDIVBDM2(edim::Int) = HDIVBDM2{edim}
 
 function Base.show(io::Core.IO, ::Type{<:HDIVBDM2{edim}}) where {edim}
 	print(io, "HDIVBDM2{$edim}")

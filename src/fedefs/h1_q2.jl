@@ -13,6 +13,7 @@ allowed ElementGeometries:
 - Tetrahedron3D (P2 space)
 """
 abstract type H1Q2{ncomponents, edim} <: AbstractH1FiniteElement where {ncomponents <: Int, edim <: Int} end
+H1Q2(ncomponents::Int,edim=ncomponents) = H1Q2{ncomponents}
 
 function Base.show(io::Core.IO, ::Type{<:H1Q2{ncomponents, edim}}) where {ncomponents, edim}
 	print(io, "H1Q2{$ncomponents,$edim}")

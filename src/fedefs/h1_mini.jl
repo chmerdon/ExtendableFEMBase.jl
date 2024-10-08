@@ -12,6 +12,7 @@ allowed element geometries:
 - Tetrahedron3D (linear polynomials + cubic cell bubble)
 """
 abstract type H1MINI{ncomponents, edim} <: AbstractH1FiniteElement where {ncomponents <: Int, edim <: Int} end
+H1MINI(ncomponents::Int,edim=ncomponents) = H1MINI{ncomponents,edim}
 
 function Base.show(io::Core.IO, ::Type{<:H1MINI{ncomponents, edim}}) where {ncomponents, edim}
 	print(io, "H1MINI{$ncomponents,$edim}")

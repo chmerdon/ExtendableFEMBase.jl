@@ -13,6 +13,7 @@ allowed ElementGeometries:
 - Tetrahedron3D (piecewise linear + normal-weighted face bubbles)
 """
 abstract type H1BR{edim} <: AbstractH1FiniteElementWithCoefficients where {edim <: Int} end
+H1BR(edim::Int) = H1BR{edim}
 
 function Base.show(io::Core.IO, ::Type{<:H1BR{edim}}) where {edim}
 	print(io, "H1BR{$edim}")

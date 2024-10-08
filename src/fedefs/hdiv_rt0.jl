@@ -12,6 +12,7 @@ allowed ElementGeometries:
 - Hexahedron3D
 """
 abstract type HDIVRT0{edim} <: AbstractHdivFiniteElement where {edim <: Int} end
+HDIVRT0(edim::Int) = HDIVRT0{edim}
 
 function Base.show(io::Core.IO, FEType::Type{<:HDIVRT0{edim}}) where {edim}
 	print(io, "HDIVRT0{$edim}")

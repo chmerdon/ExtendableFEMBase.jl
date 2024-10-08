@@ -12,6 +12,7 @@ allowed ElementGeometries:
 - Tetrahedron3D
 """
 abstract type H1P3{ncomponents, edim} <: AbstractH1FiniteElement where {ncomponents <: Int, edim <: Int} end
+H1P3(ncomponents::Int,edim=ncomponents) = H1P3{ncomponents,edim}
 
 function Base.show(io::Core.IO, ::Type{<:H1P3{ncomponents, edim}}) where {ncomponents, edim}
 	print(io, "H1P3{$ncomponents,$edim}")

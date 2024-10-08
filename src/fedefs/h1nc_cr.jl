@@ -12,6 +12,7 @@ allowed ElementGeometries:
 - Tetrahedron3D (piecewise linear, similar to P1)
 """
 abstract type H1CR{ncomponents} <: AbstractH1FiniteElement where {ncomponents <: Int} end
+H1CR(ncomponents::Int,edim=ncomponents) = H1CR{ncomponents}
 
 function Base.show(io::Core.IO, ::Type{<:H1CR{ncomponents}}) where {ncomponents}
 	print(io, "H1CR{$ncomponents}")

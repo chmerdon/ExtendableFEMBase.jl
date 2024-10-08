@@ -11,6 +11,9 @@ allowed ElementGeometries:
 - Triangle2D
 """
 abstract type H1Pk{ncomponents, edim, order} <: AbstractH1FiniteElement where {ncomponents <: Int, edim <: Int, order <: Int} end
+H1Pk(ncomponents::Int,edim=ncomponents,order=2) = H1Pk{ncomponents,edim,order}
+H1Pk(;ncomponents::Int,edim=ncomponents,order=2) = H1Pk{ncomponents,edim,order}
+
 
 function Base.show(io::Core.IO, ::Type{<:H1Pk{ncomponents, edim, order}}) where {ncomponents, edim, order}
 	print(io, "H1Pk{$ncomponents,$edim,$order}")

@@ -12,6 +12,7 @@ allowed element geometries:
 - Tetrahedron3D (one cubic bubble)
 """
 abstract type H1BUBBLE{ncomponents} <: AbstractH1FiniteElement where {ncomponents <: Int} end
+H1BUBBLE(ncomponents::Int,edim=ncomponents) = H1BUBBLE{ncomponents,edim}
 
 function Base.show(io::Core.IO, ::Type{<:H1BUBBLE{ncomponents}}) where {ncomponents}
 	print(io, "H1BUBBLE{$ncomponents}")
