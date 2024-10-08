@@ -9,6 +9,7 @@ allowed ElementGeometries:
 - any
 """
 abstract type L2P0{ncomponents} <: AbstractH1FiniteElement where {ncomponents <: Int} end
+L2P0(ncomponents::Int,edim=ncomponents) = L2P0{ncomponents}
 
 function Base.show(io::Core.IO, ::Type{<:L2P0{ncomponents}}) where {ncomponents}
 	print(io, "L2P0{$ncomponents}")

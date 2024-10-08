@@ -11,6 +11,7 @@ allowed ElementGeometries:
 - Tetrahedron3D
 """
 abstract type HCURLN0{edim} <: AbstractHcurlFiniteElement where {edim <: Int} end
+HCURLN0(edim::Int) = HCURLN0{edim}
 
 function Base.show(io::Core.IO, ::Type{<:HCURLN0{edim}}) where {edim}
 	print(io, "HCURLN0{$edim}")

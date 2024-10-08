@@ -14,6 +14,7 @@ allowed ElementGeometries:
 - Hexahedron3D (Q1 space)
 """
 abstract type H1Q1{ncomponents} <: AbstractH1FiniteElement where {ncomponents <: Int} end
+H1Q1(ncomponents::Int,edim=ncomponents) = H1Q1{ncomponents}
 
 
 function Base.show(io::Core.IO, ::Type{<:H1Q1{ncomponents}}) where {ncomponents}

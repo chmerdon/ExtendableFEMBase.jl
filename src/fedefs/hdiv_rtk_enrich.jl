@@ -16,6 +16,8 @@ allowed ElementGeometries:
 - Tetrahedron3D
 """
 abstract type HDIVRTkENRICH{edim, k, stack} <: AbstractHdivFiniteElement where {k <: Int, edim <: Int, stack <: Bool} end
+HDIVRTkENRICH(edim::Int,k::Int,stack=false) = HDIVRTkENRICH{edim,k,stack}
+HDIVRTkENRICH(;edim::Int,k::Int,stack=false) = HDIVRTkENRICH{edim,k,stack}
 
 const _num_RTk_enrich_bubbles = [[2, 3, 4], [3, 9]]
 const _num_RTk_enrich_bubbles_stacked = [[2, 5, 9], [3, 9]]

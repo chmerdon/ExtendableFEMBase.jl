@@ -11,6 +11,7 @@ allowed ElementGeometries:
 - Tetrahedron3D
 """
 abstract type HDIVBDM1{edim} <: AbstractHdivFiniteElement where {edim <: Int} end
+HDIVBDM1(edim::Int) = HDIVBDM1{edim}
 
 function Base.show(io::Core.IO, ::Type{<:HDIVBDM1{edim}}) where {edim}
 	print(io, "HDIVBDM1{$edim}")
