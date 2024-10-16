@@ -252,8 +252,8 @@ function initialize!(O::SegmentIntegrator{T, UT}, sol; time = 0, kwargs...) wher
 		end
 		function integrator!(
 			result::AbstractArray{Tv, 1},
-			w::Array{Array{Tv, 1}, 1},    # world coordinates
-			b::Array{Array{Tv, 1}, 1},    # barycentric coordinates (w.r.t. item geometry)
+			w,#::Array{Array{Tv, 1}, 1},    # world coordinates
+			b,#::Array{Array{Tv, 1}, 1},    # barycentric coordinates (w.r.t. item geometry)
 			item, # cell in which the segment lies (completely)
 		) where {Tv}
 
