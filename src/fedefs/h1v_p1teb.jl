@@ -14,6 +14,7 @@ allowed ElementGeometries:
 - Tetrahedron3D
 """
 abstract type H1P1TEB{edim} <: AbstractH1FiniteElementWithCoefficients where {edim <: Int} end
+H1P1TEB(edim::Int) = H1P1TEB{edim}
 
 function Base.show(io::Core.IO, ::Type{<:H1P1TEB{edim}}) where {edim}
 	print(io, "H1P1TEB{$edim}")

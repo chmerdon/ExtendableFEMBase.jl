@@ -9,6 +9,8 @@ allowed ElementGeometries:
 - Triangle2D
 """
 abstract type HDIVRTk{edim, order} <: AbstractHdivFiniteElement where {edim <: Int, order <: Int} end
+HDIVRTk(edim::Int,order::Int) = HDIVRTk{edim,order}
+HDIVRTk(;edim::Int,order::Int) = HDIVRTk{edim,order}
 
 function Base.show(io::Core.IO, FEType::Type{<:HDIVRTk{edim, order}}) where {edim, order}
 	print(io, "HDIVRTk{$edim, $order}")
